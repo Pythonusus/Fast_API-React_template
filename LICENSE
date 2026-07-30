@@ -1,21 +1,122 @@
-MIT License
+Petr Malafeev Non-Commercial Network Copyleft License v1.0 (RU/EN)
 
-Copyright (c) 2026 Petr Malafeev
+Copyright (C) 2026 Petr Malafeev
+Author Link: https://github.com/Pythonusus
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+----------------------------------------------------------------------
+ENGLISH
+----------------------------------------------------------------------
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Grant of Rights
+You are permitted, free of charge, to use, run, copy, study, modify, and share this software, including running it as a network service (SaaS), provided that all conditions in this License are met.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. Mandatory Conditions
+You must:
+
+a) Keep this License text and copyright notice in all copies and substantial portions of the software.
+b) Keep all source code publicly available, including:
+   - the original source code,
+   - your full modified source code,
+   - build/deployment scripts and configuration needed to run the same version you provide to users.
+c) If you run this software (original or modified) as a network service (including SaaS), you must provide users of that service a clear, visible, and working link to the full corresponding source code of the exact running version.
+d) Provide visible attribution to the original author:
+   "Original author: Petr Malafeev" with this link:
+   https://github.com/Pythonusus
+e) License any distributed or publicly network-run modified version under this same License.
+f) If you deploy this software (original or modified) as a publicly accessible SaaS or other publicly accessible network service, you must notify the author before deployment. The notice must include:
+   - your name or organization name,
+   - intended type of use (personal, educational, internal, etc.),
+   - a public URL if the software will be deployed online.
+g) Forking and renaming are allowed under this License, but you may not use the name "Petr Malafeev" to endorse, promote, market, or imply approval of your modified version without prior written permission from the author.
+
+3. Commercial Use Prohibited
+Any commercial use is prohibited without prior written permission from the copyright holder.
+Commercial use includes, but is not limited to:
+
+- selling the software or access to it;
+- paid subscriptions, paid SaaS, paid hosting, paid support packages tied to this software;
+- internal business use primarily intended for commercial advantage or monetary compensation;
+- embedding this software into paid products or paid services.
+
+To obtain a commercial license, contact the copyright holder.
+
+4. No Additional Restrictions
+You may not add legal or technical restrictions that prevent others from exercising the rights granted by this License under the same terms.
+
+5. Termination
+Any violation of this License automatically terminates your rights under this License.
+Rights may be reinstated only by explicit written permission of the copyright holder.
+
+6. Warranty Disclaimer
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+
+7. Limitation of Liability
+IN NO EVENT SHALL THE AUTHOR OR COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+8. Scope of This License
+This License applies to this project and to copyrightable parts authored by the copyright holder of this repository.
+It does not change, replace, or override licenses of third-party dependencies, libraries, frameworks, or other external components included, referenced, or installed for use with this project.
+Such third-party components remain licensed under their own respective terms.
+
+9. Governing Interpretation
+This License is a custom source-available license and is not an OSI-approved open-source license.
+If there is any discrepancy between language versions, the Russian section prevails.
+
+----------------------------------------------------------------------
+РУССКИЙ
+----------------------------------------------------------------------
+
+1. Предоставляемые права
+Вам бесплатно разрешается использовать, запускать, копировать, изучать, изменять и распространять это ПО, включая запуск как сетевого сервиса (SaaS), при соблюдении всех условий этой Лицензии.
+
+2. Обязательные условия
+Вы обязаны:
+
+a) Сохранять текст этой Лицензии и уведомление об авторских правах во всех копиях и существенных частях ПО.
+b) Держать весь исходный код публично открытым, включая:
+   - исходный оригинальный код,
+   - полный исходный код ваших изменений,
+   - скрипты сборки/деплоя и конфигурацию, необходимые для запуска той же версии, которую получают пользователи.
+c) Если вы запускаете это ПО (оригинальное или измененное) как сетевой сервис (включая SaaS), вы обязаны дать пользователям сервиса явную, видимую и рабочую ссылку на полный соответствующий исходный код именно запущенной версии.
+d) Указывать авторство в видимой форме:
+   "Автор оригинальной версии: Петр Малафеев" со ссылкой:
+   https://github.com/Pythonusus
+e) Лицензировать распространяемые или публично запускаемые по сети измененные версии на условиях этой же Лицензии.
+f) Если вы разворачиваете это ПО (оригинальное или измененное) как публично доступный SaaS или иной публично доступный сетевой сервис, вы обязаны уведомить автора до развертывания. Уведомление должно включать:
+   - ваше имя или название организации,
+   - предполагаемый тип использования (личное, образовательное, внутреннее, и т.д.),
+   - публичный URL, если ПО будет развернуто онлайн.
+g) Создание форков и переименование проекта разрешены в рамках этой Лицензии, но вы не можете использовать имя "Петр Малафеев" для одобрения, продвижения, маркетинга или создания впечатления одобрения вашей модифицированной версии без предварительного письменного разрешения автора.
+
+3. Коммерческое использование запрещено
+Любое коммерческое использование запрещено без предварительного письменного разрешения правообладателя.
+Коммерческим использованием, включая, но не ограничиваясь, считается:
+
+- продажа ПО или доступа к нему;
+- платные подписки, платный SaaS, платный хостинг, платные пакеты поддержки, связанные с этим ПО;
+- внутреннее использование бизнесом, основная цель которого - коммерческая выгода или денежная компенсация;
+- встраивание этого ПО в платные продукты или платные сервисы.
+
+Для получения коммерческой лицензии свяжитесь с правообладателем.
+
+4. Запрет дополнительных ограничений
+Вы не можете добавлять юридические или технические ограничения, которые мешают другим лицам пользоваться правами, предоставленными этой Лицензией на тех же условиях.
+
+5. Прекращение действия прав
+Любое нарушение условий этой Лицензии автоматически прекращает ваши права по этой Лицензии.
+Восстановление прав возможно только по явному письменному разрешению правообладателя.
+
+6. Отказ от гарантий
+ПРОГРАММА ПРЕДОСТАВЛЯЕТСЯ "КАК ЕСТЬ", БЕЗ КАКИХ-ЛИБО ГАРАНТИЙ, ЯВНЫХ ИЛИ ПОДРАЗУМЕВАЕМЫХ, ВКЛЮЧАЯ, НО НЕ ОГРАНИЧИВАЯСЬ, ГАРАНТИЯМИ ТОВАРНОЙ ПРИГОДНОСТИ, ПРИГОДНОСТИ ДЛЯ ОПРЕДЕЛЕННОЙ ЦЕЛИ И НЕНАРУШЕНИЯ ПРАВ.
+
+7. Ограничение ответственности
+НИ ПРИ КАКИХ ОБСТОЯТЕЛЬСТВАХ АВТОР ИЛИ ПРАВООБЛАДАТЕЛЬ НЕ НЕСЕТ ОТВЕТСТВЕННОСТЬ ПО ЛЮБЫМ ТРЕБОВАНИЯМ, УБЫТКАМ ИЛИ ИНЫМ ОБЯЗАТЕЛЬСТВАМ, ВОЗНИКШИМ ИЗ-ЗА ИСПОЛЬЗОВАНИЯ ПО ИЛИ СВЯЗАННЫХ С НИМ ДЕЙСТВИЙ.
+
+8. Область действия лицензии
+Настоящая Лицензия распространяется на данный проект и на охраноспособные части кода, созданные правообладателем этого репозитория.
+Она не изменяет, не заменяет и не отменяет лицензии сторонних зависимостей, библиотек, фреймворков и иных внешних компонентов, используемых вместе с проектом.
+Такие сторонние компоненты продолжают распространяться на условиях их собственных лицензий.
+
+9. Толкование
+Эта лицензия является кастомной source-available лицензией и не является open-source лицензией, одобренной OSI.
+При расхождениях между языковыми версиями приоритет имеет русский текст.

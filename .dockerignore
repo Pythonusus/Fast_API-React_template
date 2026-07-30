@@ -1,0 +1,105 @@
+# Include any files or directories that you don't want to be copied to your
+# container here (e.g., local build artifacts, temporary files, etc.).
+#
+# For more help, visit the .dockerignore file reference guide at
+# https://docs.docker.com/go/build-context-dockerignore/
+
+# ===== DEVELOPMENT & BUILD ARTIFACTS =====
+
+# Git repository
+.git/
+.gitignore
+.gitattributes
+
+# Docker files
+Dockerfile*
+.dockerignore
+docker-compose*
+compose.y*ml
+
+# Documentation
+README.md
+LICENSE
+
+# CI/CD files
+.github/
+.pre-commit-config.yaml
+
+# Editor files
+.vscode/
+.idea/
+**/.DS_Store
+
+# Sqlite database
+*.db
+*.sqlite
+*.sqlite3
+
+# ===== BACKEND EXCLUSIONS =====
+
+# Python cache and build artifacts
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+**/.pytest_cache/
+**/.ruff_cache/
+**/.coverage
+**/coverage/
+**/htmlcov/
+
+# Python virtual environments
+**/.venv/
+**/venv/
+**/env/
+
+# Python build artifacts
+**/build/
+**/dist/
+**/*.egg-info/
+
+# Backend development files
+backend/tests/
+
+# ===== FRONTEND EXCLUSIONS =====
+
+# Node.js dependencies
+**/node_modules/
+
+# Frontend build output (we build fresh in container)
+frontend/dist/
+frontend/build/
+
+# Node.js logs and cache
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/pnpm-debug.log*
+**/.npm/
+
+# Frontend development files
+frontend/__tests__/
+frontend/__mocks__/
+frontend/.prettier*
+frontend/eslint*
+frontend/jest.config.js
+frontend/jest.setup.js
+
+# ===== ENVIRONMENT & SECRETS =====
+
+# Environment files (use docker-compose env instead)
+.env
+.env.*
+!.env.example
+
+# ===== TEMPORARY FILES =====
+
+# OS temporary files
+**/tmp/
+**/temp/
+**/*.tmp
+**/*.temp
+
+# Application logs
+**/app_logs/
+**/logs/
+**/*.log

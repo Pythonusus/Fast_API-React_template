@@ -1,17 +1,24 @@
 repos:
   - repo: local
     hooks:
-      - id: linter
-        name: Run linter
-        entry: make lint
+      - id: backend-linter
+        name: Run backend linter
+        entry: make lint-backend
         language: system
         types: [python]
+        pass_filenames: false
 
-      - id: tests
-        name: Run tests
-        entry: make test
+      - id: backend-tests
+        name: Run backend tests
+        entry: make test-backend
         language: system
         types: [python]
+        pass_filenames: false
+
+      - id: frontend-linter
+        name: Run frontend linter
+        entry: make lint-frontend
+        language: system
         pass_filenames: false
 
   - repo: https://github.com/pre-commit/pre-commit-hooks

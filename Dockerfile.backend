@@ -1,0 +1,56 @@
+# BUILDER STAGE
+FROM python:3.13-alpine AS builder
+
+# Copy uv binary from official image
+COPY --from=ghcr.io/astral-sh/uv:0.8.11 /uv /usr/local/bin/uv
+
+WORKDIR /app
+
+# Copy dependency files first for better caching
+COPY backend/pyproject.toml backend/uv.lock ./
+
+# Install backend production dependencies strictly from the lock file.
+RUN uv sync --no-dev
+
+# Copy backend code from host to container
+COPY backend/ ./
+
+
+FROM python:3.13-alpine
+
+# Prevent Python from creating .pyc bytecode files in the container.
+ENV PYTHONDONTWRITEBYTECODE=1
+# Flush stdout/stderr immediately so logs appear in real time.
+ENV PYTHONUNBUFFERED=1
+
+# Adding virtual environment to PATH to run commands
+# Otherwise you would need to use uv in production image too.
+ENV PATH="/app/.venv/bin:${PATH}"
+
+WORKDIR /app
+
+# Add non-root user and group
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -S appuser -u 1001 -G appgroup
+
+# Copy ready-to-run backend with virtual environment
+COPY --from=builder --chown=appuser:appgroup /app ./
+
+# Drop root privileges for runtime security.
+USER appuser
+
+# Healthcheck verifies the backend responds on the health endpoint.
+# Inner timeout is less then outer so Python fails first with a clean non-zero exit,
+# instead of Docker force-timing out the whole command.
+HEALTHCHECK --interval=15s --timeout=3s --start-period=30s --retries=3 \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/api/health', timeout=2)"
+
+# Just metadata to document that the container listens on port 8080
+# Important: this instruction does not open the port outside the container.
+# Real port is opened through -p in docker run or ports in docker compose.
+# Without EXPOSE the container will still work, this is just documentation.
+EXPOSE 8080
+
+# CMD is the command that is executed when the container is started
+# Starts the backend application.
+CMD ["python", "main.py"]

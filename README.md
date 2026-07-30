@@ -1,11 +1,9 @@
 <div align="center">
 
-<img src="https://imgur.com/042gx4E.png" alt="App logo" width="300" height="300">
-
-# Python uv and ruff template
+# Fast_API-React_template
 
 ### CI/CD status:
-[![Actions Status](https://github.com/Pythonusus/python_uv_ruff_template/actions/workflows/github-ci.yaml/badge.svg)](https://github.com/Pythonusus/python_uv_ruff_template/actions)
+[![Actions Status](https://github.com/Pythonusus/Fast_API-React_template/actions/workflows/github-ci.yaml/badge.svg)](https://github.com/Pythonusus/Fast_API-React_template/actions)
 
 </div>
 
@@ -14,14 +12,30 @@
 - [About](#about)
 - [Quick Start](#quick-start)
 - [Env variables](#environment)
-- [Built with](#built)
 - [License](#license)
 - [Author](#author)
 
 <a name = "about"></a>
 ## 📋 About
 
-**Python uv and ruff template** - Python project template using uv package manager and ruff linter.
+**Simple template for FastAPI backend and React frontend fullstack project.
+
+### Built with:
+- FastAPI - async backend
+- React - frontend
+- PostgreSQL - database
+- SQLAlchemy - async ORM
+- asyncpg - async PostgreSQL driver
+- Alembic - migrations
+- Pydantic - data validation and settings management
+- Nginx - reverse proxy and fast static file delivery
+- Docker Compose - containerization
+- uv - backend package manager
+- Ruff - backend linter and formatter
+- Prettier/ESLint - frontend linter and formatter
+- Vite - frontend dev server and proxy
+- pytest - tests
+
 
 ### 💡 Main features
 
@@ -39,6 +53,7 @@
 - curl - command-line tool for transferring data using URLs
 - make - for easy custom shortcuts
 - uv - python package manager
+- docker - for running app using docker and compose
 
 ### Running the app
 
@@ -70,19 +85,10 @@ Also see .env.example in project root
 | `DEVELOPMENT` | Run the app in development mode | `false` |
 
 
-<a name = "built"></a>
-## 🏗️ Built with
-
-- [python](https://www.python.org/) programming language
-- [uv](https://docs.astral.sh/uv/) - an extremely fast Python package and project manager, written in Rust
-- [ruff](https://pypi.org/project/ruff/) - an extremely fast Python linter and code formatter, written in Rust
-- [pytest](https://pypi.org/project/pytest/) - testing framework
-- [pre-commit](https://pre-commit.com/) - framework for managing and maintaining multi-language pre-commit hooks
-
 <a id="license"></a>
 ## ⚖️ License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the Petr Malafeev Non-Commercial Network Copyleft License v1.0 (RU/EN) - see the LICENSE file for details.
 
 <a name = "author"></a>
 ## ✍️ Author

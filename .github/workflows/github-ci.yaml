@@ -16,14 +16,22 @@ jobs:
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
 
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       - name: Install dependencies
         run: |
-          make install
+          make install-backend-dev
+          make install-frontend
 
       - name: Run linters
         run: |
-          make lint
+          make lint-backend
+          make lint-frontend
 
       - name: Run tests
         run: |
-          make test
+          make test-backend
+          make test-frontend

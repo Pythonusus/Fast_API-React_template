@@ -1,12 +1,19 @@
 [project]
-name = "python_uv_ruff_template"
+name = "Fast_API-React_template"
 version = "0.1.0"
-description = "Simple template for python project with uv and ruff"
+description = "Simple template for Fast Api backend and React frontend fullstack project"
 readme = "README.md"
 authors = [{ name = "Petr Malafeev", email = "malafeevpa@yandex.ru" }]
 
 requires-python = "==3.14.*"
-dependencies = []
+dependencies = [
+    "alembic>=1.18.5",
+    "asyncpg>=0.31.0",
+    "fastapi[standard]>=0.141.1",
+    "pydantic>=2.13.4",
+    "python-dotenv>=1.2.2",
+    "sqlalchemy>=2.0.51",
+]
 
 [dependency-groups]
 dev = [
@@ -17,7 +24,7 @@ dev = [
 ]
 
 [project.urls]
-repository = "https://github.com/Pythonusus/python_uv_ruff_template.git"
+repository = "https://github.com/Pythonusus/Fast_API-React_template.git"
 
 [tool.ruff]
 line-length = 80

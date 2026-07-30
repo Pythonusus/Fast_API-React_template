@@ -1,0 +1,64 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: 'Commit SHA for deploy'
+        required: true
+        type: string
+
+concurrency:
+  group: vps-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        # Set environment variables in github actions secrets.
+        # VPS_PORT is used to set the port on which app will be available on VPS.
+        # PROJECT_NAME is a name of the project directory on VPS in $HOME/projects/PROJECT_NAME.
+        # SERVER_HOST is used to set the host for the SSH connection to VPS.
+        # SERVER_USER is used to set the username for the SSH connection to VPS.
+        # SSH_PRIVATE_KEY is used to set the private key for the SSH connection to VPS.
+        # SSH_PASSPHRASE is used to set the passphrase for the SSH private key.
+        env:
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          envs: VPS_PORT
+          script: |
+            set -e
+
+            echo "🚀 Deploying commit: ${{ github.event.inputs.commit_sha }}"
+
+            REPO_URL="https://github.com/${{ github.repository }}.git"
+            TARGET_SHA="${{ github.event.inputs.commit_sha }}"
+            PROJECT_DIR="${HOME}/projects/${{ secrets.PROJECT_NAME }}"
+
+            if [ ! -d "$PROJECT_DIR/.git" ]; then
+              echo "📦 First deploy detected. Initializing repository..."
+              mkdir -p "$PROJECT_DIR"
+              cd "$PROJECT_DIR"
+              git init
+              git remote add origin "$REPO_URL"
+            else
+              echo "🔄 Existing deploy detected. Updating repository..."
+              cd "$PROJECT_DIR"
+            fi
+
+            # Ensure data directory exists
+            # Create if not exists
+            mkdir -p "$DATA_DIR"
+
+            git fetch --depth 1 --prune origin "$TARGET_SHA"
+            git checkout --force FETCH_HEAD
+
+            echo "🔨 Running deploy.sh..."
+            ./deploy-VPS.sh
