@@ -1,0 +1,35 @@
+# Build output
+dist/
+build/
+
+# Node modules
+node_modules/
+
+# Cache directories
+.cache/
+.npm/
+
+# Environment files
+.env
+.env.*
+
+# Log files
+*.log
+
+# Generated files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Coverage files
+coverage/

@@ -1,0 +1,21 @@
+@import '/src/styles/inter-font.css';
+@import '/src/styles/utility-classes.css';
+@import '/src/styles/responsive.css';
+
+/* Custom CSS Variables */
+:root {
+  --accent-blue: #2185d0;
+}
+
+/* Semantic UI overrides */
+.ui {
+  font-family:
+    'Inter', 'Helvetica Neue', Arial, Helvetica, sans-serif !important;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  overflow: hidden;
+}

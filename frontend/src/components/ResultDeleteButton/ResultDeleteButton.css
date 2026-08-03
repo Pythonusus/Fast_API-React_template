@@ -1,0 +1,7 @@
+.ui.labeled.icon.button.result-delete-button {
+  flex: 1;
+  min-width: 0;
+  text-wrap: nowrap;
+  padding-left: 44px !important;
+  margin: 0;
+}

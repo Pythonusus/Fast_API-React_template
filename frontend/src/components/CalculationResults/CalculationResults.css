@@ -1,0 +1,49 @@
+.calculation-results {
+  width: 400px;
+  min-height: 315px;
+  display: flex;
+  flex-direction: column;
+}
+
+.calculation-results-header {
+  margin-bottom: 8px !important;
+}
+
+.calculation-results-cards-container {
+  min-height: 315px;
+  display: flex !important;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+}
+
+.calculation-results-card {
+  min-height: 80px;
+  border: 1px solid rgba(34, 36, 38, 0.15);
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
+
+.calculation-results-label {
+  padding: 6px;
+  border-radius: 5px 5px 0 0;
+  background-color: var(--accent-blue);
+  color: white;
+}
+
+.calculation-results-value {
+  margin-top: 12px;
+  font-weight: 400;
+}
+
+.calculation-result-value-placeholder {
+  font-weight: 300;
+  color: rgba(48, 48, 48, 0.7);
+}
+
+.calculation-results-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+}

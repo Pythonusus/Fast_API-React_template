@@ -1,0 +1,105 @@
+.calc-history-main-content {
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+}
+
+.calc-history-container {
+  height: fit-content;
+  margin-bottom: 12px !important;
+}
+
+.history-chassis-column {
+  width: 120px !important;
+}
+
+.history-crane-column {
+  width: 110px !important;
+}
+
+.history-country-column {
+  width: 90px !important;
+}
+
+.history-price-column {
+  width: 90px !important;
+  text-align: center !important;
+}
+
+.history-boom-column {
+  width: 80px !important;
+}
+
+.crane-name-link:hover {
+  text-decoration: underline;
+}
+
+.history-result-value {
+  color: #21ba45;
+}
+
+.history-action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.history-action-buttons .ui.button {
+  padding-top: 0.4em !important;
+  padding-bottom: 0.4em !important;
+  font-size: 0.8rem !important;
+}
+
+.history-action-buttons .ui.button .icon {
+  font-size: 0.8em !important;
+  margin-right: 0.3em !important;
+}
+
+.history-clear-button-container {
+  margin-top: 1rem;
+}
+
+.history-clear-button {
+  margin: 0 !important;
+}
+
+/* Error state styles */
+.error-message-container {
+  text-align: center;
+  margin-top: 20px;
+}
+
+@media (max-width: 1200px) {
+  .history-timestamp-column {
+    display: none;
+  }
+
+  .history-price-column {
+    display: none;
+  }
+
+  .history-method-column {
+    display: none;
+  }
+
+  .history-country-column {
+    display: none;
+  }
+
+  .history-timestamp-cell {
+    display: none;
+  }
+
+  .history-price-cell {
+    display: none;
+  }
+
+  .history-method-cell {
+    display: none;
+  }
+
+  .history-country-cell {
+    display: none;
+  }
+}

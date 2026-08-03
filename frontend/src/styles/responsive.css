@@ -1,0 +1,25 @@
+/* Responsive behavior for tablet */
+@media (max-width: 991px) {
+  .hide-on-tablet {
+    display: none !important;
+  }
+
+  .resize-text-on-tablet {
+    font-size: 0.75em !important;
+  }
+}
+
+/* Responsive behavior for mobile */
+@media (max-width: 600px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
+
+  .resize-text-on-mobile {
+    font-size: 0.75em !important;
+  }
+
+  .flex-column-on-mobile {
+    flex-direction: column !important;
+  }
+}

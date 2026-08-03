@@ -1,0 +1,19 @@
+.cranes-table-header th {
+  background-color: var(--accent-blue) !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+}
+
+.crane-name-link:hover {
+  text-decoration: underline;
+}
+
+.comparison-column {
+  width: 120px !important;
+  text-align: center !important;
+}
+
+.comparison-cell {
+  text-align: center !important;
+  padding: 0 !important;
+}

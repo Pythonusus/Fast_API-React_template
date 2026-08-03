@@ -1,0 +1,8 @@
+.add-to-comparison-button {
+  margin: 0 !important;
+  font-size: 10px !important;
+}
+
+.add-to-comparison-button.ui.button > .icon {
+  margin: 0 !important;
+}

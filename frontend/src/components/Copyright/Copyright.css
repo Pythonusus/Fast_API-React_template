@@ -1,0 +1,20 @@
+.copyright {
+  width: 428px;
+  text-align: center;
+  color: #595f73;
+  font-family: 'Manrope', 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.github-icon-container {
+  width: 49px !important;
+  height: 49px !important;
+  margin-right: 14px;
+}
+
+@media (max-width: 1600px) {
+  .copyright {
+    display: none !important;
+  }
+}

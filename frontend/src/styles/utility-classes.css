@@ -1,0 +1,70 @@
+/* Utility class for centering content both vertically and horizontally */
+.center-content {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+.center-text {
+  text-align: center !important;
+}
+
+.left-text {
+  text-align: left !important;
+}
+
+.right-text {
+  text-align: right !important;
+}
+
+.text-white {
+  color: rgb(255, 255, 255) !important;
+}
+
+.text-black {
+  color: black !important;
+}
+
+.m-top {
+  margin-top: 0.5em !important;
+}
+
+.mb-5 {
+  margin-bottom: 0.5rem !important;
+}
+
+.font-size-1 {
+  font-size: 22px !important;
+}
+
+.font-size-2 {
+  font-size: 19px !important;
+}
+
+.font-size-3 {
+  font-size: 17px !important;
+}
+
+.font-size-4 {
+  font-size: 15px !important;
+}
+
+.font-size-5 {
+  font-size: 13px !important;
+}
+
+.font-size-6 {
+  font-size: 11px !important;
+}
+
+.fw-bold {
+  font-weight: bold !important;
+}
+
+.fw-normal {
+  font-weight: normal !important;
+}
+
+.table-row-hover:hover {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  transition: background-color 0.2s ease;
+}

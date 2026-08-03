@@ -1,0 +1,147 @@
+.comparison-table-main-content {
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.comparison-table-container {
+  height: fit-content;
+}
+
+.crane-column {
+  width: 120px !important;
+}
+
+.country-column {
+  width: 100px !important;
+}
+
+.chassis-column {
+  width: 120px !important;
+}
+
+.price-column {
+  width: 120px !important;
+  text-align: center !important;
+}
+
+.price-cell {
+  text-align: center !important;
+  font-weight: 500;
+}
+
+.boom-column {
+  width: 130px !important;
+}
+
+.result-column {
+  width: 100px !important;
+  text-align: center !important;
+}
+
+.comparison-result-value {
+  text-align: center !important;
+  color: #21ba45;
+  font-weight: 500;
+}
+
+.comparison-result-value-unsafe {
+  text-align: center !important;
+  color: #db2828 !important;
+  font-weight: 500;
+}
+
+.comparison-result-placeholder {
+  color: #000000 !important;
+}
+
+.comparison-table-row-unsafe {
+  background-color: #fff5f5 !important;
+}
+
+.comparison-result-error {
+  text-align: center !important;
+  color: #db2828 !important;
+  font-weight: 500;
+}
+
+.comparison-result-error div {
+  line-height: 1.2;
+}
+
+.comparison-result-error-text {
+  color: #db2828 !important;
+  font-weight: 500;
+  text-align: center;
+}
+
+.actions-column {
+  width: 100px !important;
+}
+
+.crane-name-link:hover {
+  text-decoration: underline;
+}
+
+.table-row-hover:hover {
+  background-color: #f9fafb !important;
+}
+
+.comparison-delete-button {
+  margin: 0 !important;
+  font-size: 10px !important;
+}
+
+.comparison-delete-button.ui.button > .icon {
+  margin: 0 !important;
+}
+
+.comparison-clear-button-container {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 12px !important;
+  margin-bottom: 12px !important;
+}
+
+.comparison-clear-button,
+.comparison-clear-results-button {
+  width: 200px !important;
+}
+
+.comparison-input-and-result-container {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 8px;
+}
+
+.comparison-table-divider {
+  max-width: 960px;
+  border: 1px solid rgba(34, 36, 38, 0.15);
+  margin: 0.25rem auto !important;
+}
+
+.comparison-result-header {
+  margin: 0.4rem 0 !important;
+}
+
+@media (max-width: 1600px) {
+  .comparison-table-divider {
+    margin: 0.25rem auto !important;
+  }
+}
+
+@media (max-width: 991px) {
+  .comparison-input-and-result-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  .comparison-form {
+    margin-top: 1rem;
+  }
+  .comparison-results {
+    margin-top: 1rem;
+  }
+}

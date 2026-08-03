@@ -1,0 +1,70 @@
+.cranes-filter-sidebar {
+  max-width: 230px;
+  display: flex;
+  flex-direction: column;
+  margin: 0 0 0 24px !important;
+}
+
+.filter-section {
+  margin-bottom: 16px;
+}
+
+.filter-section h4 {
+  font-size: 0.9em !important;
+}
+
+.filter-section-description {
+  color: #666;
+  font-size: 0.9em;
+}
+
+.filter-section .ui.input {
+  font-size: 12px;
+}
+
+.filter-section .ui.input input {
+  font-size: 12px;
+}
+
+.filter-section .ui.dropdown {
+  font-size: 12px;
+}
+
+.filter-section .ui.dropdown .text {
+  font-size: 12px;
+}
+
+.filter-section .ui.dropdown .menu {
+  font-size: 12px;
+}
+
+.filter-section .ui.dropdown .menu .item {
+  font-size: 12px;
+}
+
+.filter-section-inputs-inline {
+  display: flex;
+  gap: 8px;
+}
+
+.filter-section-inputs-inline .ui.input {
+  flex: 1;
+  font-size: 12px;
+}
+
+.filter-section-inputs-inline .ui.input input {
+  font-size: 12px;
+}
+
+@media (max-width: 1600px) {
+  .cranes-filter-sidebar {
+    margin-right: 0 !important;
+  }
+}
+
+@media (max-width: 991px) {
+  .cranes-filter-sidebar {
+    max-width: 180px;
+    margin: 0 0 0 8px !important;
+  }
+}

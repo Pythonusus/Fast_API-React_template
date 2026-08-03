@@ -1,0 +1,46 @@
+.calculation-form {
+  width: 400px;
+  min-height: 315px;
+}
+
+.calculation-form-header {
+  margin-bottom: 8px !important;
+}
+
+.calculation-method-form-field {
+  border: 1px solid rgba(34, 36, 38, 0.15);
+  border-radius: 5px;
+  padding: 4px;
+  margin-bottom: 0.5rem !important;
+  background-color: white;
+}
+
+.custom-form-label {
+  display: flex !important;
+  justify-content: left !important;
+  font-size: 1rem !important;
+  margin: 2px !important;
+}
+
+.calculation-method-container {
+  margin: 0 10px;
+  font-weight: 400 !important;
+}
+
+.calculation-method-label {
+  font-weight: 700;
+}
+
+.calculation-buttons-container {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 10px;
+}
+
+.calculate-button {
+  margin: 0 !important;
+}
+
+.clear-button {
+  margin: 0 !important;
+}

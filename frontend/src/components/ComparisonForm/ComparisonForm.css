@@ -1,0 +1,27 @@
+.comparison-form {
+  width: 480px;
+  min-height: 245px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.comparison-form-header {
+  margin-bottom: 8px !important;
+}
+
+.comparison-buttons-container {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 14px;
+}
+
+.comparison-form-calculate-button {
+  margin: 0 !important;
+  flex: 1;
+}
+
+.comparison-form-clear-button {
+  margin: 0 !important;
+  flex: 1;
+}
