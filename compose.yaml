@@ -33,14 +33,16 @@ services:
 
     # runtime injection: vars from .env become available inside container process env
     # not available during parse-time
+    # .env file is required, otherwise deploy/compose run will fail
     env_file:
       - .env
+
     # runtime override layer: these values are injected into container environment,
     # and if the same key exists in env_file, this `environment` value wins
     # not available during parse-time
     environment:
       # Docker will automatically create the postgres container with these credentials.
-      POSTGRES_DB: ${POSTGRES_DB:-your-app-name}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
       POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
 
@@ -52,7 +54,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?POSTGRES_USER is required} -d ${POSTGRES_DB:-your-app-name}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?POSTGRES_USER is required} -d ${POSTGRES_DB:?POSTGRES_DB is required}"]
       interval: 15s
       timeout: 3s
       start_period: 30s
@@ -119,10 +121,10 @@ services:
         condition: service_healthy
     ports:
       # parse-time interpolation: resolved by Compose before container is created
-      # `${VPS_PORT:-8100}` here configures host port mapping at compose parse-time.
-      # This ports line itself does not inject VPS_PORT into container runtime env.
+      # `${PORT:-8100}` here configures host port mapping at compose parse-time.
+      # This ports line itself does not inject PORT var into container runtime env.
       # left side is host port, right side is container port
-      - "${VPS_PORT:-8100}:8080"
+      - "${PORT:-8100}:8080"
 
     # healthcheck is set in the Dockerfile.frontend
 

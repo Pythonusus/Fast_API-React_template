@@ -19,7 +19,7 @@ b) Keep all source code publicly available, including:
    - your full modified source code,
    - build/deployment scripts and configuration needed to run the same version you provide to users.
 c) If you run this software (original or modified) as a network service (including SaaS), you must provide users of that service a clear, visible, and working link to the full corresponding source code of the exact running version.
-d) Provide visible attribution to the original author:
+d) If you run this software (original or modified) as a network service (including SaaS), you must provide visible attribution:
    "Original author: Petr Malafeev" with this link:
    https://github.com/Pythonusus
 e) License any distributed or publicly network-run modified version under this same License.
@@ -78,7 +78,7 @@ b) Держать весь исходный код публично открыт
    - полный исходный код ваших изменений,
    - скрипты сборки/деплоя и конфигурацию, необходимые для запуска той же версии, которую получают пользователи.
 c) Если вы запускаете это ПО (оригинальное или измененное) как сетевой сервис (включая SaaS), вы обязаны дать пользователям сервиса явную, видимую и рабочую ссылку на полный соответствующий исходный код именно запущенной версии.
-d) Указывать авторство в видимой форме:
+d) Если вы запускаете это ПО (оригинальное или измененное) как сетевой сервис (включая SaaS), вы обязаны указывать авторство в видимой форме:
    "Автор оригинальной версии: Петр Малафеев" со ссылкой:
    https://github.com/Pythonusus
 e) Лицензировать распространяемые или публично запускаемые по сети измененные версии на условиях этой же Лицензии.

@@ -19,22 +19,22 @@ jobs:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         # Set environment variables in github actions secrets.
-        # VPS_PORT is used to set the port on which app will be available on VPS.
-        # PROJECT_NAME is a name of the project directory on VPS in $HOME/projects/PROJECT_NAME.
-        # SERVER_HOST is used to set the host for the SSH connection to VPS.
-        # SERVER_USER is used to set the username for the SSH connection to VPS.
-        # SSH_PRIVATE_KEY is used to set the private key for the SSH connection to VPS.
-        # SSH_PASSPHRASE is used to set the passphrase for the SSH private key.
+        # See .env.example for more details.
         env:
-          VPS_PORT: ${{ secrets.VPS_PORT }}
+          DEVELOPMENT: ${{ secrets.DEVELOPMENT }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          PORT: ${{ secrets.PORT }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          envs: VPS_PORT
+          envs: DEVELOPMENT,DATABASE_URL,POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD,PORT
           script: |
-            set -e
+            set -euo pipefail
 
             echo "🚀 Deploying commit: ${{ github.event.inputs.commit_sha }}"
 
@@ -53,12 +53,24 @@ jobs:
               cd "$PROJECT_DIR"
             fi
 
-            # Ensure data directory exists
-            # Create if not exists
-            mkdir -p "$DATA_DIR"
-
             git fetch --depth 1 --prune origin "$TARGET_SHA"
             git checkout --force FETCH_HEAD
 
+            # Ensure required secrets are present.
+            : "${DATABASE_URL:?DATABASE_URL secret is required}"
+            : "${POSTGRES_DB:?POSTGRES_DB secret is required}"
+            : "${POSTGRES_USER:?POSTGRES_USER secret is required}"
+            : "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD secret is required}"
+
+            # Build .env on VPS from GitHub Secrets for this deployment.
+            {
+              printf 'DEVELOPMENT=%s\n' "${DEVELOPMENT}"
+              printf 'DATABASE_URL=%s\n' "${DATABASE_URL}"
+              printf 'POSTGRES_DB=%s\n' "${POSTGRES_DB}"
+              printf 'POSTGRES_USER=%s\n' "${POSTGRES_USER}"
+              printf 'POSTGRES_PASSWORD=%s\n' "${POSTGRES_PASSWORD}"
+              printf 'PORT=%s\n' "${PORT}"
+            } > .env
+
             echo "🔨 Running deploy.sh..."
-            ./deploy-VPS.sh
+            ./deploy.sh
