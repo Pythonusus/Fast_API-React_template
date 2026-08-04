@@ -22,10 +22,13 @@
 **Simple template for FastAPI backend and React frontend fullstack project.**
 
 ### Built with:
-- FastAPI - async backend
+- FastAPI - backend
 - React - frontend
+- Tailwindcss - styling
+- Radix-UI - react component primitives
+- Validator - frontend string validation and normalization
 - PostgreSQL - database
-- SQLAlchemy - async ORM
+- SQLAlchemy - ORM
 - asyncpg - async PostgreSQL driver
 - Alembic - migrations
 - Pydantic - data validation and settings management
@@ -33,7 +36,7 @@
 - Docker Compose - containerization
 - uv - backend package manager
 - Ruff - backend linter and formatter
-- Prettier/ESLint - frontend linter and formatter
+- Prettier/ESLint/Stylelint - frontend linting and formatting
 - Vite - frontend dev server and proxy
 - pytest - tests
 

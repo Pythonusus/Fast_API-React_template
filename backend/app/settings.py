@@ -1,5 +1,5 @@
 """
-Project settings.
+Backend application settings.
 
 Check the .env.example file in the root directory for more information.
 """

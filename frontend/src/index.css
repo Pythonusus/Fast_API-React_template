@@ -1,21 +1,40 @@
-@import '/src/styles/inter-font.css';
-@import '/src/styles/utility-classes.css';
-@import '/src/styles/responsive.css';
+/*
+Project wide styles and imports.
+*/
+@import "tailwindcss";
+@import url("themes.css");
 
-/* Custom CSS Variables */
-:root {
-  --accent-blue: #2185d0;
-}
+/*
+Theme control guide:
+- Set <html data-theme="light"> to force light mode.
+- Set <html data-theme="dark"> to force dark mode.
+- Remove data-theme to use light mode by default.
+These rules consume tokens defined in themes.css through Tailwind utilities.
+*/
+@layer base {
+  html {
+    font-family: var(--sans);
+    font-size: 18px;
+    line-height: 1.45;
+    letter-spacing: 0.18px;
+    color-scheme: light dark;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-/* Semantic UI overrides */
-.ui {
-  font-family:
-    'Inter', 'Helvetica Neue', Arial, Helvetica, sans-serif !important;
-}
+  @media (max-width: 1024px) {
+    html {
+      font-size: 16px;
+    }
+  }
 
-body {
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  overflow: hidden;
+  body {
+    @apply m-0 min-h-screen bg-[var(--bg)] p-0 text-[var(--text)];
+  }
+
+  #root {
+    @apply mx-auto flex min-h-screen w-full max-w-[1126px] flex-col box-border text-center;
+  }
 }

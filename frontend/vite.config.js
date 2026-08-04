@@ -1,56 +1,40 @@
-import path from 'node:path'
+import path from "node:path";
 
-import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
+
+const backend_url = "http://localhost:8000";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
-  // Serve the dist folder in production, because it is mounted in backend.
-  // During development, we serve the frontend from the root folder.
-  // This is needed for hot reloading to work
-  base: process.env.NODE_ENV === 'production' ? '/dist/' : '/',
-  build: {
-    target: 'es2022', // Support top-level await
-  },
-  optimizeDeps: {
-    esbuildOptions: {
-      target: 'es2022', // Support top-level await for dependencies
-    },
-  },
+  plugins: [react(), tailwindcss()],
+  // Resolve aliases for the project
   resolve: {
     alias: {
-      '@': path.resolve(process.cwd(), '.'),
+      "@": path.resolve(process.cwd(), "."),
     },
   },
   // Development server configuration
   server: {
     proxy: {
       // Proxy API requests to backend in dev mode
-      '/api': {
-        target: 'http://localhost:8000',
+      "/api": {
+        target: backend_url,
         changeOrigin: true,
       },
-      '/process': {
-        target: 'http://localhost:8000',
+      "/metrics": {
+        target: backend_url,
         changeOrigin: true,
       },
-      '/health': {
-        target: 'http://localhost:8000',
+      "/docs": {
+        target: backend_url,
         changeOrigin: true,
       },
-      '/metrics': {
-        target: 'http://localhost:8000',
-        changeOrigin: true,
-      },
-      '/docs': {
-        target: 'http://localhost:8000',
-        changeOrigin: true,
-      },
-      '/openapi.json': {
-        target: 'http://localhost:8000',
+      "/openapi.json": {
+        target: backend_url,
         changeOrigin: true,
       },
     },
   },
-})
+});
