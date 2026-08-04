@@ -12,8 +12,15 @@ app = FastAPI(title=settings.APP_TITLE)
 
 
 @app.get("/api/health")
-async def health():
+def health():
     return {
         "status_code": 200,
         "message": f"{settings.APP_TITLE} is up and running",
+    }
+
+
+@app.get("/api/hello")
+def hello():
+    return {
+        "message": "Hello, World!",
     }
