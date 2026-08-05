@@ -5,6 +5,9 @@ build/
 # Node modules
 node_modules/
 
+# React Router generated files
+.react-router/
+
 # Cache directories
 .cache/
 .npm/

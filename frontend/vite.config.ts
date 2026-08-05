@@ -1,20 +1,20 @@
 import path from "node:path";
 
-import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
+import { reactRouter } from "@react-router/dev/vite";
 import { defineConfig } from "vite";
 
 const backend_url = "http://localhost:8000";
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
-  // Resolve aliases for the project
+  // React Router plugin for SSG + CSR mode.
+  // SSR is disabled in `react-router.config.ts`.
+  plugins: [reactRouter()],
   resolve: {
     alias: {
-      "@": path.resolve(process.cwd(), "."),
+      "~": path.resolve(import.meta.dirname, "app"),
     },
   },
+
   // Development server configuration
   server: {
     proxy: {

@@ -1,4 +1,6 @@
 import js from "@eslint/js";
+import tsEslintPlugin from "@typescript-eslint/eslint-plugin";
+import tsParser from "@typescript-eslint/parser";
 import eslintConfigPrettier from "eslint-config-prettier";
 import xo from "eslint-config-xo";
 import xoReact from "eslint-config-xo-react";
@@ -8,7 +10,6 @@ import prettierPlugin from "eslint-plugin-prettier";
 import promisePlugin from "eslint-plugin-promise";
 import reactPlugin from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
-import reactRefresh from "eslint-plugin-react-refresh";
 import securityPlugin from "eslint-plugin-security";
 import sonarjsPlugin from "eslint-plugin-sonarjs";
 import unicornPlugin from "eslint-plugin-unicorn";
@@ -24,6 +25,7 @@ export default [
       ".git/**",
       ".cache/**",
       ".npm/**",
+      ".react-router/**",
       "*.log",
       ".idea/**",
       ".vscode/**",
@@ -49,9 +51,10 @@ export default [
   },
   // Main lint config for application source files.
   {
-    files: ["**/*.{js,jsx}"],
+    files: ["**/*.{js,jsx,ts,tsx}"],
     languageOptions: {
       ecmaVersion: 2022,
+      parser: tsParser,
       globals: {
         ...globals.browser,
         ...globals.node,
@@ -64,8 +67,8 @@ export default [
     },
     // Register plugins used by rules below.
     plugins: {
+      "@typescript-eslint": tsEslintPlugin,
       "react-hooks": reactHooks,
-      "react-refresh": reactRefresh,
       react: reactPlugin,
       prettier: prettierPlugin,
       import: importPlugin,
@@ -85,6 +88,7 @@ export default [
       ...unicornPlugin.configs.recommended.rules,
       ...sonarjsPlugin.configs.recommended.rules,
       ...securityPlugin.configs.recommended.rules,
+      ...tsEslintPlugin.configs.recommended.rules,
 
       // Prettier
       "prettier/prettier": ["error"],
@@ -93,13 +97,11 @@ export default [
       "react/react-in-jsx-scope": "off",
       "react/jsx-uses-react": "off",
 
-      // JavaScript
-      "no-unused-vars": ["error", { varsIgnorePattern: "^[A-Z]" }],
-
-      // React Refresh
-      "react-refresh/only-export-components": [
-        "warn",
-        { allowConstantExport: true },
+      // TypeScript/JavaScript
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { varsIgnorePattern: "^[A-Z]" },
       ],
 
       // Import

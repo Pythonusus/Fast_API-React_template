@@ -7,6 +7,7 @@ Contains FastAPI application and API endpoints.
 from fastapi import FastAPI
 
 import app.settings as settings
+from schemas.api import MirrorRequest
 
 app = FastAPI(title=settings.APP_TITLE)
 
@@ -23,4 +24,18 @@ def health():
 def hello():
     return {
         "message": "Hello, World!",
+    }
+
+
+@app.get("/api/about")
+def about():
+    return {
+        "message": "This is the about page",
+    }
+
+
+@app.post("/api/mirror")
+def mirror(request: MirrorRequest):
+    return {
+        "message": request.message,
     }

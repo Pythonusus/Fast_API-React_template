@@ -84,6 +84,10 @@ frontend/eslint*
 frontend/jest.config.js
 frontend/jest.setup.js
 
+# React Router
+.react-router
+
+
 # ===== ENVIRONMENT & SECRETS =====
 
 # Environment files (use docker-compose env instead)

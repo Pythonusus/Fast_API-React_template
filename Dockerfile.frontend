@@ -15,8 +15,9 @@ RUN npm ci
 # Copy frontend code from host to container
 COPY frontend/ .
 
-# Building the application
-# By default, npm run build will build the application in the ./dist directory.
+# Build SSG + CSR frontend artifacts.
+# - Static route HTML + hashed assets are emitted to ./build/client
+# - Server build output may still exist, but is not needed in this Nginx image
 RUN npm run build
 
 # RUNTIME STAGE
@@ -25,8 +26,8 @@ RUN npm run build
 # Nginx and builded files will live in one container.
 FROM nginx:alpine
 
-# Copying build result from builder stage to the runtime stage
-COPY --from=builder --chown=nginx:nginx /app/dist /usr/share/nginx/html
+# Copy only static client output for Nginx serving.
+COPY --from=builder --chown=nginx:nginx /app/build/client /usr/share/nginx/html
 
 # Copying nginx configuration to the container from host
 COPY --chown=nginx:nginx nginx.conf /etc/nginx/conf.d/default.conf

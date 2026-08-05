@@ -185,7 +185,7 @@ wheels = [
 ]
 
 [[package]]
-name = "fast-api-react-template"
+name = "fast-api-react-template-backend"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

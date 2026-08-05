@@ -1,0 +1,34 @@
+:root {
+  color-scheme: light;
+
+  /* Light theme defaults for template projects. */
+  --app-bg: #fff;
+  --app-surface: #f8fafc;
+  --app-text: #0f172a;
+  --app-border: #dbe3eb;
+
+  /* Optional Radix token overrides that can be customized later. */
+  --accent-9: #4f46e5;
+  --accent-10: #4338ca;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Dracula-inspired starter values for dark mode. */
+  --app-bg: #282a36;
+  --app-surface: #303341;
+  --app-text: #f8f8f2;
+  --app-border: #44475a;
+  --accent-9: #bd93f9;
+  --accent-10: #a479ef;
+}
+
+body {
+  background: var(--app-bg);
+  color: var(--app-text);
+}
+
+.app-shell {
+  background-color: var(--app-bg);
+}

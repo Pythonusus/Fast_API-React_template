@@ -1,5 +1,5 @@
 [project]
-name = "Fast_API-React_template"
+name = "Fast_API-React_template_backend"
 version = "0.1.0"
 description = "Simple template for Fast Api backend and React frontend fullstack project"
 readme = "README.md"

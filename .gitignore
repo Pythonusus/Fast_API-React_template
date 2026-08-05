@@ -88,7 +88,6 @@ ipython_config.py
 
 # ===== FRONTEND =====
 
-# JavaScript/Node.js
 node_modules/
 dist/
 dist-ssr/
@@ -99,3 +98,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+
+# React Router
+.react-router/
+build/

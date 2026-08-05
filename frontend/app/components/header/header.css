@@ -1,0 +1,9 @@
+.app-header {
+  background-color: var(--app-surface);
+  border-bottom: 1px solid var(--app-border);
+  inset-inline: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+}
