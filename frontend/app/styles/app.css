@@ -1,3 +1,5 @@
+/* App wide styles */
+
 * {
   box-sizing: border-box;
 }
@@ -7,4 +9,16 @@ body {
   margin: 0;
   min-height: 100%;
   padding: 0;
+}
+
+/* Fonts setup*/
+.radix-themes {
+
+  /* TYPOGRAPHY RADIX TOKENS */
+  --default-font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* --heading-font-family: ; */
+  /* --code-font-family: ; */
+  /* --strong-font-family: ; */
+  /* --em-font-family: ; */
+  /* --quote-font-family: ; */
 }

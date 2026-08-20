@@ -28,7 +28,7 @@ import { Header } from "~/components/header";
 import { HTML_LANG } from "~/config";
 import { useTheme } from "~/hooks/use-theme";
 
-/**
+/*
  * `Layout` defines the full HTML document structure.
  *
  * In React Router framework mode, this component wraps your route tree and is
@@ -77,16 +77,23 @@ const App = () => {
     /*
       Theme props:
       - appearance: selects light/dark token set.
+      - accentColor: sets the main accent color for the app.
       - radius: sets default component corner roundness.
       - scaling: scales spacing/typography/sizing globally.
+      -
+      - For more information see https://www.radix-ui.com/themes/docs/components/theme
     */
-    <Theme appearance={appearance} radius="medium" scaling="100%">
+    <Theme
+      appearance={appearance}
+      accentColor={appearance === "light" ? "indigo" : "jade"}
+      radius="medium"
+      scaling="100%"
+    >
       {/*
         Outer shell element for app-wide styling.
         - `minHeight="100vh"` ensures full viewport height.
-        - `data-theme` can be used by custom CSS selectors for light/dark behavior.
       */}
-      <Box className="app-shell" data-theme={appearance} minHeight="100vh">
+      <Box className="app-shell" minHeight="100vh">
         {/* Shared top navigation/header visible on every route. */}
         <Header appearance={appearance} onToggleTheme={toggleTheme} />
         {/* Vertical layout: main content grows, footer stays at bottom. */}

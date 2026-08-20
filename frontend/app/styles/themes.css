@@ -1,110 +1,55 @@
-/* UNFINISHED */
-/* https://www.radix-ui.com/themes/docs/theme/colors */
-/* https://www.radix-ui.com/themes/docs/theme/typography */
-/* https://github.com/radix-ui/themes/tree/main/packages/radix-ui-themes/src/styles/tokens*/
+/* Themes styles
+*
+* - Default theme is light.
+* - Customisation is done by overriding default Radix Theme tokens
+* - and by setting custom CSS color variables that are used for some UI elements.
+* - Values of custom CSS variables should be Radix color tokens.
+* - See https://www.radix-ui.com/themes/docs/theme/color
+* - and https://github.com/radix-ui/themes/blob/main/packages/radix-ui-themes/src/styles/tokens/color.css
+* - Main accent color is defined in root Theme component prop in root.tsx
+*/
+
+/* DEFAULT THEME (LIGHT) */
 .radix-themes {
-  color-scheme: light;
-
-  /* Light theme defaults for template projects. */
-  --app-bg: #fff;
-  --app-surface: #f8fafc;
-  --app-text: #0f172a;
-  --app-border: #dbe3eb;
-
-  /* App typography mapped to Radix theme font token. */
-  --default-font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-
-  /* Radix color scales (1-12): light mode. */
-  --accent-1: #eef2ff;
-  --accent-2: #e0e7ff;
-  --accent-3: #c7d2fe;
-  --accent-4: #a5b4fc;
-  --accent-5: #818cf8;
-  --accent-6: #6366f1;
-  --accent-7: #4f46e5;
-  --accent-8: #4338ca;
-  --accent-9: #3730a3;
-  --accent-10: #312e81;
-  --accent-11: #1e1b4b;
-  --accent-12: #0f172a;
-
-  --gray-1: #f8fafc;
-  --gray-2: #f1f5f9;
-  --gray-3: #e2e8f0;
-  --gray-4: #cbd5e1;
-  --gray-5: #94a3b8;
-  --gray-6: #64748b;
-  --gray-7: #475569;
-  --gray-8: #334155;
-  --gray-9: #1e293b;
-  --gray-10: #0f172a;
-  --gray-11: #020617;
-  --gray-12: #000;
-
-  --focus-1: #eff6ff;
-  --focus-2: #dbeafe;
-  --focus-3: #bfdbfe;
-  --focus-4: #93c5fd;
-  --focus-5: #60a5fa;
-  --focus-6: #3b82f6;
-  --focus-7: #2563eb;
-  --focus-8: #1d4ed8;
-  --focus-9: #1e40af;
-  --focus-10: #1e3a8a;
-  --focus-11: #172554;
-  --focus-12: #0b1020;
-}
-
-.radix-themes [data-theme="dark"] {
   color-scheme: dark;
 
-  /* Dracula-inspired starter values for dark mode. */
-  --app-bg: #282a36;
-  --app-surface: #303341;
-  --app-text: #f8f8f2;
-  --app-border: #44475a;
-  /* Radix color scales (1-12): dark mode. */
-  --accent-1: #2b2538;
-  --accent-2: #332b45;
-  --accent-3: #3e3254;
-  --accent-4: #4d3d69;
-  --accent-5: #5e4a81;
-  --accent-6: #71599a;
-  --accent-7: #8669b4;
-  --accent-8: #9f7dd2;
-  --accent-9: #bd93f9;
-  --accent-10: #a479ef;
-  --accent-11: #d7bcff;
-  --accent-12: #f1e6ff;
+  /* BACKGROUND COLORS RADIX TOKENS */
 
-  --gray-1: #282a36;
-  --gray-2: #303341;
-  --gray-3: #3a3d4d;
-  --gray-4: #44475a;
-  --gray-5: #565a6f;
-  --gray-6: #6c7086;
-  --gray-7: #7f839c;
-  --gray-8: #9397ad;
-  --gray-9: #a8abc0;
-  --gray-10: #bdc0d2;
-  --gray-11: #d4d6e6;
-  --gray-12: #f8f8f2;
+  /* Page background */
+  --color-background: #fff;
 
-  --focus-1: #1a2533;
-  --focus-2: #1f2d40;
-  --focus-3: #243952;
-  --focus-4: #2b4666;
-  --focus-5: #34567d;
-  --focus-6: #3f6896;
-  --focus-7: #4d7cb2;
-  --focus-8: #5c92cf;
-  --focus-9: #6caaf0;
-  --focus-10: #88bef6;
-  --focus-11: #b1d7fb;
-  --focus-12: #d9ecff;
+  /* Panel backgrounds, such as cards, tables, popovers, dropdown menus, etc. */
+  --color-panel-solid: #f8fafc;
+  --color-panel-translucent: #f8fafc;
+
+  /* Form component backgrounds, such as text fields, checkboxes, select, etc. */
+  --color-surface: #f8fafc;
+
+  /* Dialog overlays */
+  --color-overlay: #000;
+
+  /* CUSTOM CSS VARIABLES */
 }
 
-.app-shell {
-  background-color: var(--app-bg);
-  color: var(--app-text);
+/* DARK THEME */
+/* Overrides default theme styles */
+.radix-themes.dark {
+  color-scheme: dark;
+
+  /* BACKGROUND COLORS RADIX TOKENS */
+
+  /* Page background */
+  --color-background: #282a36;
+
+  /* Panel backgrounds, such as cards, tables, popovers, dropdown menus, etc. */
+  --color-panel-solid: #343746;
+  --color-panel-translucent: rgba(68, 71, 90, 0.72);
+
+  /* Form component backgrounds, such as text fields, checkboxes, select, etc. */
+  --color-surface: #44475a;
+
+  /* Dialog overlays */
+  --color-overlay: rgba(15, 16, 22, 0.78);
+
+
 }

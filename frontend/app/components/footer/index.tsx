@@ -3,8 +3,6 @@
  */
 import { Box, Container, Text } from "@radix-ui/themes";
 
-import "./footer.css";
-
 export const Footer = () => {
   return (
     <Box asChild>
