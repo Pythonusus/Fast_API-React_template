@@ -15,6 +15,7 @@
  * - loaders are executed during build and will be included as static html content.
  * - clientLoader will be bundled as javascript code and executed in the browser.
  */
+
 import "@radix-ui/themes/styles.css";
 import "~/styles/app.css";
 import "~/styles/themes.css";
@@ -28,7 +29,7 @@ import { Header } from "~/components/header";
 import { HTML_LANG } from "~/config";
 import { useTheme } from "~/hooks/use-theme";
 
-/*
+/**
  * `Layout` defines the full HTML document structure.
  *
  * In React Router framework mode, this component wraps your route tree and is
@@ -72,17 +73,18 @@ const App = () => {
   const { appearance, toggleTheme } = useTheme();
 
   return (
-    // Radix UI theme provider: all Radix components and custom components with
-    // neccesary css vars inside inherit these design tokens.
-    /*
-      Theme props:
-      - appearance: selects light/dark token set.
-      - accentColor: sets the main accent color for the app.
-      - radius: sets default component corner roundness.
-      - scaling: scales spacing/typography/sizing globally.
-      -
-      - For more information see https://www.radix-ui.com/themes/docs/components/theme
-    */
+    /**
+     * Radix UI theme provider: all Radix components and custom components with
+     * neccesary css vars inside inherit these design tokens.
+     *
+     *
+     * Theme props:
+     * - appearance: selects light/dark token set.
+     * - accentColor: sets the main accent color for the app.
+     * - radius: sets default component corner roundness.
+     * - scaling: scales spacing/typography/sizing globally.
+     * - For more information see https://www.radix-ui.com/themes/docs/components/theme
+     */
     <Theme
       appearance={appearance}
       accentColor={appearance === "light" ? "indigo" : "jade"}
@@ -111,8 +113,8 @@ const App = () => {
                     child route component renders.
 
                     Example:
-                    - URL `/` may render `routes/home.tsx` here.
-                    - URL `/about` may render `routes/about.tsx` here.
+                    - URL `/` will render `routes/home.tsx` here.
+                    - URL `/about` will render `routes/about.tsx` here.
                     The root shell remains mounted, only outlet content changes.
                   */}
                   <Outlet />
@@ -127,4 +129,5 @@ const App = () => {
     </Theme>
   );
 };
+
 export default App;

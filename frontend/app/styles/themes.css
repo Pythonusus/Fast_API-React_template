@@ -1,13 +1,13 @@
-/* Themes styles
-*
-* - Default theme is light.
-* - Customisation is done by overriding default Radix Theme tokens
-* - and by setting custom CSS color variables that are used for some UI elements.
-* - Values of custom CSS variables should be Radix color tokens.
-* - See https://www.radix-ui.com/themes/docs/theme/color
-* - and https://github.com/radix-ui/themes/blob/main/packages/radix-ui-themes/src/styles/tokens/color.css
-* - Main accent color is defined in root Theme component prop in root.tsx
-*/
+/** Themes styles
+  *
+  * - Default theme is light.
+  * - Customisation is done by overriding default Radix Theme tokens
+  * - and by setting custom CSS color variables that are used for some UI elements.
+  * - Values of custom CSS variables should be Radix color tokens.
+  * - See https://www.radix-ui.com/themes/docs/theme/color
+  * - and https://github.com/radix-ui/themes/blob/main/packages/radix-ui-themes/src/styles/tokens/color.css
+  * - Main accent color is defined in root Theme component prop in root.tsx
+  */
 
 /* DEFAULT THEME (LIGHT) */
 .radix-themes {
@@ -29,6 +29,7 @@
   --color-overlay: #000;
 
   /* CUSTOM CSS VARIABLES */
+  --custom-border-color: var(--gray-5);
 }
 
 /* DARK THEME */
@@ -51,5 +52,6 @@
   /* Dialog overlays */
   --color-overlay: rgba(15, 16, 22, 0.78);
 
-
+  /* CUSTOM CSS VARIABLES */
+  --custom-border-color: var(--gray-6);
 }

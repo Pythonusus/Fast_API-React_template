@@ -10,6 +10,7 @@ Use relative URLs like ("/api/hello"):
 
 import type { TextResponse } from "~/types/api";
 
+// Fetch hello message from the backend.
 export const fetchHello = async (): Promise<TextResponse> => {
   const response = await fetch("/api/hello");
 
@@ -20,6 +21,7 @@ export const fetchHello = async (): Promise<TextResponse> => {
   return response.json() as Promise<TextResponse>;
 };
 
+// Fetch about message from the backend.
 export const fetchAbout = async (): Promise<TextResponse> => {
   const response = await fetch("/api/about");
 
@@ -30,6 +32,7 @@ export const fetchAbout = async (): Promise<TextResponse> => {
   return response.json() as Promise<TextResponse>;
 };
 
+// Send message to the backend mirror endpoint.
 export const fetchMirror = async (message: string): Promise<TextResponse> => {
   const response = await fetch("/api/mirror", {
     method: "POST",

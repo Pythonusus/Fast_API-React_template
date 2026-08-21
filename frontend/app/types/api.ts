@@ -1,3 +1,5 @@
-export type TextResponse = {
-  message: string;
-};
+/**
+ * API response types.
+ */
+
+export type TextResponse = { message: string };
