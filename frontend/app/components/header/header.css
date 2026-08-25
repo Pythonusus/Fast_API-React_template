@@ -5,3 +5,22 @@
   z-index: 1000;
   border-bottom: 1px solid var(--custom-border-color);
 }
+
+/**
+ * Theme toggle icons.
+ *
+ * The header renders the moon and the sun at the same time, and these rules
+ * keep exactly one of them visible. The switch is driven by the `dark` class
+ * that next-themes puts on `<html>` before the page is painted, which is the
+ * same hook the color variables in `styles/themes.css` use.
+ */
+
+/* Light mode: offer the moon, clicking it turns the dark mode on. */
+:root:not(.dark) .theme-icon-when-dark {
+  display: none;
+}
+
+/* Dark mode: offer the sun, clicking it turns the light mode on. */
+:root.dark .theme-icon-when-light {
+  display: none;
+}

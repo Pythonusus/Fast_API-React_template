@@ -11,14 +11,14 @@ body {
   padding: 0;
 }
 
-/* Fonts setup*/
+/* Fonts setup */
 .radix-themes {
-
   /* TYPOGRAPHY RADIX TOKENS */
-  --default-font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  /* --heading-font-family: ; */
-  /* --code-font-family: ; */
-  /* --strong-font-family: ; */
-  /* --em-font-family: ; */
-  /* --quote-font-family: ; */
+
+  /* See more at https://github.com/radix-ui/themes/blob/main/packages/radix-ui-themes/src/styles/tokens/typography.css */
+
+  /* and https://www.radix-ui.com/themes/docs/theme/typography#custom-fonts */
+
+  --default-font-family:
+    inter, "Segoe UI", roboto, helvetica, arial, sans-serif;
 }

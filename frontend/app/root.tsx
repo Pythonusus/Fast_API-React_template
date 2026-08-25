@@ -21,13 +21,13 @@ import "~/styles/app.css";
 import "~/styles/themes.css";
 
 import { Box, Container, Flex, Section, Theme } from "@radix-ui/themes";
+import { ThemeProvider } from "next-themes";
 import { type ReactNode } from "react";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 
 import { Footer } from "~/components/footer";
 import { Header } from "~/components/header";
 import { HTML_LANG } from "~/config";
-import { useTheme } from "~/hooks/use-theme";
 
 /**
  * `Layout` defines the full HTML document structure.
@@ -39,8 +39,13 @@ import { useTheme } from "~/hooks/use-theme";
  * Think of it as a placeholder where the currently matched child route component renders.
  */
 export const Layout = ({ children }: { children: ReactNode }) => {
+  /*
+    `suppressHydrationWarning` below is required by next-themes: its inline
+    script adds the `light`/`dark` class to `<html>` before React hydrates, so
+    this element intentionally differs from the prerendered HTML.
+  */
   return (
-    <html lang={HTML_LANG}>
+    <html lang={HTML_LANG} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta content="width=device-width, initial-scale=1" name="viewport" />
@@ -68,10 +73,6 @@ export const Layout = ({ children }: { children: ReactNode }) => {
  * consistent while the user navigates between nested routes.
  */
 const App = () => {
-  // Custom hook that stores theme state and exposes a toggle handler.
-  // `appearance` is typically "light" or "dark".
-  const { appearance, toggleTheme } = useTheme();
-
   return (
     /**
      * Radix UI theme provider: all Radix components and custom components with
@@ -85,48 +86,45 @@ const App = () => {
      * - scaling: scales spacing/typography/sizing globally.
      * - For more information see https://www.radix-ui.com/themes/docs/components/theme
      */
-    <Theme
-      appearance={appearance}
-      accentColor={appearance === "light" ? "indigo" : "jade"}
-      radius="medium"
-      scaling="100%"
-    >
-      {/*
-        Outer shell element for app-wide styling.
-        - `minHeight="100vh"` ensures full viewport height.
-      */}
-      <Box className="app-shell" minHeight="100vh">
-        {/* Shared top navigation/header visible on every route. */}
-        <Header appearance={appearance} onToggleTheme={toggleTheme} />
-        {/* Vertical layout: main content grows, footer stays at bottom. */}
-        <Flex direction="column" minHeight="100vh">
-          {/* `asChild` makes Box pass its props/styles onto the `<main>` element directly. */}
-          <Box asChild flexGrow="1" pt="9">
-            <main>
-              {/* Page content spacing wrapper. */}
-              <Section py="6">
-                {/* Constrains content width and adds horizontal padding. */}
-                <Container px="4" size="4">
-                  {/*
-                    Most important React Router concept here:
-                    `<Outlet />` is a placeholder where the currently matched
-                    child route component renders.
+    <ThemeProvider attribute="class">
+      <Theme radius="medium" scaling="100%">
+        {/*
+          Outer shell element for app-wide styling.
+          - `minHeight="100vh"` ensures full viewport height.
+        */}
+        <Box className="app-shell" minHeight="100vh">
+          {/* Shared top navigation/header visible on every route. */}
+          <Header />
+          {/* Vertical layout: main content grows, footer stays at bottom. */}
+          <Flex direction="column" minHeight="100vh">
+            {/* `asChild` makes Box pass its props/styles onto the `<main>` element directly. */}
+            <Box asChild flexGrow="1" pt="9">
+              <main>
+                {/* Page content spacing wrapper. */}
+                <Section py="6">
+                  {/* Constrains content width and adds horizontal padding. */}
+                  <Container px="4" size="4">
+                    {/*
+                      Most important React Router concept here:
+                      `<Outlet />` is a placeholder where the currently matched
+                      child route component renders.
 
-                    Example:
-                    - URL `/` will render `routes/home.tsx` here.
-                    - URL `/about` will render `routes/about.tsx` here.
-                    The root shell remains mounted, only outlet content changes.
-                  */}
-                  <Outlet />
-                </Container>
-              </Section>
-            </main>
-          </Box>
-          {/* Shared footer visible on every route. */}
-          <Footer />
-        </Flex>
-      </Box>
-    </Theme>
+                      Example:
+                      - URL `/` will render `routes/home.tsx` here.
+                      - URL `/about` will render `routes/about.tsx` here.
+                      The root shell remains mounted, only outlet content changes.
+                    */}
+                    <Outlet />
+                  </Container>
+                </Section>
+              </main>
+            </Box>
+            {/* Shared footer visible on every route. */}
+            <Footer />
+          </Flex>
+        </Box>
+      </Theme>
+    </ThemeProvider>
   );
 };
 

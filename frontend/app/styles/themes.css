@@ -10,8 +10,8 @@
   */
 
 /* DEFAULT THEME (LIGHT) */
-.radix-themes {
-  color-scheme: dark;
+:root .radix-themes {
+  color-scheme: light;
 
   /* BACKGROUND COLORS RADIX TOKENS */
 
@@ -28,13 +28,46 @@
   /* Dialog overlays */
   --color-overlay: #000;
 
+  /* ACCENT COLORS RADIX TOKENS */
+
+  /* If you are fine with same accent color in all themes, you can set in root.tsx Theme prop */
+  --accent-1: var(--blue-1);
+  --accent-2: var(--blue-2);
+  --accent-3: var(--blue-3);
+  --accent-4: var(--blue-4);
+  --accent-5: var(--blue-5);
+  --accent-6: var(--blue-6);
+  --accent-7: var(--blue-7);
+  --accent-8: var(--blue-8);
+  --accent-9: var(--blue-9);
+  --accent-10: var(--blue-10);
+  --accent-11: var(--blue-11);
+  --accent-12: var(--blue-12);
+  --accent-a1: var(--blue-a1);
+  --accent-a2: var(--blue-a2);
+  --accent-a3: var(--blue-a3);
+  --accent-a4: var(--blue-a4);
+  --accent-a5: var(--blue-a5);
+  --accent-a6: var(--blue-a6);
+  --accent-a7: var(--blue-a7);
+  --accent-a8: var(--blue-a8);
+  --accent-a9: var(--blue-a9);
+  --accent-a10: var(--blue-a10);
+  --accent-a11: var(--blue-a11);
+  --accent-a12: var(--blue-a12);
+  --accent-contrast: var(--blue-contrast);
+  --accent-surface: var(--blue-surface);
+  --accent-indicator: var(--blue-indicator);
+  --accent-track: var(--blue-track);
+
   /* CUSTOM CSS VARIABLES */
   --custom-border-color: var(--gray-5);
 }
 
 /* DARK THEME */
+
 /* Overrides default theme styles */
-.radix-themes.dark {
+:root.dark .radix-themes {
   color-scheme: dark;
 
   /* BACKGROUND COLORS RADIX TOKENS */
@@ -44,13 +77,45 @@
 
   /* Panel backgrounds, such as cards, tables, popovers, dropdown menus, etc. */
   --color-panel-solid: #343746;
-  --color-panel-translucent: rgba(68, 71, 90, 0.72);
+  --color-panel-translucent: rgb(68 71 90 / 72%);
 
   /* Form component backgrounds, such as text fields, checkboxes, select, etc. */
   --color-surface: #44475a;
 
   /* Dialog overlays */
-  --color-overlay: rgba(15, 16, 22, 0.78);
+  --color-overlay: rgb(15 16 22 / 78%);
+
+  /* ACCENT COLORS RADIX TOKENS */
+
+  /* If you are fine with same accent color in all themes, you can set in root.tsx Theme prop */
+  --accent-1: var(--iris-1);
+  --accent-2: var(--iris-2);
+  --accent-3: var(--iris-3);
+  --accent-4: var(--iris-4);
+  --accent-5: var(--iris-5);
+  --accent-6: var(--iris-6);
+  --accent-7: var(--iris-7);
+  --accent-8: var(--iris-8);
+  --accent-9: var(--iris-9);
+  --accent-10: var(--iris-10);
+  --accent-11: var(--iris-11);
+  --accent-12: var(--iris-12);
+  --accent-a1: var(--iris-a1);
+  --accent-a2: var(--iris-a2);
+  --accent-a3: var(--iris-a3);
+  --accent-a4: var(--iris-a4);
+  --accent-a5: var(--iris-a5);
+  --accent-a6: var(--iris-a6);
+  --accent-a7: var(--iris-a7);
+  --accent-a8: var(--iris-a8);
+  --accent-a9: var(--iris-a9);
+  --accent-a10: var(--iris-a10);
+  --accent-a11: var(--iris-a11);
+  --accent-a12: var(--iris-a12);
+  --accent-contrast: var(--iris-contrast);
+  --accent-surface: var(--iris-surface);
+  --accent-indicator: var(--iris-indicator);
+  --accent-track: var(--iris-track);
 
   /* CUSTOM CSS VARIABLES */
   --custom-border-color: var(--gray-6);
