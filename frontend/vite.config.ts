@@ -9,6 +9,7 @@ export default defineConfig({
   // React Router plugin for SSG + CSR mode.
   // SSR is disabled in `react-router.config.ts`.
   plugins: [reactRouter()],
+  // Allows to use `~` as a shortcut for `src/app` in imports.
   resolve: {
     alias: {
       "~": path.resolve(import.meta.dirname, "app"),

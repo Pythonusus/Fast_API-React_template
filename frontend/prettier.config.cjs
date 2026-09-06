@@ -1,4 +1,6 @@
 // Prettier settings for frontend code style.
+// See https://prettier.io/docs/en/options.html for more information.
+
 module.exports = {
   // Always end statements with semicolons. Example: `const x = 1;`
   semi: true,

@@ -30,7 +30,7 @@
 
   /* ACCENT COLORS RADIX TOKENS */
 
-  /* If you are fine with same accent color in all themes, you can set in root.tsx Theme prop */
+  /* If you are fine with same accent color in all themes, you can set in root.tsx Theme prop and delete this section */
   --accent-1: var(--blue-1);
   --accent-2: var(--blue-2);
   --accent-3: var(--blue-3);
@@ -87,7 +87,7 @@
 
   /* ACCENT COLORS RADIX TOKENS */
 
-  /* If you are fine with same accent color in all themes, you can set in root.tsx Theme prop */
+  /* If you are fine with same accent color in all themes, you can set in root.tsx Theme prop and delete this section */
   --accent-1: var(--iris-1);
   --accent-2: var(--iris-2);
   --accent-3: var(--iris-3);

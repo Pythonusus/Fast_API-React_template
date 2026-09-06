@@ -1,26 +1,44 @@
+// TypeScript configuration for the React Router frontend.
+// Used by the editor, `tsc`, and Vite for type-checking — not for emitting JS.
+// JS files compilation is handled by Vite.
 {
+  // Files and folders included in the TypeScript project.
   "include": [
-    "**/*",
-    "**/.server/**/*",
-    "**/.client/**/*",
-    ".react-router/types/**/*"
+    "**/*", // All source files under the frontend root
+    "**/.server/**/*", // React Router server-side build output
+    "**/.client/**/*", // React Router client-side build output
+    ".react-router/types/**/*" // Generated route types from React Router
   ],
   "compilerOptions": {
+    // Built-in type definitions available globally (browser APIs + modern JS).
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    // Ambient types loaded without explicit imports (Node.js + Vite env/globals).
     "types": ["node", "vite/client"],
+    // Downlevel/emit target for JS syntax (matches modern browsers and bundlers).
     "target": "ES2022",
+    // Module syntax for imports/exports (ES modules).
     "module": "ES2022",
+    // Resolve modules the way Vite/esbuild do (supports package.json "exports").
     "moduleResolution": "bundler",
+    // Use the React 17+ JSX transform (no need to import React in every file).
     "jsx": "react-jsx",
+    // Treat project root and generated types as one logical source tree for imports.
     "rootDirs": [".", "./.react-router/types"],
+    // Path alias: `~/components/Foo` resolves to `./app/components/Foo`.
     "paths": {
       "~/*": ["./app/*"]
     },
+    // Allow default imports from CommonJS modules (e.g. `import fs from "fs"`).
     "esModuleInterop": true,
+    // Require `import type` / `export type` for type-only imports (clearer, better tree-shaking).
     "verbatimModuleSyntax": true,
+    // Type-check only; Vite handles compilation — do not write .js output files.
     "noEmit": true,
+    // Allow importing .json files as modules with typed shapes.
     "resolveJsonModule": true,
+    // Skip type-checking of declaration files in node_modules (faster builds).
     "skipLibCheck": true,
+    // Enable all strict type-checking rules (null checks, implicit any, etc.).
     "strict": true
   }
 }

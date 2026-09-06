@@ -1,7 +1,7 @@
 import type { Config } from "@react-router/dev/config";
 
 /**
- * Rendering strategy for this template:
+ * Rendering strategy for this project:
  *
  * 1) No runtime SSR:
  *    - `ssr: false` means the app does not render pages on the server per request.
