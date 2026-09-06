@@ -13,8 +13,8 @@ import type { Config } from "@react-router/dev/config";
  *      static route text, so pages can load quickly.
  *
  * 3) Client-side rendering (CSR) for dynamic content:
- *    - Route `clientLoader` functions fetch backend data in the browser.
- *    - If backend is unavailable, routes should show local fallback/error UI
+ *    - Routes fetch backend data in the browser after hydration via `useEffect`.
+ *    - If backend is unavailable, routes show local fallback/error UI
  *      instead of failing the whole page.
  */
 export default {

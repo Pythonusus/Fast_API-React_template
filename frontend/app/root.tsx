@@ -7,13 +7,13 @@
  * - It renders shared UI that should appear on every page (header/footer).
  * - It reserves a slot where nested route content will be rendered (`<Outlet />`).
  *
- * Rendering model in this app - SSG for static shell and SSR for dynamic content.
- * SSR is disabled at all in react-router.config.ts.
- * - The static shell (header/footer/main structure) is prerendered and built into static html files.
+ * Rendering model in this app - SSG for static shell, CSR for dynamic content.
+ * SSR is disabled in react-router.config.ts.
+ * - The static shell (header/footer/main structure) is prerendered into static HTML files.
  * - `<Outlet />` is a placeholder where nested route modules render inside the shell.
- * - Route-specific data can be fetched by each route's loader/clientLoader.
- * - loaders are executed during build and will be included as static html content.
- * - clientLoader will be bundled as javascript code and executed in the browser.
+ * - Routes fetch backend data in the browser after hydration (see `routes/home.tsx`
+ *   and `routes/about.tsx`) using `useEffect` inside the route component.
+ * - User-triggered requests (forms, buttons) fetch on action without a route loader.
  */
 
 import "@radix-ui/themes/styles.css";

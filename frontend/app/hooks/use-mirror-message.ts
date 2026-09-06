@@ -4,7 +4,7 @@
  * ## When to extract a hook vs keep logic inline
  *
  * Keep state and effects **inline in the component** when:
- * - The logic is used in one place only (see `AboutBackendMessageCard`).
+ * - The logic is used in one place only (see mount-time fetch in `routes/about.tsx`).
  * - The fetch is a simple mount-time request with a few state variables.
  * - Splitting it out would add a file without improving readability.
  *
@@ -16,7 +16,7 @@
  *
  * This hook is extracted because the mirror form owns multiple related states
  * (`inputMessage`, `isMirroring`, `mirrorError`, `mirrorMessage`) and an async
- * submit handler — keeping that inside `MirrorExampleCard` would bury the UI.
+ * submit handler — keeping that inside `HomeRoute` would bury the UI.
  */
 import { useState } from "react";
 
