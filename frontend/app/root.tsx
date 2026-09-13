@@ -16,6 +16,7 @@
  * - User-triggered requests (forms, buttons) fetch on action without a route loader.
  *
  * Error handling:
+ * - Unmatched URLs render `routes/404.tsx` via the splat (`*`) route.
  * - `ErrorBoundary` is React Router's route-level error boundary export.
  *   `Layout` wraps both `App` and `ErrorBoundary`, so header/footer stay visible
  *   without duplicating shell markup.
@@ -134,6 +135,7 @@ const App = () => {
       Example:
       - URL `/` will render `routes/home.tsx` here.
       - URL `/about` will render `routes/about.tsx` here.
+      - Any other URL will render `routes/404.tsx` here.
       The root shell remains mounted, only outlet content changes.
     */
     <Outlet />
