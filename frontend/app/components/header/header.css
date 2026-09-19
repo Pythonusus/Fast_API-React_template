@@ -7,6 +7,45 @@
 }
 
 /**
+ * Header nav links with hover underline and fade effect.
+ *
+ * Cannot be achieved with standard Radix props.
+ * Position relative is used to position the underline absolutely.
+ * Absolute positioning is looking for the nearest ancestor that is not static.
+ * Text decoration is removed to prevent the default underline.
+ */
+.app-header-nav-link {
+  position: relative;
+  text-decoration: none;
+  transition: color 220ms ease;
+}
+
+/* scaleX(0) makes the underline invisible in default state */
+.app-header-nav-link::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 1px;
+  background-color: currentcolor;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 220ms ease;
+}
+
+
+.app-header-nav-link:hover,
+.app-header-nav-link:focus-visible {
+  color: var(--gray-11);
+}
+
+/* scaleX(1) makes the underline visible on hover and focus */
+.app-header-nav-link:hover::after,
+.app-header-nav-link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/**
  * Theme toggle icons.
  *
  * The header renders the moon and the sun at the same time, and these rules

@@ -56,10 +56,22 @@ export const Header = () => {
             </Flex>
             <Flex asChild align="center" gap="3">
               <nav aria-label="Main">
-                <Link asChild color="gray" highContrast>
+                <Link
+                  asChild
+                  className="app-header-nav-link"
+                  color="gray"
+                  highContrast
+                  underline="none"
+                >
                   <NavLink to="/">Home</NavLink>
                 </Link>
-                <Link asChild color="gray" highContrast>
+                <Link
+                  asChild
+                  className="app-header-nav-link"
+                  color="gray"
+                  highContrast
+                  underline="none"
+                >
                   <NavLink to="/about">About</NavLink>
                 </Link>
               </nav>
