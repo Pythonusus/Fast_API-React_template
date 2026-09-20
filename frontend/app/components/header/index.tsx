@@ -4,8 +4,15 @@
  * This component is intentionally simple so it can be reused as a starter
  * in new projects.
  */
-import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
-import { Box, Flex, IconButton, Link, Text } from "@radix-ui/themes";
+import { HamburgerMenuIcon, MoonIcon, SunIcon } from "@radix-ui/react-icons";
+import {
+  Box,
+  DropdownMenu,
+  Flex,
+  IconButton,
+  Link,
+  Text,
+} from "@radix-ui/themes";
 import { useTheme } from "next-themes";
 import { NavLink } from "react-router";
 
@@ -41,8 +48,8 @@ export const Header = () => {
     <Box asChild className="app-header" p="4">
       <header>
         <Flex align="center" gap="4" justify="between">
-          <Flex align="center" gap="4">
-            <Flex align="center" gap="2">
+          <Flex align="center" gap="4" minWidth="0">
+            <Flex align="center" gap="2" minWidth="0">
               <img
                 alt="React logo"
                 height="24"
@@ -50,11 +57,22 @@ export const Header = () => {
                 src={reactLogo}
                 width="24"
               />
-              <Text as="p" size="4" weight="bold">
+              <Text as="p" className="app-header-title" size="4" weight="bold">
                 FastAPI + React Template
               </Text>
             </Flex>
-            <Flex asChild align="center" gap="3">
+            {/*
+              Desktop and mobile navs are both always in the DOM. `header.css`
+              media queries hide one of them, so the breakpoint needs no
+              JavaScript. `display: none` also removes the hidden nav from the
+              accessibility tree, so only one set of links is exposed at a time.
+            */}
+            <Flex
+              asChild
+              align="center"
+              className="app-header-nav-desktop"
+              gap="3"
+            >
               <nav aria-label="Main">
                 <Link
                   asChild
@@ -77,25 +95,52 @@ export const Header = () => {
               </nav>
             </Flex>
           </Flex>
-          <IconButton
-            aria-label="Toggle light and dark theme"
-            onClick={toggleTheme}
-            radius="full"
-            variant="soft"
-          >
-            {/*
-              Both icons are always rendered and `header.css` hides the one that
-              does not match the active theme.
+          <Flex align="center" flexShrink="0" gap="3">
+            <Box className="app-header-nav-mobile">
+              <DropdownMenu.Root>
+                <DropdownMenu.Trigger>
+                  <IconButton
+                    aria-label="Open main navigation"
+                    radius="full"
+                    variant="soft"
+                  >
+                    <HamburgerMenuIcon />
+                  </IconButton>
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Content
+                  align="end"
+                  aria-label="Main"
+                  className="app-header-nav-menu"
+                >
+                  <DropdownMenu.Item asChild>
+                    <NavLink to="/">Home</NavLink>
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item asChild>
+                    <NavLink to="/about">About</NavLink>
+                  </DropdownMenu.Item>
+                </DropdownMenu.Content>
+              </DropdownMenu.Root>
+            </Box>
+            <IconButton
+              aria-label="Toggle light and dark theme"
+              onClick={toggleTheme}
+              radius="full"
+              variant="soft"
+            >
+              {/*
+                Both icons are always rendered and `header.css` hides the one that
+                does not match the active theme.
 
-              Picking the icon in JavaScript is not an option here: pages are
-              prerendered to static HTML at build time, when the visitor's theme
-              is unknown. The prerendered icon would then differ from the first
-              client render, which causes a hydration mismatch and a visible
-              flash of the wrong icon. CSS applies before the first paint.
-            */}
-            <MoonIcon className="theme-icon-when-light" />
-            <SunIcon className="theme-icon-when-dark" />
-          </IconButton>
+                Picking the icon in JavaScript is not an option here: pages are
+                prerendered to static HTML at build time, when the visitor's theme
+                is unknown. The prerendered icon would then differ from the first
+                client render, which causes a hydration mismatch and a visible
+                flash of the wrong icon. CSS applies before the first paint.
+              */}
+              <MoonIcon className="theme-icon-when-light" />
+              <SunIcon className="theme-icon-when-dark" />
+            </IconButton>
+          </Flex>
         </Flex>
       </header>
     </Box>

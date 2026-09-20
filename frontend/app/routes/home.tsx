@@ -30,6 +30,7 @@ import {
   BACKEND_UNAVAILABLE,
   START_BACKEND_SERVER_HINT,
 } from "~/common-texts/errors";
+import { FeatureCards } from "~/components/feature-cards";
 import { useMirrorMessage } from "~/hooks/use-mirror-message";
 
 /**
@@ -118,6 +119,8 @@ const HomeRoute = () => {
           highlights, and API-connected UI.
         </Text>
       </header>
+
+      <FeatureCards />
 
       <Flex direction="column" gap="4">
         <Card>

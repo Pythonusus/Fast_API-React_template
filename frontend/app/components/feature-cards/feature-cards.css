@@ -1,0 +1,49 @@
+/**
+ * Feature cards layout extras that Radix Card props do not cover.
+ *
+ * Card has no layout `height` prop, so equal-height cells need CSS.
+ * `Card asChild` renders an `<a>`; inherit keeps heading/body colors
+ * instead of the browser link color.
+ * Hover scale and background shift cannot be done with Radix Card props.
+ *
+ * Surface cards paint on `::before` via `--card-background-color`.
+ */
+
+.app-feature-card {
+  height: 100%;
+  transform-origin: center;
+  transition:
+    transform 220ms ease,
+    background-color 220ms ease;
+}
+
+a.app-feature-card {
+  color: inherit;
+}
+
+@media (hover: hover) {
+  .app-feature-card:hover {
+    --card-background-color: var(--gray-3);
+
+    z-index: 1;
+    transform: scale(1.03);
+  }
+}
+
+.app-feature-card:focus-visible {
+  --card-background-color: var(--gray-3);
+
+  z-index: 1;
+  transform: scale(1.03);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-feature-card {
+    transition: background-color 220ms ease;
+  }
+
+  .app-feature-card:hover,
+  .app-feature-card:focus-visible {
+    transform: none;
+  }
+}

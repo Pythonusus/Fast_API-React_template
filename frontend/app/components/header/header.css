@@ -7,6 +7,48 @@
 }
 
 /**
+ * Collapsible navigation.
+ *
+ * Both the inline links and the hamburger dropdown stay in the markup.
+ * These queries pick which one is visible. 768px matches Radix Themes `sm`.
+ *
+ * Dropdown content is portaled to `document.body`, so it is hidden with its
+ * own class rather than as a descendant of `.app-header`.
+ */
+.app-header .app-header-nav-mobile {
+  display: none;
+}
+
+@media (width <= 767px) {
+  .app-header .app-header-nav-desktop {
+    display: none;
+  }
+
+  .app-header .app-header-nav-mobile {
+    display: flex;
+  }
+
+  .app-header .app-header-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* 520px matches Radix Themes `xs`. */
+@media (width <= 519px) {
+  .app-header .app-header-title {
+    display: none;
+  }
+}
+
+@media (width >= 768px) {
+  .app-header-nav-menu {
+    display: none;
+  }
+}
+
+/**
  * Header nav links with hover underline and fade effect.
  *
  * Cannot be achieved with standard Radix props.
