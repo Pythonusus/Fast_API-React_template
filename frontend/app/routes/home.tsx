@@ -30,7 +30,7 @@ import {
   BACKEND_UNAVAILABLE,
   START_BACKEND_SERVER_HINT,
 } from "~/common-texts/errors";
-import { FeatureCards } from "~/components/feature-cards";
+import { HomePageCards } from "~/components/home-page-cards";
 import { useMirrorMessage } from "~/hooks/use-mirror-message";
 
 /**
@@ -110,17 +110,15 @@ const HomeRoute = () => {
   /* Resulting HTML output: */
   return (
     <Section p="0">
-      <header>
-        <Heading as="h1" mb="2" size="8">
-          Home
-        </Heading>
-        <Text as="p" color="gray" mb="6" size="3">
-          Use this page as a starting point for landing sections, feature
-          highlights, and API-connected UI.
-        </Text>
-      </header>
+      <Heading as="h1" mb="2" size="8">
+        Home
+      </Heading>
+      <Text as="p" color="gray" mb="6" size="3">
+        Use this page as a starting point for landing sections, feature
+        highlights, and API-connected UI.
+      </Text>
 
-      <FeatureCards />
+      <HomePageCards />
 
       <Flex direction="column" gap="4">
         <Card>

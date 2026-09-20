@@ -79,7 +79,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
           - For more information see https://www.radix-ui.com/themes/docs/components/theme
         */}
         <ThemeProvider attribute="class">
-          <Theme radius="medium" scaling="100%">
+          <Theme panelBackground="solid" radius="medium" scaling="100%">
             {/*
               Outer shell element for app-wide styling.
               - `minHeight="100vh"` ensures full viewport height.

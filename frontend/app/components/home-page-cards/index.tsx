@@ -9,7 +9,7 @@ import { ExternalLinkIcon } from "@radix-ui/react-icons";
 import { Card, Flex, Grid, Heading, Text } from "@radix-ui/themes";
 
 import reactLogo from "~/assets/react.svg";
-import "./feature-cards.css";
+import "./home-page-cards.css";
 
 const ComingSoonCard = () => {
   return (
@@ -25,7 +25,7 @@ const ComingSoonCard = () => {
   );
 };
 
-export const FeatureCards = () => {
+export const HomePageCards = () => {
   return (
     <section aria-labelledby="featured-heading">
       <Heading as="h2" id="featured-heading" mb="4" size="5">
@@ -62,6 +62,7 @@ export const FeatureCards = () => {
             </Flex>
           </a>
         </Card>
+        <ComingSoonCard />
         <ComingSoonCard />
         <ComingSoonCard />
       </Grid>
