@@ -32,6 +32,10 @@ export default defineConfig({
         target: backend_url,
         changeOrigin: true,
       },
+      "/redoc": {
+        target: backend_url,
+        changeOrigin: true,
+      },
       "/openapi.json": {
         target: backend_url,
         changeOrigin: true,

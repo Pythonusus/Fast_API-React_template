@@ -3,7 +3,7 @@
  *
  * Think of the root route as the app's outer frame:
  * - It defines the document HTML wrapper (`<html>`, `<head>`, `<body>`).
- * - It provides global providers (the Radix Theme in this case).
+ * - It sets global providers (the Radix Theme in this case).
  * - It renders shared UI that should appear on every page (header/footer).
  * - It reserves a slot where nested route content will be rendered (`<Outlet />`).
  *
@@ -20,6 +20,13 @@
  * - `ErrorBoundary` is React Router's route-level error boundary export.
  *   `Layout` wraps both `App` and `ErrorBoundary`, so header/footer stay visible
  *   without duplicating shell markup.
+ *
+ * Conventional export names (must match exactly — React Router discovers them
+ * by name, not by file structure):
+ * - `Layout` — optional root-only document shell (`<html>` / `<head>` / `<body>`)
+ * - `ErrorBoundary` — route error UI
+ * - `default` (`App`) — renders `<Outlet />` for nested routes
+ * - `HydrateFallback` — optional pre-hydrate loading UI (not used here)
  */
 import "@radix-ui/themes/styles.css";
 import "~/styles/app.css";
@@ -35,19 +42,24 @@ import { Header } from "~/components/header";
 import { HTML_LANG } from "~/config";
 
 /*
-  React Router looks for a named `ErrorBoundary` export on the root route module.
+  Conventional name: React Router looks for a named `ErrorBoundary` export on
+  the route module. The local identifier must stay `ErrorBoundary`.
   Re-export it here so the implementation can live in `components/error-boundary`.
 */
 export { ErrorBoundary } from "~/components/error-boundary";
 
 /**
- * `Layout` defines the full HTML document structure and shared app chrome.
+ * Conventional name: `Layout` is a React Router framework convention for
+ * `app/root.tsx` only (optional named export). Renaming it breaks document
+ * wrapping — the framework will not pick up a differently named function.
  *
- * In React Router framework mode, this component wraps your route tree and is
- * responsible for document-level elements.
+ * It defines the full HTML document structure and shared app chrome.
+ * `children` is whichever of these is active:
+ * - the root default export (`App`)
+ * - `ErrorBoundary` when something throws
+ * - `HydrateFallback` during SPA hydrate (if exported)
  *
- * `children` is either the normal route app (`App`) or the route error boundary
- * when something throws. Because the header/footer shell lives here, both paths
+ * Because the header/footer shell lives here, both success and error paths
  * share the same outer frame.
  */
 export const Layout = ({ children }: { children: ReactNode }) => {
@@ -120,7 +132,11 @@ export const Layout = ({ children }: { children: ReactNode }) => {
 };
 
 /**
- * `App` is the visual root of your route tree.
+ * Root default export — the visual root of the route tree.
+ *
+ * The local name (`App`) is optional; what matters is `export default`.
+ * React Router renders this inside `Layout` as `children` and expects it to
+ * provide an `<Outlet />` for nested routes from `routes.ts`.
  *
  * Most shared layout lives in `Layout`. This component only renders the nested
  * route slot for the currently matched URL.

@@ -6,7 +6,7 @@
   * - Values of custom CSS variables should be Radix color tokens.
   * - See https://www.radix-ui.com/themes/docs/theme/color
   * - and https://github.com/radix-ui/themes/blob/main/packages/radix-ui-themes/src/styles/tokens/color.css
-  * - Main accent color is defined in root Theme component prop in root.tsx
+  * - Main accent color can be defined in root Theme component prop in root.tsx or by setting --accent-* CSS variables here.
   */
 
 /* DEFAULT THEME (LIGHT) */

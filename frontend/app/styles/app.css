@@ -1,9 +1,17 @@
-/* App wide styles */
+/* App-wide base styles
+ *
+ * Global resets and shared layout defaults used across the whole frontend.
+ * Theme colors live in themes.css; component-specific styles live under styles/components/.
+ */
 
+/* Include padding and border in an element's width/height calculations.
+ * Avoids layout surprises when adding padding to sized boxes. */
 * {
   box-sizing: border-box;
 }
 
+/* Strip browser default spacing so layouts start from a clean slate,
+ * and let the page fill at least the full viewport height. */
 html,
 body {
   margin: 0;
@@ -15,9 +23,8 @@ body {
 .radix-themes {
   /* TYPOGRAPHY RADIX TOKENS */
 
-  /* See more at https://github.com/radix-ui/themes/blob/main/packages/radix-ui-themes/src/styles/tokens/typography.css */
-
-  /* and https://www.radix-ui.com/themes/docs/theme/typography#custom-fonts */
+  /* See more at https://github.com/radix-ui/themes/blob/main/packages/radix-ui-themes/src/styles/tokens/typography.css
+   * and https://www.radix-ui.com/themes/docs/theme/typography#custom-fonts */
 
   --default-font-family:
     inter, "Segoe UI", roboto, helvetica, arial, sans-serif;

@@ -10,16 +10,21 @@
 ## 🔍 Table of content
 
 - [About](#about)
-- [Quick Start](#quick-start)
+- [Frontend](#frontend)
+- [Backend](#backend)
+- [Docker](#docker)
+- [Nginx](#nginx)
+- [Other stuff](#other)
 - [Env variables](#environment)
-- [VPS deploy vars](#vps-deploy-vars)
+- [Launching in dev mode](#dev-mode)
+- [Deploy](#deploy)
 - [License](#license)
 - [Author](#author)
 
 <a name = "about"></a>
 ## 📋 About
 
-**Simple template for FastAPI backend and React frontend fullstack project.**
+**Opinionated template for FastAPI backend and React frontend fullstack project.**
 
 ### Built with:
 - FastAPI - backend
