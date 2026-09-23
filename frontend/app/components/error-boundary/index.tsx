@@ -14,6 +14,7 @@ import {
   UNEXPECTED_RENDER_ERROR,
   UNEXPECTED_RENDER_ERROR_HINT,
 } from "~/common-texts/errors";
+import { DEVELOPMENT } from "~/config";
 
 /**
  * Picks a developer-facing message from the caught value.
@@ -23,7 +24,7 @@ import {
  * - In development: returns a short message to speed up debugging.
  */
 const getErrorMessage = (error: unknown): string | undefined => {
-  if (!import.meta.env.DEV) {
+  if (!DEVELOPMENT) {
     return undefined;
   }
 
@@ -42,7 +43,7 @@ export const ErrorBoundary = () => {
   const error = useRouteError();
   const details = getErrorMessage(error);
 
-  if (import.meta.env.DEV) {
+  if (DEVELOPMENT) {
     console.error("Route error caught by ErrorBoundary:", error);
   }
 

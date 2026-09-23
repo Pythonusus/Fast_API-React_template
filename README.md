@@ -54,6 +54,69 @@
 - **Feature 2** - description
 - **Feature 3** - description
 
+<a name = "frontend"></a>
+## 🎨 Frontend
+
+React 19 + React Router 8 (framework mode) + Vite 8 + Radix Themes + next-themes.
+
+**Rendering model:** SSG for the page shell, CSR for dynamic data. Runtime SSR is off (`ssr: false` in `react-router.config.ts`). Public routes are prerendered to static HTML at build time; after hydration, routes load backend data in the browser via `useEffect`. If the backend is down, pages show local fallback/error UI instead of failing the whole app.
+
+### How the pieces work
+
+**Routing.** Routes are registered explicitly in `app/routes.ts` (not auto-discovered from the folder). Today: `/` → `home.tsx`, `/about` → `about.tsx`, `*` → `404.tsx`. Keep UI and data-loading inside each route module; keep `routes.ts` declarations-only.
+
+**Root shell.** `Layout` in `root.tsx` owns `<html>` / `<head>` / `<body>`, Radix + next-themes providers, header, and footer. `App` only renders `<Outlet />` for the matched child route. Conventional export names (`Layout`, `ErrorBoundary`, `Outlet`, `meta`) must stay exact — React Router discovers them by name.
+
+**API calls.** Helpers in `app/api/` use relative URLs like `/api/hello`. In development, Vite’s `server.proxy` forwards them to `localhost:8000`. In production, Nginx reverse-proxies `/api/*`. On failure, throw with shared copy from `common-texts/errors.ts`; routes/hooks catch and show a soft error in the UI.
+
+**Types & shared text.** Put cross-module API shapes in `app/types/`. Colocate props/local state next to the one file that uses them. Add strings to `common-texts/` only when they appear in more than one place.
+
+**Styling & theme.** Prefer Radix Themes components/props. Custom CSS lives next to the component or under `styles/` (global resets, light/dark token overrides). Theme toggle uses CSS to pick icons so prerendered HTML does not flash the wrong icon.
+
+**Errors.** Unknown URLs → splat `404.tsx`. Thrown render errors → root `ErrorBoundary` (still inside `Layout`, so header/footer stay visible). Soft API failures stay local to the page/hook.
+
+**Config.** Copy `frontend/.env.example.frontend` → `frontend/.env`. Only `VITE_*` keys are exposed to the client — never put secrets there.
+
+### Naming conventions
+
+| Entity | Convention | Examples |
+|------|------------|----------|
+| Folders & files | kebab-case | `home-page-cards/`, `use-mirror-message.ts`, `example-api.ts` |
+| Component folders | kebab-case dir + `index.tsx`; colocated CSS named after the folder | `components/header/index.tsx`, `header.css` |
+| Route modules | short kebab/lowercase file under `app/routes/` | `home.tsx`, `about.tsx`, `404.tsx` |
+| React components | PascalCase exports | `Header`, `HomePageCards`, `AboutRoute` |
+| Hooks | `use` + camelCase | `useMirrorMessage` |
+| API helpers | `fetch` + camelCase | `fetchHello`, `fetchMirror` |
+| Shared constants / error strings | SCREAMING_SNAKE_CASE | `BACKEND_LOAD_FAILED`, `HTML_LANG` |
+| Types | PascalCase | `TextResponse` |
+| CSS classes | kebab-case (often `app-` prefix for shell UI) | `app-header`, `app-shell` |
+| Env keys (client) | `VITE_` prefix | `VITE_HTML_LANG` |
+
+### Step-by-step: adding a new page
+
+Example: a public `/products` page that loads data from the backend after hydration.
+
+1. **Create the route module** — `app/routes/products.tsx`
+   - Export `meta` (title/description; name must be `meta`).
+   - Default-export the page component.
+   - Build UI with Radix (`Section`, `Heading`, `Text`, `Card`, …).
+
+2. **Register the route** — in `app/routes.ts`, add before the `*` splat:
+   ```ts
+   {
+     path: "products",
+     file: "routes/products.tsx",
+   },
+   ```
+
+3. **Prerender the shell (optional)** — in `react-router.config.ts`, add `"/products"` to `prerender` for public marketing/content pages whose shell is known at build time. Skip auth-only, personalized, or parameterized routes. Do not prerender the 404 splat.
+
+4. **API helper (if needed)** — add a typed function in `app/api/` with a relative `/api/...` URL; put shared response types in `app/types/`; reuse `fetchMessageError` / shared error strings.
+
+5. **Styles / shared components (optional)** — colocate CSS under `app/components/<name>/`, or put page-only rules in `app/styles/components/`. Prefer Radix props first. Put reusable UI in `app/components/`.
+
+6. **Shared strings** — if the same copy is used elsewhere, add it to `app/common-texts/`; otherwise leave it inline.
+
 <a name = "quick-start"></a>
 ## 🚀 Quick Start
 
