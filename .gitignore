@@ -41,6 +41,11 @@ nosetests.xml
 
 # ===== BACKEND =====
 
+# Local SQLite databases (see DATABASE_URL in .env.example)
+*.db
+*.db-journal
+*.sqlite3
+
 # Python-related
 __pycache__/
 *.py[cod]

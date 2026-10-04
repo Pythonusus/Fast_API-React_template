@@ -6,13 +6,43 @@ Contains FastAPI application and API endpoints.
 
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
+from starlette.middleware.sessions import SessionMiddleware
 
+from app.admin import create_admin
+from app.routers.posts import router as posts_router
 from app.schemas.api import MirrorRequest
 from app.settings import settings
 
 # FastAPI application instance.
 # The core of the backend service.
 app = FastAPI(title=settings.app_title)
+
+# Signed session cookies for starlette-admin auth (see app.admin.auth).
+# Must use the same secret_key as Admin(...). Cookie max_age is the longer
+# remember-me bound; shorter sessions still expire via server-side TTL in
+# AdminAuthProvider.authenticate(). Parent middleware wraps mounted apps,
+# so /admin sees request.session.
+# Cookies in starlette-admin are http-only by default.
+# JavaScript cannot read the cookie via document.cookie;
+# https_only=False in development so local HTTP login works; in production
+# the Secure flag is set so the cookie is HTTPS-only.
+# same_site="lax": browser sends the cookie on same-site requests and on
+# top-level GET navigations from other sites (e.g. clicking a link to /admin),
+# but not on cross-site POSTs/embeds — reduces CSRF while still
+# allowing normal inbound links.
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=settings.secret_key,
+    max_age=settings.session_remember_me_max_age,
+    same_site="lax",
+    https_only=not settings.development,
+)
+
+# Feature routers: each module owns its own APIRouter and is mounted here.
+app.include_router(posts_router)
+
+# Mount starlette-admin under settings.admin_url_prefix (default /admin).
+create_admin().mount_to(app)
 
 
 # Liveness check. Callers (load balancers, monitors, the frontend) hit

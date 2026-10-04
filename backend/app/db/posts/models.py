@@ -6,7 +6,7 @@ Define the structure of the database tables.
 
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, String, Text, false, func
+from sqlalchemy import DateTime, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.engine import Base
@@ -30,25 +30,10 @@ class Post(Base):
         nullable=False,
         comment="Human-readable headline shown in lists and detail views.",
     )
-    slug: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False,
-        unique=True,
-        comment="URL-friendly unique identifier (e.g. getting-started).",
-    )
     content: Mapped[str] = mapped_column(
         Text,
         nullable=False,
         comment="Body in HTML format (e.g. <p>Hello</p>).",
-    )
-    # False = draft (not shown publicly); True = published.
-    published: Mapped[bool] = mapped_column(
-        Boolean,
-        nullable=False,
-        # Keeping both default and server_default is slightly an
-        # overkill, but it's a good practice to have both.
-        default=False,  # Set to False by default in ORM
-        server_default=false(),  # Set to False by default in DB.
     )
     # Timezone-aware timestamps (Postgres TIMESTAMPTZ).
     # timezone=True means the column stores an absolute instant; Postgres

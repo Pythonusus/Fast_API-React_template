@@ -3,6 +3,10 @@ Module for working with the database.
 
 Creates an asynchronous SQLAlchemy engine and a session factory.
 All database operations must be asynchronous for maximum performance.
+
+Now two databases are supported: SQLite and PostgreSQL.
+SQLite is used for development and testing.
+PostgreSQL is used for production.
 """
 
 from typing import AsyncGenerator
@@ -30,15 +34,20 @@ class Base(DeclarativeBase):
 
 
 # Async SQLAlchemy engine.
-# echo=True logs all SQL statements (useful for debugging).
-# pool_pre_ping checks the connection before using it.
-engine: AsyncEngine = create_async_engine(
-    settings.database_url,
-    echo=settings.debug,  # Log SQL only in debug mode
-    pool_pre_ping=True,  # Verify connection before each use
-    pool_size=5,  # Connection pool size
-    max_overflow=10,  # Extra connections allowed beyond pool_size
-)
+# SQLite has no QueuePool, so skip pool_size / max_overflow for it.
+if settings.database_url.startswith("sqlite"):
+    engine: AsyncEngine = create_async_engine(
+        settings.database_url,
+        echo=settings.development,  # Log SQL only in development
+    )
+else:
+    engine = create_async_engine(
+        settings.database_url,
+        echo=settings.development,  # Log SQL only in development
+        pool_pre_ping=True,  # Verify connection before each use
+        pool_size=5,  # Connection pool size
+        max_overflow=10,  # Extra connections beyond pool_size
+    )
 
 
 # Async session factory: call it to open a new session per request.

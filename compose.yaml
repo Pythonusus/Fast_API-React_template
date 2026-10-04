@@ -49,10 +49,12 @@ services:
     # Volumes are used to persist data on host machine.
     # syntax: host_path:in_container_path
     # Linux default host path is usually /var/lib/docker/volumes/<volume-name>/_data
-    # Docker Compose prefixes postgres_data with the dir name, where compose file is located.
+    # Docker Compose prefixes <postgres_data> with the dir name, where compose file is located.
     # So different apps get isolated volumes.
+    # For this template final volume host path on linux machine is:
+    # /var/lib/docker/volumes/fast-api-react-template-postgres_data/_data
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data  # volume host path -> Postgres data dir in container
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?POSTGRES_USER is required} -d ${POSTGRES_DB:?POSTGRES_DB is required}"]
       interval: 15s
@@ -92,6 +94,8 @@ services:
       - .env
     environment:
       DEVELOPMENT: ${DEVELOPMENT:-false}
+      # for this template DATABASE_URL is:
+      # postgresql+asyncpg://POSTGRES_USER:POSTGRES_PASSWORD@db:5432/POSTGRES_DB_NAME
       DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
     expose:
       - "8080"

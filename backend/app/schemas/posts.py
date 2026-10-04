@@ -3,7 +3,6 @@ Pydantic schemas for posts CRUD operations.
 """
 
 from datetime import UTC, datetime
-from typing import Self
 from zoneinfo import ZoneInfo
 
 from pydantic import (
@@ -11,11 +10,9 @@ from pydantic import (
     ConfigDict,
     Field,
     field_serializer,
-    model_validator,
 )
 
 from app.settings import settings
-from app.utils.slugify import slugify
 
 
 class PostBase(BaseModel):
@@ -47,42 +44,10 @@ class PostBase(BaseModel):
         description="Body in HTML format (e.g. ``<p>Hello</p>``).",
         examples=["<p>Hello from <strong>TinyMCE</strong>.</p>"],
     )
-    # Optional on create/update: omit on create -> derived from title;
-    # omit on update -> leave existing slug unchanged. PostRead requires it.
-    slug: str | None = Field(
-        default=None,
-        min_length=2,
-        max_length=255,
-        description=(
-            "URL-friendly unique identifier. "
-            "If omitted on create, derived from title (spaces become hyphens)."
-        ),
-        examples=["getting-started-with-fastapi"],
-    )
-    # default=False makes the field optional in the create schema
-    published: bool = Field(
-        default=False,
-        description="False keeps the post as a draft; True publishes it.",
-        examples=[False],
-    )
 
 
 class PostCreate(PostBase):
-    """
-    Request body for ``POST`` — create a new post.
-
-    ``slug`` is optional (from ``PostBase``): if omitted (or blank), it is
-    built from ``title`` with hyphens via ``slugify``.
-    """
-
-    @model_validator(mode="after")
-    def ensure_slug(self) -> Self:
-        # Prefer the user-provided slug; otherwise derive from title.
-        source = self.slug if self.slug else self.title
-        self.slug = slugify(source)
-        if not self.slug:
-            raise ValueError("Unable to build a slug from the given title/slug")
-        return self
+    """Request body for ``POST`` — create a new post."""
 
 
 class PostUpdate(PostBase):
@@ -91,7 +56,7 @@ class PostUpdate(PostBase):
 
     Inherits ``model_config`` from ``PostBase``. Fields are redeclared as
     optional so omit means "leave unchanged"; constraints still apply when
-    a value is sent. ``slug`` stays optional from ``PostBase``.
+    a value is sent.
     """
 
     # `str | None` alone still requires the key (send a string or null).
@@ -110,21 +75,6 @@ class PostUpdate(PostBase):
         description="Body in HTML format (e.g. ``<p>Hello</p>``).",
         examples=["<p>Hello from <strong>TinyMCE</strong>.</p>"],
     )
-    published: bool | None = Field(
-        default=None,
-        description="False keeps the post as a draft; True publishes it.",
-        examples=[True],
-    )
-
-    @model_validator(mode="after")
-    def normalize_slug(self) -> Self:
-        # Only touch slug when the client sends one; do not rebuild from title
-        # on PATCH (that would silently change URLs when renaming a post).
-        if self.slug is not None:
-            self.slug = slugify(self.slug)
-            if not self.slug:
-                raise ValueError("Unable to build a slug from the given value.")
-        return self
 
 
 class PostRead(PostBase):
@@ -145,15 +95,6 @@ class PostRead(PostBase):
     )
 
     id: int = Field(..., description="Primary key.", examples=[1])
-
-    # Required here: responses always include the stored slug.
-    slug: str = Field(
-        ...,
-        min_length=2,
-        max_length=255,
-        description="URL-friendly unique identifier.",
-        examples=["getting-started-with-fastapi"],
-    )
     created_at: datetime = Field(
         ...,
         description="When the post was created (converted to app timezone).",

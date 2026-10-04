@@ -30,8 +30,9 @@ LICENSE
 .idea/
 **/.DS_Store
 
-# Sqlite database
+# Local SQLite databases (see DATABASE_URL in .env.example)
 *.db
+*.db-journal
 *.sqlite
 *.sqlite3
 

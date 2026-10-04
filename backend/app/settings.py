@@ -57,7 +57,9 @@ class Settings(BaseSettings):
         ...,
         description=(
             "[REQUIRED] Async SQLAlchemy URL (env: DATABASE_URL). "
-            "Example: postgresql+asyncpg://user:pass@host:5432/db"
+            "Local: sqlite+aiosqlite:///../local.db "
+            "Local db is assumed to be located in the root of the project. ",
+            "Compose/prod: postgresql+asyncpg://user:pass@db:5432/db_name",
         ),
     )
 
@@ -66,6 +68,70 @@ class Settings(BaseSettings):
         description=(
             "[OPTIONAL] IANA timezone for API datetime serialization "
             "(env: TIMEZONE). Defaults to Europe/Moscow."
+        ),
+    )
+
+    # --- starlette-admin / session auth -------------------------------------
+
+    secret_key: str = Field(
+        ...,
+        description=(
+            "[REQUIRED] Secret used to sign session cookies and admin CSRF "
+            "(env: SECRET_KEY). Use a long random string; never commit real "
+            "values. Must match SessionMiddleware and Admin(secret_key=...)."
+        ),
+    )
+
+    admin_username: str = Field(
+        ...,
+        description=(
+            "[REQUIRED] Single admin username for the admin panel "
+            "(env: ADMIN_USERNAME)."
+        ),
+    )
+
+    admin_password_hash: str = Field(
+        ...,
+        description=(
+            "[REQUIRED] bcrypt hash of the admin password "
+            "(env: ADMIN_PASSWORD_HASH). Generate with "
+            "`uv run python scripts/generate_hash.py` from backend/."
+        ),
+    )
+
+    admin_title: str = Field(
+        default="Admin",
+        description=(
+            "[OPTIONAL] Browser/nav title for the admin panel "
+            "(env: ADMIN_TITLE). Defaults to Admin."
+        ),
+    )
+
+    admin_url_prefix: str = Field(
+        default="/admin",
+        description=(
+            "[OPTIONAL] URL prefix where the admin is mounted "
+            "(env: ADMIN_URL_PREFIX). Defaults to /admin. Prefer a less "
+            "guessable path in production."
+        ),
+    )
+
+    session_max_age: int = Field(
+        default=3600,
+        description=(
+            "[OPTIONAL] Server-side session TTL in seconds when "
+            "remember_me is false (env: SESSION_MAX_AGE). Defaults to 3600 "
+            "(1 hour)."
+        ),
+    )
+
+    session_remember_me_max_age: int = Field(
+        default=604800,
+        description=(
+            "[OPTIONAL] Server-side session TTL in seconds when "
+            "remember_me is true (env: SESSION_REMEMBER_ME_MAX_AGE). "
+            "Also used as the SessionMiddleware cookie max_age upper bound. "
+            "Defaults to 604800 (7 days)."
         ),
     )
 
