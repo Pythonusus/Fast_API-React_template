@@ -41,7 +41,8 @@ app.add_middleware(
 # Feature routers: each module owns its own APIRouter and is mounted here.
 app.include_router(posts_router)
 
-# Mount starlette-admin under settings.admin_url_prefix (default /admin).
+# Mount starlette-admin at settings.admin_url_prefix.
+# Keep vite.config.ts and nginx.conf proxies in sync if changed.
 create_admin().mount_to(app)
 
 

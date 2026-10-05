@@ -40,6 +40,13 @@ export default defineConfig({
         target: backend_url,
         changeOrigin: true,
       },
+      // Must match backend.app.settings.admin_url_prefix.
+      // In a real app, use a less obvious path (same as settings + nginx)
+      // to cut bot noise scanning /admin. Not a security control.
+      "/admin": {
+        target: backend_url,
+        changeOrigin: true,
+      },
     },
   },
 });

@@ -32,7 +32,6 @@ jobs:
           ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
           ADMIN_PASSWORD_HASH: ${{ secrets.ADMIN_PASSWORD_HASH }}
           ADMIN_TITLE: ${{ secrets.ADMIN_TITLE }}
-          ADMIN_URL_PREFIX: ${{ secrets.ADMIN_URL_PREFIX }}
           SESSION_MAX_AGE: ${{ secrets.SESSION_MAX_AGE }}
           SESSION_REMEMBER_ME_MAX_AGE: ${{ secrets.SESSION_REMEMBER_ME_MAX_AGE }}
         with:
@@ -40,7 +39,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          envs: DEVELOPMENT,DATABASE_URL,POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD,PORT,TIMEZONE,SECRET_KEY,ADMIN_USERNAME,ADMIN_PASSWORD_HASH,ADMIN_TITLE,ADMIN_URL_PREFIX,SESSION_MAX_AGE,SESSION_REMEMBER_ME_MAX_AGE
+          envs: DEVELOPMENT,DATABASE_URL,POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD,PORT,TIMEZONE,SECRET_KEY,ADMIN_USERNAME,ADMIN_PASSWORD_HASH,ADMIN_TITLE,SESSION_MAX_AGE,SESSION_REMEMBER_ME_MAX_AGE
           script: |
             set -euo pipefail
 
@@ -86,7 +85,6 @@ jobs:
               printf 'ADMIN_USERNAME=%s\n' "${ADMIN_USERNAME}"
               printf 'ADMIN_PASSWORD_HASH=%s\n' "${ADMIN_PASSWORD_HASH}"
               printf 'ADMIN_TITLE=%s\n' "${ADMIN_TITLE}"
-              printf 'ADMIN_URL_PREFIX=%s\n' "${ADMIN_URL_PREFIX}"
               printf 'SESSION_MAX_AGE=%s\n' "${SESSION_MAX_AGE}"
               printf 'SESSION_REMEMBER_ME_MAX_AGE=%s\n' "${SESSION_REMEMBER_ME_MAX_AGE}"
             } > .env

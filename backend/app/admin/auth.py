@@ -54,7 +54,7 @@ normal for form auth. Protection splits into two layers:
    the real password. If ``.env`` or a backup leaks, attackers get a slow-to-
    crack hash, not a usable password.
 
-``scripts/generate_hash.py`` builds the hash you put in ``.env``.
+``scripts/generate_password_hash.py`` builds the hash you put in ``.env``.
 
 We do **not** compare the form password to a plain env password on purpose:
 a storage leak would equal instant admin access (and password reuse risk).
@@ -88,7 +88,8 @@ Security notes baked into this file
   not reveal whether the username exists.
 - Failure message is always Invalid username or password,
   never "wrong password" vs "unknown user".
-- Reject short inputs before bcrypt to avoid paying bcrypt cost on garbage.
+- Validate passwords via ``app.utils.password_rules`` before bcrypt
+  (full policy in production only).
 - Sessions without ``login_time`` are rejected and cleared.
 
 For multiple admins later: move credentials to the DB, keep bcrypt + sessions,
@@ -104,6 +105,7 @@ from starlette_admin.auth import AdminUser, AuthProvider
 from starlette_admin.exceptions import FormValidationError, LoginFailed
 
 from app.settings import settings
+from app.utils.password_rules import validate_password
 
 
 def _hash_password(password: str) -> str:
@@ -175,16 +177,16 @@ class AdminAuthProvider(AuthProvider):
             LoginFailed: Credentials invalid (generic error message)
         """
         # Cheap checks first: bcrypt is deliberately slow (~100ms+), so skip
-        # it for inputs that can never be valid.
+        # it for inputs that can never be valid. Full composition rules apply
+        # in production only (see app.utils.password_rules).
         if not username or len(username) < 3:
             raise FormValidationError(
                 {"username": "Username must be at least 3 characters"}
             )
 
-        if not password or len(password) < 8:
-            raise FormValidationError(
-                {"password": "Password must be at least 8 characters"}
-            )
+        password_error = validate_password(password)
+        if password_error:
+            raise FormValidationError({"password": password_error})
 
         # --- Credential check -------------------------------------------------
         # Username: plain string compare to env. Not constant-time, but the

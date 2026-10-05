@@ -13,7 +13,7 @@ help:
 	@echo "BACKEND:"
 	@echo "  make install-backend-dev      Install backend prod+dev dependencies"
 	@echo "  make install-backend-prod     Install backend prod dependencies"
-	@echo "  make generate-admin-hash      Generate a new hash for the admin password"
+	@echo "  make generate-password-hash      Generate a new hash for the admin password"
 	@echo "  make lint-backend             Run backend lint checks"
 	@echo "  make fix-backend              Auto-fix backend lint issues"
 	@echo "  make format-backend           Format backend code"
@@ -47,8 +47,8 @@ pre-commit:
 	uv run pre-commit run --all-files
 
 # Generate a new hash for the admin password
-generate-admin-hash:
-	cd backend && uv run python scripts/generate_hash.py
+generate-password-hash:
+	cd backend && uv run python scripts/generate_password_hash.py
 
 # ===== BACKEND =====
 
@@ -144,7 +144,7 @@ docker-down:
 	docker compose down
 
 .PHONY: help pre-commit-install pre-commit \
-	      generate-admin-hash \
+	      generate-password-hash \
 	      install-backend-dev install-backend-prod \
 	      lint-backend fix-backend format-backend \
 	      test-backend test-backend-coverage \

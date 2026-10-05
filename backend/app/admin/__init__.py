@@ -17,7 +17,7 @@ from starlette_admin.contrib.sqla import Admin
 
 from app.admin.auth import AdminAuthProvider
 from app.admin.posts.views import PostAdmin
-from app.db import engine
+from app.db.engine import engine
 from app.db.posts.models import Post
 from app.settings import settings
 
@@ -34,7 +34,8 @@ def create_admin() -> Admin:
         # Async SQLAlchemy engine (starlette-admin 1.x: session_provider)
         session_provider=engine,
         title=settings.admin_title,
-        base_url=settings.admin_url_prefix,  # Obscure URL prefix
+        # Must stay in sync with vite.config.ts and nginx.conf proxies.
+        base_url=settings.admin_url_prefix,
         auth_provider=AdminAuthProvider(),
         # Used to sign admin CSRF / flash cookies.
         # Session cookies use the same secret via SessionMiddleware in api.py.

@@ -6,6 +6,7 @@ See ``.env.example`` at the repository root for names and examples.
 """
 
 from pathlib import Path
+from typing import ClassVar
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -95,7 +96,8 @@ class Settings(BaseSettings):
         description=(
             "[REQUIRED] bcrypt hash of the admin password "
             "(env: ADMIN_PASSWORD_HASH). Generate with "
-            "`uv run python scripts/generate_hash.py` from backend/."
+            "`uv run python scripts/generate_password_hash.py` "
+            "from backend/."
         ),
     )
 
@@ -107,14 +109,11 @@ class Settings(BaseSettings):
         ),
     )
 
-    admin_url_prefix: str = Field(
-        default="/admin",
-        description=(
-            "[OPTIONAL] URL prefix where the admin is mounted "
-            "(env: ADMIN_URL_PREFIX). Defaults to /admin. Prefer a less "
-            "guessable path in production."
-        ),
-    )
+    # Hardcoded mount path — not loaded from env (ClassVar).
+    # Keep in sync with frontend/vite.config.ts and nginx.conf proxies.
+    # In a real app, change "/admin" to something less obvious (e.g.
+    # "/manage-x7k2") to cut bot noise. Not a security control — auth is.
+    admin_url_prefix: ClassVar[str] = "/admin"
 
     session_max_age: int = Field(
         default=3600,

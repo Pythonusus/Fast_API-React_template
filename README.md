@@ -158,9 +158,8 @@ Also see `.env.example` in project root.
 | `PORT` | Host port mapped to frontend container port `8080`. | No | `8100` |
 | `SECRET_KEY` | Signs session cookies and admin CSRF. Long random string. | Yes | `change-me-to-a-long-random-string` |
 | `ADMIN_USERNAME` | Admin panel login username. | Yes | `admin` |
-| `ADMIN_PASSWORD_HASH` | bcrypt hash of admin password (`uv run python scripts/generate_hash.py`). | Yes | see `.env.example` |
+| `ADMIN_PASSWORD_HASH` | bcrypt hash of admin password (`uv run python scripts/generate_password_hash.py`). | Yes | see `.env.example` |
 | `ADMIN_TITLE` | Admin UI title. | No | `Admin` |
-| `ADMIN_URL_PREFIX` | Admin mount path. | No | `/admin` |
 | `SESSION_MAX_AGE` | Session TTL seconds without remember-me. | No | `3600` |
 | `SESSION_REMEMBER_ME_MAX_AGE` | Session TTL seconds with remember-me. | No | `604800` |
 | `POSTGRES_DB` | Database name created by postgres container on first init. | Yes | `your_database_name` |
@@ -186,12 +185,11 @@ The workflow `.github/workflows/vps-deploy.yaml` generates `.env` on the VPS fro
 | `POSTGRES_PASSWORD` | Postgres password for container initialization. | Yes | `your_super_secret_password` |
 | `SECRET_KEY` | Signs session cookies and admin CSRF. | Yes | long random string |
 | `ADMIN_USERNAME` | Admin panel login username. | Yes | `admin` |
-| `ADMIN_PASSWORD_HASH` | bcrypt hash of admin password. | Yes | from `generate_hash.py` |
+| `ADMIN_PASSWORD_HASH` | bcrypt hash of admin password. | Yes | from `generate_password_hash.py` |
 | `PORT` | Host port mapped to frontend container port `8080`. | No | `8100` |
 | `DEVELOPMENT` | Enables development mode in application. | No | `false` |
 | `TIMEZONE` | IANA timezone for API datetime serialization. | No | `Europe/Moscow` |
 | `ADMIN_TITLE` | Admin UI title. | No | `Admin` |
-| `ADMIN_URL_PREFIX` | Admin mount path. | No | `/admin` |
 | `SESSION_MAX_AGE` | Session TTL seconds without remember-me. | No | `3600` |
 | `SESSION_REMEMBER_ME_MAX_AGE` | Session TTL seconds with remember-me. | No | `604800` |
 
