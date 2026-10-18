@@ -20,6 +20,10 @@ export default [
     file: "routes/about.tsx",
   },
   {
+    path: "posts",
+    file: "routes/posts.tsx",
+  },
+  {
     path: "*",
     file: "routes/404.tsx",
   },

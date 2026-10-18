@@ -7,10 +7,10 @@
  * user clicks "Mirror text".
  *
  * Flow:
- *   Build      → Static HTML with header, form, and "Backend message: Loading..."
+ *   Build      → Static HTML with shell and loading state
  *   Page load  → User sees that prerendered content immediately
- *   Hydration  → `useEffect` calls `fetchHello()`; the card text updates in place
- *   On error   → Message turns red and shows a hint to start the backend server
+ *   Hydration  → `useEffect` fetches data from the backend
+ *   On error   → Shows error message. The app does not crash entirely.
  */
 import {
   Button,

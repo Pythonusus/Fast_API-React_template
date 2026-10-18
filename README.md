@@ -75,7 +75,7 @@ React 19 + React Router 8 (framework mode) + Vite 8 + Radix Themes + next-themes
 
 **Errors.** Unknown URLs → splat `404.tsx`. Thrown render errors → root `ErrorBoundary` (still inside `Layout`, so header/footer stay visible). Soft API failures stay local to the page/hook.
 
-**Config.** Copy `frontend/.env.example.frontend` → `frontend/.env`. Only `VITE_*` keys are exposed to the client — never put secrets there.
+**Config.** Frontend env lives in the repo-root `.env` (same file as backend/compose). Vite loads it via `envDir` in `vite.config.ts`. Only `VITE_*` keys are exposed to the client — never put secrets there.
 
 ### Naming conventions
 
@@ -117,6 +117,11 @@ Example: a public `/products` page that loads data from the backend after hydrat
 
 6. **Shared strings** — if the same copy is used elsewhere, add it to `app/common-texts/`; otherwise leave it inline.
 
+7. **Nginx** — a normal page needs no `nginx.conf` change. In production the frontend image serves the build with Nginx (`Dockerfile.frontend`). `location /` uses `try_files $uri $uri/ /__spa-fallback.html`: a prerendered `/products` is its static HTML file; a CSR-only route hydrates from `__spa-fallback.html` and the in-app router (including the 404 splat) takes over. Hashed files under `/assets/` are cached for a year.
+   - Keep API calls on a prefix Nginx already reverse-proxies to `backend:8080`: `/api`, `/metrics`, `/docs`, `/redoc`, `/openapi.json`, `/admin`. That list must stay in sync with `frontend/vite.config.ts`. A new prefix (for example `/billing`) has to be added in both places or production requests never reach FastAPI.
+   - Do not put a page on one of those prefixes — Nginx sends them to the backend, not the React app.
+   - If the page loads third-party scripts, fonts, images, or APIs, extend the `Content-Security-Policy` header in `nginx.conf` (`script-src`, `font-src`, `img-src`, `connect-src`, and so on). The default policy is same-origin only.
+
 <a name = "quick-start"></a>
 ## 🚀 Quick Start
 
@@ -156,6 +161,7 @@ Also see `.env.example` in project root.
 | `DATABASE_URL` | Async SQLAlchemy database URL for backend. Must match postgres settings below. | Yes | `postgresql+asyncpg://POSTGRES_USER:POSTGRES_PASSWORD@db:5432/POSTGRES_DB_NAME` |
 | `TIMEZONE` | IANA timezone for API datetime serialization. | No | `Europe/Moscow` |
 | `PORT` | Host port mapped to frontend container port `8080`. | No | `8100` |
+| `VITE_HTML_LANG` | HTML lang attribute baked into the frontend at build. | No | `ru-RU` |
 | `SECRET_KEY` | Signs session cookies and admin CSRF. Long random string. | Yes | `change-me-to-a-long-random-string` |
 | `ADMIN_USERNAME` | Admin panel login username. | Yes | `admin` |
 | `ADMIN_PASSWORD_HASH` | bcrypt hash of admin password (`uv run python scripts/generate_password_hash.py`). | Yes | see `.env.example` |
@@ -189,6 +195,7 @@ The workflow `.github/workflows/vps-deploy.yaml` generates `.env` on the VPS fro
 | `PORT` | Host port mapped to frontend container port `8080`. | No | `8100` |
 | `DEVELOPMENT` | Enables development mode in application. | No | `false` |
 | `TIMEZONE` | IANA timezone for API datetime serialization. | No | `Europe/Moscow` |
+| `VITE_HTML_LANG` | HTML lang attribute baked into the frontend at build. | No | `ru-RU` |
 | `ADMIN_TITLE` | Admin UI title. | No | `Admin` |
 | `SESSION_MAX_AGE` | Session TTL seconds without remember-me. | No | `3600` |
 | `SESSION_REMEMBER_ME_MAX_AGE` | Session TTL seconds with remember-me. | No | `604800` |

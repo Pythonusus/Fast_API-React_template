@@ -15,10 +15,14 @@ RUN npm ci
 # Copy frontend code from host to container
 COPY frontend/ .
 
-# Build SSG + CSR frontend artifacts.
-# - Static route HTML + hashed assets are emitted to ./build/client
-# - Server build output may still exist, but is not needed in this Nginx image
-RUN npm run build
+# Vite inlines VITE_* at build time (envDir = parent of /app → /).
+# Mount root `.env` as a BuildKit secret (not COPY — keeps secrets out of layers),
+# then write only VITE_* lines where Vite can read them. Any new VITE_* key is
+# picked up automatically;
+# Compose wires the secret via `build.secrets` + top-level `secrets:` (file: .env).
+RUN --mount=type=secret,id=root_env \
+    sh -c 'grep -E "^VITE_" /run/secrets/root_env > /.env || true' \
+    && npm run build
 
 # RUNTIME STAGE
 # We need only build result from builder stage

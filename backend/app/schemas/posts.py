@@ -122,4 +122,24 @@ class PostRead(PostBase):
         return value.astimezone(ZoneInfo(settings.timezone))
 
 
+class PostsListResponse(BaseModel):
+    """
+    Paginated list payload for ``GET /api/posts``.
+
+    ``total`` is the full row count (ignoring skip/limit) so clients can
+    build page numbers and hide controls when there is only one page.
+    """
+
+    items: list[PostRead] = Field(
+        ...,
+        description="Posts for this page, newest first.",
+    )
+    total: int = Field(
+        ...,
+        ge=0,
+        description="Total number of posts in the database.",
+        examples=[42],
+    )
+
+
 # No delete model because in delete requests there is nothing to validate.

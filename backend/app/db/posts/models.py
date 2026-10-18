@@ -15,7 +15,11 @@ from app.db.engine import Base
 class Post(Base):
     """
     Blog post stored in the ``posts`` table.
-    Validation is done by Pydantic schemas.
+
+    ``nullable=False`` only rejects SQL NULL — empty strings (``""``) are
+    still allowed at the DB layer. Length / non-empty rules live in Pydantic
+    (``app.schemas.posts``) for the API and in ``PostAdmin.validate`` for
+    starlette-admin (admin does not use those schemas by default).
     """
 
     __tablename__ = "posts"

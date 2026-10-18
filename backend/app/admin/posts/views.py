@@ -24,6 +24,7 @@ No auth or SessionMiddleware changes are needed — those are shared.
 
 from typing import Any
 
+from pydantic import ValidationError
 from starlette.requests import Request
 from starlette_admin.contrib.sqla import ModelView
 from starlette_admin.fields import (
@@ -32,8 +33,10 @@ from starlette_admin.fields import (
     StringField,
     TextAreaField,
 )
+from starlette_admin.helpers import pydantic_error_to_form_validation_errors
 
 from app.db.posts.models import Post
+from app.schemas.posts import PostCreate
 
 
 class PostAdmin(ModelView):
@@ -45,6 +48,9 @@ class PostAdmin(ModelView):
     - Searchable fields
     - Sorting
     - Lifecycle hooks
+
+    Validation reuses ``PostCreate`` (same rules as the public API). The ORM
+    ``nullable=False`` only blocks SQL NULL — empty strings still need this.
     """
 
     # Display labels (singular / plural)
@@ -69,8 +75,8 @@ class PostAdmin(ModelView):
     # Editable form fields
     fields = [
         IntegerField("id", read_only=True),
-        StringField("title", label="Title"),
-        TextAreaField("content", label="Content"),
+        StringField("title", label="Title", required=True),
+        TextAreaField("content", label="Content", required=True),
         DateTimeField("created_at", read_only=True, label="Created"),
         DateTimeField("updated_at", read_only=True, label="Updated"),
     ]
@@ -81,7 +87,45 @@ class PostAdmin(ModelView):
     # Hide immutable / auto fields on edit
     exclude_fields_from_edit = ["id", "created_at"]
 
-    # === Lifecycle hooks (async) ===
+    # -------------------------------------------------------------------------
+    # Framework hooks — override fixed method names; starlette-admin calls them.
+    # You do not register these yourself (no decorator / no add_hook).
+    #
+    # Create / edit submit order (simplified):
+    #   1. Parse form → ``data``
+    #   2. Per-field checks (``required``, field ``validators``)
+    #   3. ``validate(request, data)``      ← raise FormValidationError to abort
+    #   4. ``before_create`` / ``before_edit``
+    #   5. Persist to DB
+    #   6. ``after_create`` / ``after_edit``
+    #
+    # Delete: ``before_delete`` → DELETE → ``after_delete``.
+    # Base ``ModelView`` stubs are no-ops; only overrides you define run.
+    # See: https://jowilf.github.io/starlette-admin/api/views/
+    # -------------------------------------------------------------------------
+
+    async def validate(self, request: Request, data: dict[str, Any]) -> None:
+        """
+        Cross-field / schema validation before create or edit is saved.
+
+        Called by starlette-admin after field-level checks, by this exact
+        method name. Raise ``FormValidationError`` to redisplay the form
+        with errors and skip the DB write.
+
+        We reuse ``PostCreate`` so admin matches the public API rules.
+        Admin writes the ORM directly and does not run Pydantic unless we
+        call it here. ``nullable=False`` on the model still allows ``""``.
+        """
+        try:
+            PostCreate.model_validate(
+                {
+                    "title": data.get("title") or "",
+                    "content": data.get("content") or "",
+                }
+            )
+        except ValidationError as exc:
+            # Maps Pydantic field errors → admin form field errors.
+            raise pydantic_error_to_form_validation_errors(exc) from exc
 
     async def before_create(
         self,
@@ -90,9 +134,9 @@ class PostAdmin(ModelView):
         obj: Post,
     ) -> None:
         """
-        Called before a new object is saved.
+        Called by starlette-admin before a new row is inserted.
 
-        Use for defaults, validation, or side effects.
+        Use for defaults or side effects (validation belongs in ``validate``).
 
         Args:
             request: HTTP request
@@ -107,7 +151,7 @@ class PostAdmin(ModelView):
         obj: Post,
     ) -> None:
         """
-        Called after a new object is created successfully.
+        Called by starlette-admin after a new row is committed.
 
         Use for notifications, cache invalidation, or logging.
 
@@ -124,7 +168,7 @@ class PostAdmin(ModelView):
         obj: Post,
     ) -> None:
         """
-        Called before edits are saved.
+        Called by starlette-admin before an existing row is updated.
 
         Args:
             request: HTTP request
@@ -139,7 +183,7 @@ class PostAdmin(ModelView):
         obj: Post,
     ) -> None:
         """
-        Called after edits are saved successfully.
+        Called by starlette-admin after an edit is committed.
 
         Args:
             request: HTTP request
@@ -153,7 +197,7 @@ class PostAdmin(ModelView):
         obj: Post,
     ) -> None:
         """
-        Called before an object is deleted.
+        Called by starlette-admin before a row is deleted.
 
         Args:
             request: HTTP request
@@ -167,7 +211,7 @@ class PostAdmin(ModelView):
         obj: Post,
     ) -> None:
         """
-        Called after an object is deleted successfully.
+        Called by starlette-admin after a delete is committed.
 
         Args:
             request: HTTP request

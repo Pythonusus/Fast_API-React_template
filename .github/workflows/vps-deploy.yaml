@@ -28,6 +28,7 @@ jobs:
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           PORT: ${{ secrets.PORT }}
           TIMEZONE: ${{ secrets.TIMEZONE }}
+          VITE_HTML_LANG: ${{ secrets.VITE_HTML_LANG }}
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
           ADMIN_PASSWORD_HASH: ${{ secrets.ADMIN_PASSWORD_HASH }}
@@ -39,7 +40,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          envs: DEVELOPMENT,DATABASE_URL,POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD,PORT,TIMEZONE,SECRET_KEY,ADMIN_USERNAME,ADMIN_PASSWORD_HASH,ADMIN_TITLE,SESSION_MAX_AGE,SESSION_REMEMBER_ME_MAX_AGE
+          envs: DEVELOPMENT,DATABASE_URL,POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD,PORT,TIMEZONE,VITE_HTML_LANG,SECRET_KEY,ADMIN_USERNAME,ADMIN_PASSWORD_HASH,ADMIN_TITLE,SESSION_MAX_AGE,SESSION_REMEMBER_ME_MAX_AGE
           script: |
             set -euo pipefail
 
@@ -81,6 +82,7 @@ jobs:
               printf 'POSTGRES_PASSWORD=%s\n' "${POSTGRES_PASSWORD}"
               printf 'PORT=%s\n' "${PORT}"
               printf 'TIMEZONE=%s\n' "${TIMEZONE}"
+              printf 'VITE_HTML_LANG=%s\n' "${VITE_HTML_LANG}"
               printf 'SECRET_KEY=%s\n' "${SECRET_KEY}"
               printf 'ADMIN_USERNAME=%s\n' "${ADMIN_USERNAME}"
               printf 'ADMIN_PASSWORD_HASH=%s\n' "${ADMIN_PASSWORD_HASH}"

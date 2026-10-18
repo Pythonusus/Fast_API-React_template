@@ -12,7 +12,7 @@ codes or FastAPI. Routes should:
 helpers ``flush`` (send SQL, get DB-generated values) but do not ``commit``.
 """
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.posts.models import Post
@@ -28,6 +28,12 @@ async def get_post(session: AsyncSession, post_id: int) -> Post | None:
     Returns ``None`` if no row exists — the API layer turns that into 404.
     """
     return await session.get(Post, post_id)
+
+
+async def count_posts(session: AsyncSession) -> int:
+    """Return the total number of posts (for pagination UI)."""
+    result = await session.execute(select(func.count()).select_from(Post))
+    return int(result.scalar_one())
 
 
 # all args after * are keyword-only and optional because of the default values

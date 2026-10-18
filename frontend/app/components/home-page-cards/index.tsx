@@ -1,19 +1,19 @@
 /**
- * Responsive project/feature cards.
+ * Home “Featured” section: sample project cards built on `CardBase`.
  *
  * Swap the sample link card and the placeholders for real projects.
  * Layout uses Radix Grid breakpoints (1 / 2 / 3 columns) instead of
  * Bootstrap `col-12 col-md-6 col-xl-4`.
  */
 import { ExternalLinkIcon } from "@radix-ui/react-icons";
-import { Card, Flex, Grid, Heading, Text } from "@radix-ui/themes";
+import { Flex, Grid, Heading, Text } from "@radix-ui/themes";
 
 import reactLogo from "~/assets/react.svg";
-import "./home-page-cards.css";
+import { CardBase } from "~/components/ui/card-base";
 
 const ComingSoonCard = () => {
   return (
-    <Card className="app-feature-card" size="2">
+    <CardBase>
       <Heading as="h3" mb="2" size="4">
         Coming soon
       </Heading>
@@ -21,7 +21,7 @@ const ComingSoonCard = () => {
         This slot is empty because a bug was sitting in the chair between the
         keyboard and the monitor.
       </Text>
-    </Card>
+    </CardBase>
   );
 };
 
@@ -37,7 +37,7 @@ export const HomePageCards = () => {
         mb="6"
         width="100%"
       >
-        <Card asChild className="app-feature-card" size="2">
+        <CardBase asChild>
           <a
             aria-label="Open React documentation"
             href="https://react.dev/"
@@ -61,7 +61,7 @@ export const HomePageCards = () => {
               </Flex>
             </Flex>
           </a>
-        </Card>
+        </CardBase>
         <ComingSoonCard />
         <ComingSoonCard />
         <ComingSoonCard />

@@ -41,5 +41,5 @@ export default {
    *
    * Tip: keep shells static here; load backend data after hydration (as home/about do).
    */
-  prerender: ["/", "/about"],
+  prerender: ["/", "/about", "/posts"],
 } satisfies Config;

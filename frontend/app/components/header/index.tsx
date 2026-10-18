@@ -90,6 +90,15 @@ export const Header = () => {
                   highContrast
                   underline="none"
                 >
+                  <NavLink to="/posts">Posts</NavLink>
+                </Link>
+                <Link
+                  asChild
+                  className="app-header-nav-link"
+                  color="gray"
+                  highContrast
+                  underline="none"
+                >
                   <NavLink to="/about">About</NavLink>
                 </Link>
               </nav>
@@ -114,6 +123,9 @@ export const Header = () => {
                 >
                   <DropdownMenu.Item asChild>
                     <NavLink to="/">Home</NavLink>
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item asChild>
+                    <NavLink to="/posts">Posts</NavLink>
                   </DropdownMenu.Item>
                   <DropdownMenu.Item asChild>
                     <NavLink to="/about">About</NavLink>

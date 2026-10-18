@@ -6,7 +6,11 @@
 #    - Sources for that resolution are:
 #      a) shell environment variables from your terminal session
 #      b) project `.env` file in the compose project directory (default behavior)
+#         so all variables in project root `.env` file are available during parse-time.
 #      c) `--env-file <file>` if explicitly passed to docker compose command
+#    Compose does not pass these variables to the container automatically,
+#    not during images build time (Dockerfile does not get these variables),
+#    nor during container runtime (you need to pass them explicitly to the service).
 #
 # 2) RUNTIME (inside each running container):
 #    - `env_file: .env` injects vars from `.env` into container environment.
@@ -19,6 +23,12 @@
 # 4) WHY BOTH `env_file` AND `${...}` ARE USED:
 #    - `${...}` gives defaults and allows compose-level config (ports/names/etc).
 #    - `env_file` makes vars available to app processes at runtime.
+#
+# 5) FRONTEND VITE_* AT IMAGE BUILD:
+#    - Vite inlines VITE_* into the JS bundle at `docker build` time, not at container start.
+#    - `env_file` on the frontend service is too late for that.
+#    - Instead: top-level `secrets.root_env` (host `.env`) + `build.secrets` mounts it
+#      into Dockerfile.frontend, which greps every `VITE_*` line for Vite. No per-key ARGs.
 # ------------------------------------------------------------------------------
 services:
   db:
@@ -36,15 +46,6 @@ services:
     # .env file is required, otherwise deploy/compose run will fail
     env_file:
       - .env
-
-    # runtime override layer: these values are injected into container environment,
-    # and if the same key exists in env_file, this `environment` value wins
-    # not available during parse-time
-    environment:
-      # Docker will automatically create the postgres container with these credentials.
-      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
-      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
 
     # Volumes are used to persist data on host machine.
     # syntax: host_path:in_container_path
@@ -87,16 +88,18 @@ services:
       dockerfile: Dockerfile.backend
 
     # container_name: backend-container-name
+
     depends_on:
       db:
         condition: service_healthy
+
+    # runtime injection: vars from .env become available inside container process env
+    # .env file is required, otherwise deploy/compose run will fail
     env_file:
       - .env
-    environment:
-      DEVELOPMENT: ${DEVELOPMENT:-false}
-      # for this template DATABASE_URL is:
-      # postgresql+asyncpg://POSTGRES_USER:POSTGRES_PASSWORD@db:5432/POSTGRES_DB_NAME
-      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+
+    # service listens on this port inside the docker network
+    # does not expose the port to the host machine
     expose:
       - "8080"
 
@@ -116,8 +119,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
+      # Build-time only: root `.env` is mounted as a secret inside Dockerfile.frontend.
+      # The Dockerfile greps VITE_* into Vite's envDir — new VITE_* keys need no compose edits.
+      # Read from the host path (not build context), so `.dockerignore` excluding `.env` is fine.
+      secrets:
+        - root_env
 
     # container_name: frontend-container-name
+
+    # runtime injection: vars from .env become available inside container process env
+    # .env file is required, otherwise deploy/compose run will fail
     env_file:
       - .env
     depends_on:
@@ -126,7 +137,6 @@ services:
     ports:
       # parse-time interpolation: resolved by Compose before container is created
       # `${PORT:-8100}` here configures host port mapping at compose parse-time.
-      # This ports line itself does not inject PORT var into container runtime env.
       # left side is host port, right side is container port
       - "${PORT:-8100}:8080"
 
@@ -147,3 +157,9 @@ services:
 # This also makes it easy to later add options like `external`, `name`, or `driver`.
 volumes:
   postgres_data:
+
+# Host file secrets for image builds (not injected into running containers unless listed
+# under a service's `secrets:`). `root_env` is used only by the frontend image build.
+secrets:
+  root_env:
+    file: .env

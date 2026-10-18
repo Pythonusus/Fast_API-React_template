@@ -1,0 +1,112 @@
+/**
+ * Minimal load-more + numbered pagination strip.
+ *
+ * Active page is a solid accent square; other pages are plain text.
+ * Portions of Radix Button chrome are reset so page links stay quiet.
+ */
+
+.app-posts-navigate {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+.app-posts-navigate__more {
+  width: 100%;
+  justify-content: center;
+}
+
+.app-posts-navigate__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.app-posts-navigate__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-posts-navigate__range {
+  margin: 0;
+  color: var(--gray-11);
+  font-size: var(--font-size-2);
+  line-height: var(--line-height-2);
+  white-space: nowrap;
+}
+
+.app-posts-navigate__ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  color: var(--gray-11);
+  user-select: none;
+}
+
+.app-posts-navigate__page,
+.app-posts-navigate__arrow {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--gray-12);
+  font: inherit;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.app-posts-navigate__page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding-inline: 0.35rem;
+}
+
+.app-posts-navigate__page:hover:not(:disabled),
+.app-posts-navigate__arrow:hover:not(:disabled) {
+  color: var(--accent-11);
+}
+
+.app-posts-navigate__page--active {
+  background-color: var(--accent-9);
+  color: var(--accent-contrast);
+  font-weight: 600;
+}
+
+.app-posts-navigate__page--active:hover:not(:disabled) {
+  background-color: var(--accent-10);
+  color: var(--accent-contrast);
+}
+
+.app-posts-navigate__arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+}
+
+.app-posts-navigate__page:disabled,
+.app-posts-navigate__arrow:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-posts-navigate__page,
+  .app-posts-navigate__arrow {
+    transition: none;
+  }
+}

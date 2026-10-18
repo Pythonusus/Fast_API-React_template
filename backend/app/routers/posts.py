@@ -13,7 +13,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.engine import get_session
 from app.db.posts import crud
 from app.db.posts.models import Post
-from app.schemas.posts import PostCreate, PostRead, PostUpdate
+from app.schemas.posts import (
+    PostCreate,
+    PostRead,
+    PostsListResponse,
+    PostUpdate,
+)
 
 # prefix is shared by every route below; tags group them in OpenAPI docs.
 router = APIRouter(prefix="/api/posts", tags=["posts"])
@@ -26,7 +31,7 @@ router = APIRouter(prefix="/api/posts", tags=["posts"])
 # the automatic documentation. The response model shhould have
 # from_attributes=True config set to let Pydantic build the model from the
 # SQLAlchemy model.
-@router.get("", response_model=list[PostRead])
+@router.get("", response_model=PostsListResponse)
 async def read_posts(
     # Query means the parameter is passed as a query string parameter'
     # Those after ? in the URL are query parameters.
@@ -35,9 +40,14 @@ async def read_posts(
     skip: int = Query(0, ge=0, description="Rows to skip (offset)."),
     limit: int = Query(100, ge=1, le=100, description="Max rows to return."),
     session: AsyncSession = Depends(get_session),
-) -> list[Post]:
-    """List up to 100 posts, newest first."""
-    return await crud.list_posts(session, skip=skip, limit=limit)
+) -> PostsListResponse:
+    """List posts (newest first) plus total count for pagination."""
+    items = await crud.list_posts(session, skip=skip, limit=limit)
+    total = await crud.count_posts(session)
+    return PostsListResponse(
+        items=[PostRead.model_validate(post) for post in items],
+        total=total,
+    )
 
 
 @router.get("/{post_id}", response_model=PostRead)

@@ -9,6 +9,9 @@ export default defineConfig({
   // React Router plugin for SSG + CSR mode.
   // SSR is disabled in `react-router.config.ts`.
   plugins: [reactRouter()],
+  // Load `.env` / `.env.*` from the repo root (shared with backend & compose).
+  // Only keys prefixed with `VITE_` are exposed to client code.
+  envDir: path.resolve(import.meta.dirname, ".."),
   // Allows to use `~` as a shortcut for `src/app` in imports.
   resolve: {
     alias: {

@@ -5,10 +5,10 @@
  * message card shows "Loading..." until `fetchAbout()` completes after hydration.
  *
  * Flow:
- *   Build      → Static HTML with header and "Backend message: Loading..."
+ *   Build      → Static HTML with shell and loading state
  *   Page load  → User sees that prerendered content immediately
- *   Hydration  → `useEffect` calls `fetchAbout()`; the card text updates in place
- *   On error   → Message turns red and shows a hint to start the backend server
+ *   Hydration  → `useEffect` fetches data from the backend
+ *   On error   → Shows error message. The app does not crash entirely.
  */
 import { Card, Heading, Section, Text } from "@radix-ui/themes";
 /**
