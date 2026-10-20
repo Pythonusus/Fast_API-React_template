@@ -1,4 +1,4 @@
-from app.settings import APP_TITLE
+from app.settings import settings
 
 
 def test_healthcheck(client):
@@ -6,4 +6,6 @@ def test_healthcheck(client):
 
     assert response.status_code == 200
 
-    assert response.json() == {"message": f"{APP_TITLE} is up and running"}
+    assert response.json() == {
+        "message": f"{settings.app_title} is up and running"
+    }

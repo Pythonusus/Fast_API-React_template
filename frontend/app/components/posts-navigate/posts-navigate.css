@@ -12,12 +12,12 @@
   width: 100%;
 }
 
-.app-posts-navigate__more {
+.app-posts-navigate-more {
   width: 100%;
   justify-content: center;
 }
 
-.app-posts-navigate__bar {
+.app-posts-navigate-bar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -25,7 +25,7 @@
   gap: var(--space-3);
 }
 
-.app-posts-navigate__list {
+.app-posts-navigate-list {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -35,7 +35,7 @@
   list-style: none;
 }
 
-.app-posts-navigate__range {
+.app-posts-navigate-range {
   margin: 0;
   color: var(--gray-11);
   font-size: var(--font-size-2);
@@ -43,7 +43,7 @@
   white-space: nowrap;
 }
 
-.app-posts-navigate__ellipsis {
+.app-posts-navigate-ellipsis {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -52,8 +52,8 @@
   user-select: none;
 }
 
-.app-posts-navigate__page,
-.app-posts-navigate__arrow {
+.app-posts-navigate-page,
+.app-posts-navigate-arrow {
   margin: 0;
   padding: 0;
   border: none;
@@ -65,7 +65,7 @@
   cursor: pointer;
 }
 
-.app-posts-navigate__page {
+.app-posts-navigate-page {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -74,23 +74,7 @@
   padding-inline: 0.35rem;
 }
 
-.app-posts-navigate__page:hover:not(:disabled),
-.app-posts-navigate__arrow:hover:not(:disabled) {
-  color: var(--accent-11);
-}
-
-.app-posts-navigate__page--active {
-  background-color: var(--accent-9);
-  color: var(--accent-contrast);
-  font-weight: 600;
-}
-
-.app-posts-navigate__page--active:hover:not(:disabled) {
-  background-color: var(--accent-10);
-  color: var(--accent-contrast);
-}
-
-.app-posts-navigate__arrow {
+.app-posts-navigate-arrow {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -98,15 +82,31 @@
   height: 2rem;
 }
 
-.app-posts-navigate__page:disabled,
-.app-posts-navigate__arrow:disabled {
+.app-posts-navigate-page:disabled,
+.app-posts-navigate-arrow:disabled {
   cursor: default;
   opacity: 0.4;
 }
 
+.app-posts-navigate-page:hover:not(:disabled),
+.app-posts-navigate-arrow:hover:not(:disabled) {
+  color: var(--accent-11);
+}
+
+.app-posts-navigate-page-active {
+  background-color: var(--accent-9);
+  color: var(--accent-contrast);
+  font-weight: 600;
+}
+
+.app-posts-navigate-page-active:hover:not(:disabled) {
+  background-color: var(--accent-10);
+  color: var(--accent-contrast);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .app-posts-navigate__page,
-  .app-posts-navigate__arrow {
+  .app-posts-navigate-page,
+  .app-posts-navigate-arrow {
     transition: none;
   }
 }

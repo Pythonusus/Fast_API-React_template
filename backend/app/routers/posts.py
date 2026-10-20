@@ -19,6 +19,7 @@ from app.schemas.posts import (
     PostsListResponse,
     PostUpdate,
 )
+from app.settings import settings
 
 # prefix is shared by every route below; tags group them in OpenAPI docs.
 router = APIRouter(prefix="/api/posts", tags=["posts"])
@@ -28,7 +29,7 @@ router = APIRouter(prefix="/api/posts", tags=["posts"])
 # to the Pydantic model. It also automatically documents the API in docs.
 # You can omit the response_model and serialize the response manually
 # in the handler, like PostRead.model_validate(post) but you would lose
-# the automatic documentation. The response model shhould have
+# the automatic documentation. The response model should have
 # from_attributes=True config set to let Pydantic build the model from the
 # SQLAlchemy model.
 @router.get("", response_model=PostsListResponse)
@@ -36,9 +37,14 @@ async def read_posts(
     # Query means the parameter is passed as a query string parameter'
     # Those after ? in the URL are query parameters.
     # default value makes the parameter optional., so by default
-    # this endpoint returns the last 100 posts.
+    # this endpoint returns the last settings.max_pagination_size posts.
     skip: int = Query(0, ge=0, description="Rows to skip (offset)."),
-    limit: int = Query(100, ge=1, le=100, description="Max rows to return."),
+    limit: int = Query(
+        settings.max_pagination_size,
+        ge=1,
+        le=settings.max_pagination_size,
+        description="Max rows to return.",
+    ),
     session: AsyncSession = Depends(get_session),
 ) -> PostsListResponse:
     """List posts (newest first) plus total count for pagination."""
@@ -63,6 +69,10 @@ async def read_post(
             detail="Post not found",
         )
     return post
+
+
+# Below functions are not used in the project yet.
+# Post management is allowed only to admin now.
 
 
 # status_code sets the HTTP status code for the response.

@@ -39,13 +39,7 @@ class Settings(BaseSettings):
         extra="ignore",  # ignore extra variables in .env file
     )
 
-    app_title: str = Field(
-        default="Fast_API-React_template",
-        description=(
-            "[OPTIONAL] FastAPI title (env: APP_TITLE). "
-            "Defaults to Fast_API-React_template."
-        ),
-    )
+    app_title: ClassVar[str] = "Fast_API-React_template"
 
     development: bool = Field(
         default=False,
@@ -133,6 +127,10 @@ class Settings(BaseSettings):
             "Defaults to 604800 (7 days)."
         ),
     )
+
+    # Maximum pagination size for the list API responses.
+    # That protects the API and the client from huge payloads.
+    max_pagination_size: ClassVar[int] = 100
 
 
 # Shared instance; import validates config once at startup.

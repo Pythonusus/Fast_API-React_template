@@ -40,11 +40,11 @@ help:
 
 # Install pre-commit hooks
 pre-commit-install:
-	uv run pre-commit install
+	cd backend && uv run pre-commit install
 
 # Run pre-commit hooks
 pre-commit:
-	uv run pre-commit run --all-files
+	cd backend && uv run pre-commit run --all-files
 
 # Generate a new hash for the admin password
 generate-password-hash:

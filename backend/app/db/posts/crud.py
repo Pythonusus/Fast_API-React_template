@@ -17,6 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.posts.models import Post
 from app.schemas.posts import PostCreate, PostUpdate
+from app.settings import settings
 
 
 async def get_post(session: AsyncSession, post_id: int) -> Post | None:
@@ -41,7 +42,7 @@ async def list_posts(
     session: AsyncSession,
     *,
     skip: int = 0,
-    limit: int = 100,
+    limit: int = settings.max_pagination_size,
 ) -> list[Post]:
     """
     Return posts, newest first.
@@ -62,6 +63,9 @@ async def list_posts(
     result = await session.execute(stmt)
     return list(result.scalars().all())
 
+
+# Below functions are not used in the project yet.
+# Post creation is allowed only to admin now.
 
 async def create_post(session: AsyncSession, data: PostCreate) -> Post:
     """
