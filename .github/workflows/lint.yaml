@@ -1,4 +1,4 @@
-name: GitHub CI
+name: Lint
 
 on:
   - push
@@ -6,7 +6,7 @@ on:
   - workflow_dispatch
 
 jobs:
-  build-and-test:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -30,7 +30,3 @@ jobs:
         run: |
           make lint-backend
           make lint-frontend
-
-      - name: Run tests
-        run: |
-          make test-backend

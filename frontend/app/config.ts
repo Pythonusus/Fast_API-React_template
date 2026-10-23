@@ -1,9 +1,9 @@
 /**
  * Frontend application configuration.
  *
- * Custom values come from the repo-root `.env` (see `.env.example`).
+ * Custom values may be added in repo-root `.env`.
  * Vite loads that file via `envDir` in `vite.config.ts`.
- * Only keys that start with `VITE_` are exposed on `import.meta.env`.
+ * ONLY KEYS that start with `VITE_` are exposed on `import.meta.env`.
  *
  * Vite also always injects these built-ins — do not put them in `.env`:
  * - `import.meta.env.DEV` — `true` while `npm run dev` / non-production `NODE_ENV`
@@ -19,12 +19,12 @@
 export const DEVELOPMENT = import.meta.env.DEV;
 
 // HTML lang attribute to use for the document.
-export const HTML_LANG = import.meta.env.VITE_HTML_LANG || "ru-RU";
+export const HTML_LANG = "ru-RU";
 
 // Default page size for ``GET /api/posts`` list pagination.
 // Keep this ≤ ``POSTS_MAX_PAGE_SIZE``.
-// Planned: move to ``VITE_POSTS_PAGE_SIZE`` once env wiring is ready.
 export const POSTS_PAGE_SIZE = 12;
 
-// Backend ``limit`` upper bound from ``Query(..., le=100)``.
+// Backend ``limit`` upper bound — keep in sync with
+// ``settings.max_pagination_size`` in backend/app/settings.py.
 export const POSTS_MAX_PAGE_SIZE = 100;

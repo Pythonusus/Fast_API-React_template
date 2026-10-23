@@ -85,7 +85,7 @@ class PostRead(PostBase):
     ``Post`` instance (``PostRead.model_validate(row)``).
 
     Datetimes are stored as UTC (``TIMESTAMPTZ``) and serialized in
-    ``settings.timezone`` (env ``TIMEZONE``, default Europe/Moscow).
+    ``settings.timezone`` (hardcoded in ``backend/app/settings.py``).
     Use this schema as ``response_model`` so FastAPI applies that conversion.
     """
 

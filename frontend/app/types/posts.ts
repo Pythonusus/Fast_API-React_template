@@ -2,7 +2,7 @@
  * Post shapes matching backend ``PostRead`` / list responses.
  *
  * Datetimes arrive as ISO-8601 strings in the app timezone (see backend
- * ``TIMEZONE`` / ``PostRead`` serializers).
+ * ``settings.timezone`` / ``PostRead`` serializers).
  */
 
 /** Single post from ``GET /api/posts/{id}`` or a list item. */

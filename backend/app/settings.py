@@ -30,6 +30,8 @@ class Settings(BaseSettings):
 
     Field names use snake_case; env keys use UPPER_SNAKE_CASE
     (``database_url`` <-> ``DATABASE_URL``). Env names are case-insensitive.
+
+    Product defaults are ``ClassVar``s — change them here, not in ``.env``.
     """
 
     model_config = SettingsConfigDict(
@@ -40,6 +42,9 @@ class Settings(BaseSettings):
     )
 
     app_title: ClassVar[str] = "Fast_API-React_template"
+
+    # IANA timezone for API datetime serialization.
+    timezone: ClassVar[str] = "Europe/Moscow"
 
     development: bool = Field(
         default=False,
@@ -53,16 +58,8 @@ class Settings(BaseSettings):
         description=(
             "[REQUIRED] Async SQLAlchemy URL (env: DATABASE_URL). "
             "Local: sqlite+aiosqlite:///../local.db "
-            "Local db is assumed to be located in the root of the project. ",
-            "Compose/prod: postgresql+asyncpg://user:pass@db:5432/db_name",
-        ),
-    )
-
-    timezone: str = Field(
-        default="Europe/Moscow",
-        description=(
-            "[OPTIONAL] IANA timezone for API datetime serialization "
-            "(env: TIMEZONE). Defaults to Europe/Moscow."
+            "(Local db file assumed at project root). "
+            "Compose/prod: postgresql+asyncpg://user:pass@db:5432/db_name "
         ),
     )
 
@@ -73,7 +70,7 @@ class Settings(BaseSettings):
         description=(
             "[REQUIRED] Secret used to sign session cookies and admin CSRF "
             "(env: SECRET_KEY). Use a long random string; never commit real "
-            "values. Must match SessionMiddleware and Admin(secret_key=...)."
+            "values. Used by SessionMiddleware and Admin(secret_key=...)."
         ),
     )
 
@@ -95,41 +92,25 @@ class Settings(BaseSettings):
         ),
     )
 
-    admin_title: str = Field(
-        default="Admin",
-        description=(
-            "[OPTIONAL] Browser/nav title for the admin panel "
-            "(env: ADMIN_TITLE). Defaults to Admin."
-        ),
-    )
+    # Browser/nav title for the admin panel.
+    admin_title: ClassVar[str] = "Admin"
 
-    # Hardcoded mount path — not loaded from env (ClassVar).
+    # Admin panel mount URL.
     # Keep in sync with frontend/vite.config.ts and nginx.conf proxies.
     # In a real app, change "/admin" to something less obvious (e.g.
     # "/manage-x7k2") to cut bot noise. Not a security control — auth is.
     admin_url_prefix: ClassVar[str] = "/admin"
 
-    session_max_age: int = Field(
-        default=3600,
-        description=(
-            "[OPTIONAL] Server-side session TTL in seconds when "
-            "remember_me is false (env: SESSION_MAX_AGE). Defaults to 3600 "
-            "(1 hour)."
-        ),
-    )
+    # Server-side session TTL in seconds when remember_me is false (1 hour).
+    session_max_age: ClassVar[int] = 3600
 
-    session_remember_me_max_age: int = Field(
-        default=604800,
-        description=(
-            "[OPTIONAL] Server-side session TTL in seconds when "
-            "remember_me is true (env: SESSION_REMEMBER_ME_MAX_AGE). "
-            "Also used as the SessionMiddleware cookie max_age upper bound. "
-            "Defaults to 604800 (7 days)."
-        ),
-    )
+    # Server-side session TTL when remember_me is true (7 days).
+    # Also used as the SessionMiddleware cookie max_age upper bound.
+    session_remember_me_max_age: ClassVar[int] = 604800
 
     # Maximum pagination size for the list API responses.
     # That protects the API and the client from huge payloads.
+    # Keep this in sync with the frontend's ``POSTS_MAX_PAGE_SIZE``.
     max_pagination_size: ClassVar[int] = 100
 
 
