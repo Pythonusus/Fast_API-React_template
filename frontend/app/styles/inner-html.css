@@ -1,0 +1,150 @@
+/**
+ * Shared prose styles for inbound HTML (TinyMCE / admin / CMS fragments).
+ *
+ * Put on any wrapper that uses ``dangerouslySetInnerHTML`` so rich text looks
+ * consistent across posts, pages, and future HTML-bearing components.
+ *
+ * Usage:
+ *   <div className="app-inner-html" dangerouslySetInnerHTML={{ __html }} />
+ *
+ * Why this file exists (vs co-located component CSS):
+ * - Several components may render the same kind of HTML; keep one source of truth.
+ * - Tags inside the HTML are not Radix ``Text``/``Heading``, so they need their
+ *   own spacing, links, and media rules under this scoped class.
+ *
+ * Keep this in sync with the TinyMCE toolbar in
+ * ``backend/app/admin/posts/views.py`` (headings, tables, code, hr, …).
+ *
+ * Loaded globally from ``root.tsx`` with ``app.css`` and ``themes.css``.
+ */
+
+/* Base type for the HTML island — align with Radix size-2-ish body text. */
+.app-inner-html {
+  overflow-wrap: anywhere;
+  font-size: var(--font-size-2);
+  line-height: var(--line-height-3);
+  color: var(--gray-12);
+}
+
+/* Avoid stacking browser/default margins against the parent card/section padding. */
+.app-inner-html > :first-child {
+  margin-top: 0;
+}
+
+.app-inner-html > :last-child {
+  margin-bottom: 0;
+}
+
+/* Block rhythm between paragraphs and lists produced by the editor. */
+.app-inner-html p,
+.app-inner-html ul,
+.app-inner-html ol,
+.app-inner-html blockquote,
+.app-inner-html pre,
+.app-inner-html table,
+.app-inner-html hr {
+  margin: 0 0 var(--space-3);
+}
+
+/* Headings from TinyMCE “blocks” / formatselect. */
+.app-inner-html h1,
+.app-inner-html h2,
+.app-inner-html h3,
+.app-inner-html h4,
+.app-inner-html h5,
+.app-inner-html h6 {
+  margin: 0 0 var(--space-3);
+  color: var(--gray-12);
+  font-weight: 600;
+  line-height: var(--line-height-2);
+}
+
+.app-inner-html h1 {
+  font-size: var(--font-size-6);
+}
+
+.app-inner-html h2 {
+  font-size: var(--font-size-5);
+}
+
+.app-inner-html h3 {
+  font-size: var(--font-size-4);
+}
+
+.app-inner-html h4,
+.app-inner-html h5,
+.app-inner-html h6 {
+  font-size: var(--font-size-3);
+}
+
+/* Browser default list indent is often too tight inside cards. */
+.app-inner-html ul,
+.app-inner-html ol {
+  padding-left: var(--space-5);
+}
+
+.app-inner-html blockquote {
+  border-left: 3px solid var(--gray-7);
+  padding-left: var(--space-3);
+  color: var(--gray-11);
+}
+
+/* Links inherit accent instead of the browser default blue. */
+.app-inner-html a {
+  color: var(--accent-11);
+  text-decoration: underline;
+}
+
+/* Editor images must not overflow the layout width. */
+.app-inner-html img {
+  max-width: 100%;
+  height: auto;
+}
+
+.app-inner-html hr {
+  border: none;
+  border-top: 1px solid var(--gray-8);
+}
+
+.app-inner-html code {
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius-2);
+  background-color: var(--gray-3);
+  font-family: ui-monospace, sfmono-regular, menlo, monaco, consolas, monospace;
+  font-size: 0.9em;
+}
+
+.app-inner-html pre {
+  overflow-x: auto;
+  padding: var(--space-3);
+  border-radius: var(--radius-2);
+  background-color: var(--gray-3);
+}
+
+.app-inner-html pre code {
+  padding: 0;
+  background: none;
+}
+
+.app-inner-html table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.app-inner-html th,
+.app-inner-html td {
+  border: 1px solid var(--gray-8);
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  vertical-align: top;
+}
+
+.app-inner-html th {
+  background-color: var(--gray-3);
+  font-weight: 600;
+}
+
+.app-inner-html sub,
+.app-inner-html sup {
+  font-size: 0.75em;
+}

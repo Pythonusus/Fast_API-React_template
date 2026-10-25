@@ -5,6 +5,9 @@
  * ``settings.timezone`` / ``PostRead`` serializers).
  */
 
+/** Default ``order_by`` for list requests (newest first). */
+export const DEFAULT_POSTS_ORDER_BY = "-created_at";
+
 /** Single post from ``GET /api/posts/{id}`` or a list item. */
 export type Post = {
   id: number;
@@ -18,6 +21,27 @@ export type Post = {
 export type PostsListResponse = {
   items: Post[];
   total: number;
+};
+
+/**
+ * Search / sort / filter sent to ``GET /api/posts`` (fastapi-filter).
+ *
+ * - ``search`` — free-text search
+ * - ``orderBy`` — e.g. ``-created_at`` or ``title``
+ * - ``createdAtGte`` / ``createdAtLte`` — inclusive date range
+ */
+export type PostsListQuery = {
+  search: string;
+  orderBy: string;
+  createdAtGte: string;
+  createdAtLte: string;
+};
+
+export const EMPTY_POSTS_QUERY: PostsListQuery = {
+  search: "",
+  orderBy: DEFAULT_POSTS_ORDER_BY,
+  createdAtGte: "",
+  createdAtLte: "",
 };
 
 /**

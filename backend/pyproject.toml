@@ -10,12 +10,13 @@ dependencies = [
     "alembic>=1.18.5",
     "asyncpg>=0.31.0",
     "bcrypt>=5.0.0",
+    "fastapi-filter[sqlalchemy]>=3.0.0",
     "fastapi[standard]>=0.141.1",
     "pydantic>=2.13.4",
     "pydantic-settings>=2.14.2",
     "python-dotenv>=1.2.2",
     "sqlalchemy>=2.0.51",
-    "starlette-admin>=1.0.2",
+    "starlette-admin[i18n,tinymce]>=1.0.2",
 ]
 
 [dependency-groups]

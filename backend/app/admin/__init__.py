@@ -13,7 +13,9 @@ Auth overview (see ``app.admin.auth`` for the full design):
   with ``add_view``
 """
 
+from starlette_admin import I18nConfig
 from starlette_admin.contrib.sqla import Admin
+from starlette_admin.i18n import SUPPORTED_LOCALES
 
 from app.admin.auth import AdminAuthProvider
 from app.admin.posts.views import PostAdmin
@@ -29,9 +31,9 @@ def create_admin() -> Admin:
     Returns:
         Configured Admin instance ready to mount on FastAPI
     """
-    # Async SQLAlchemy engine; starlette-admin detects async automatically.
+    # Async SQLAlchemy engine; the admin panel detects async automatically.
     admin = Admin(
-        # Async SQLAlchemy engine (starlette-admin 1.x: session_provider)
+        # Async SQLAlchemy engine (session_provider)
         session_provider=engine,
         title=settings.admin_title,
         # Must stay in sync with vite.config.ts and nginx.conf proxies.
@@ -40,6 +42,11 @@ def create_admin() -> Admin:
         # Used to sign admin CSRF / flash cookies.
         # Session cookies use the same secret via SessionMiddleware in api.py.
         secret_key=settings.secret_key,
+        i18n_config=I18nConfig(
+            default_locale=settings.admin_default_locale,
+            # optional: navbar language picker
+            language_switcher=SUPPORTED_LOCALES,
+        ),
     )
 
     admin.add_view(PostAdmin(Post))

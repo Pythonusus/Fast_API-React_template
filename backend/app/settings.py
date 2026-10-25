@@ -101,6 +101,9 @@ class Settings(BaseSettings):
     # "/manage-x7k2") to cut bot noise. Not a security control — auth is.
     admin_url_prefix: ClassVar[str] = "/admin"
 
+    # Admin panel default locale.
+    admin_default_locale: ClassVar[str] = "ru"
+
     # Server-side session TTL in seconds when remember_me is false (1 hour).
     session_max_age: ClassVar[int] = 3600
 
@@ -112,6 +115,11 @@ class Settings(BaseSettings):
     # That protects the API and the client from huge payloads.
     # Keep this in sync with the frontend's ``POSTS_MAX_PAGE_SIZE``.
     max_pagination_size: ClassVar[int] = 100
+
+    # Max HTML body size for a post (characters). Large enough for rich
+    # TinyMCE content; capped to limit abuse. Enforced in Pydantic schemas
+    # (API + admin) and a DB check constraint on ``posts.content``.
+    post_content_max_length: ClassVar[int] = 100_000
 
 
 # Shared instance; import validates config once at startup.

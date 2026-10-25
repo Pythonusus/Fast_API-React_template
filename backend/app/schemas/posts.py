@@ -40,8 +40,11 @@ class PostBase(BaseModel):
     content: str = Field(
         ...,
         min_length=2,
-        max_length=30_000,
-        description="Body in HTML format (e.g. ``<p>Hello</p>``).",
+        max_length=settings.post_content_max_length,
+        description=(
+            "Body in HTML format (e.g. ``<p>Hello</p>``). "
+            f"Max {settings.post_content_max_length} characters."
+        ),
         examples=["<p>Hello from <strong>TinyMCE</strong>.</p>"],
     )
 
@@ -71,8 +74,11 @@ class PostUpdate(PostBase):
     content: str | None = Field(
         default=None,
         min_length=2,
-        max_length=30_000,
-        description="Body in HTML format (e.g. ``<p>Hello</p>``).",
+        max_length=settings.post_content_max_length,
+        description=(
+            "Body in HTML format (e.g. ``<p>Hello</p>``). "
+            f"Max {settings.post_content_max_length} characters."
+        ),
         examples=["<p>Hello from <strong>TinyMCE</strong>.</p>"],
     )
 
@@ -126,18 +132,22 @@ class PostsListResponse(BaseModel):
     """
     Paginated list payload for ``GET /api/posts``.
 
-    ``total`` is the full row count (ignoring skip/limit) so clients can
-    build page numbers and hide controls when there is only one page.
+    ``total`` is the row count after the same ``q`` / ``filter`` as the
+    page (still ignoring skip/limit) so clients can build page numbers.
     """
 
     items: list[PostRead] = Field(
         ...,
-        description="Posts for this page, newest first.",
+        description=(
+            "Posts for this page, ordered by ``sort`` (default: newest first)."
+        ),
     )
     total: int = Field(
         ...,
         ge=0,
-        description="Total number of posts in the database.",
+        description=(
+            "Total posts matching search/filters (not just this page)."
+        ),
         examples=[42],
     )
 

@@ -10,7 +10,7 @@ import { Box, Button, Flex, Heading, Section, Text } from "@radix-ui/themes";
 import { Link, type MetaFunction } from "react-router";
 
 import lostPageImage from "~/assets/404.webp";
-import "~/styles/components/404.css";
+import "./404.css";
 
 /**
  * Function to set the meta tags for the 404 page.

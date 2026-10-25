@@ -1,0 +1,257 @@
+/**
+ * Reusable load-more + numbered pagination strip.
+ *
+ * Class names are kebab-case (stylelint ``selector-class-pattern``). Keep every
+ * selector in sync with ``index.tsx`` — a mismatch leaves the ``<ul>`` as a
+ * vertical bulleted browser list.
+ *
+ * Active page is a solid accent square; other pages are plain text.
+ * Appear/disappear uses opacity + scale + width collapse so slots don’t jump.
+ * At ``≤519px`` only “Show more” remains; the numbered strip is hidden.
+ */
+
+.app-pagination {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--app-duration) var(--app-ease),
+    transform var(--app-duration) var(--app-ease);
+}
+
+.app-pagination-visible {
+  animation: app-pagination-section-in var(--app-duration) var(--app-ease) both;
+}
+
+.app-pagination-hidden {
+  opacity: 0;
+  transform: translateY(0.35rem);
+  pointer-events: none;
+  animation: none;
+}
+
+.app-pagination-more-wrap {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--app-duration) var(--app-ease),
+    transform var(--app-duration) var(--app-ease),
+    grid-template-rows var(--app-duration) var(--app-ease),
+    margin var(--app-duration) var(--app-ease);
+}
+
+.app-pagination-more-wrap.app-pagination-presence-hidden {
+  grid-template-rows: 0fr;
+  margin: 0;
+  opacity: 0;
+  transform: translateY(-0.25rem);
+  pointer-events: none;
+}
+
+.app-pagination-more-wrap > * {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.app-pagination-more {
+  width: 100%;
+  justify-content: center;
+}
+
+.app-pagination-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/* 519px matches app title hide / posts header (Radix Themes ``xs``). */
+@media (width <= 519px) {
+  .app-pagination-bar {
+    display: none;
+  }
+}
+
+.app-pagination-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-pagination-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 2.5rem;
+  opacity: 1;
+  overflow: hidden;
+  transform: scale(1);
+  transition:
+    opacity var(--app-duration) var(--app-ease),
+    transform var(--app-duration) var(--app-ease),
+    max-width var(--app-duration) var(--app-ease),
+    margin var(--app-duration) var(--app-ease);
+}
+
+/* Page numbers / ellipsis mount in; arrows use presence classes instead. */
+.app-pagination-slot:not(
+  .app-pagination-presence-visible,
+  .app-pagination-presence-hidden
+) {
+  animation: app-pagination-slot-in var(--app-duration) var(--app-ease) both;
+}
+
+.app-pagination-slot.app-pagination-presence-hidden {
+  max-width: 0;
+  margin-inline: calc(var(--space-3) * -0.5);
+  opacity: 0;
+  transform: scale(0.85);
+  pointer-events: none;
+}
+
+.app-pagination-range {
+  margin: 0;
+  color: var(--gray-11);
+  font-size: var(--font-size-2);
+  line-height: var(--line-height-2);
+  white-space: nowrap;
+  animation: app-pagination-fade-in var(--app-duration) var(--app-ease) both;
+}
+
+.app-pagination-ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  color: var(--gray-11);
+  user-select: none;
+}
+
+.app-pagination-page,
+.app-pagination-arrow {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--gray-12);
+  font: inherit;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color var(--app-duration-fast) var(--app-ease),
+    background-color var(--app-duration-fast) var(--app-ease),
+    opacity var(--app-duration-fast) var(--app-ease);
+}
+
+.app-pagination-page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding-inline: 0.35rem;
+}
+
+.app-pagination-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+}
+
+.app-pagination-page:disabled,
+.app-pagination-arrow:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.app-pagination-page:hover:not(:disabled),
+.app-pagination-arrow:hover:not(:disabled) {
+  color: var(--accent-11);
+}
+
+.app-pagination-page-active {
+  background-color: var(--accent-9);
+  color: var(--accent-contrast);
+  font-weight: 600;
+}
+
+.app-pagination-page-active:hover:not(:disabled) {
+  background-color: var(--accent-10);
+  color: var(--accent-contrast);
+}
+
+@keyframes app-pagination-section-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.35rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes app-pagination-slot-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes app-pagination-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-pagination,
+  .app-pagination-more-wrap,
+  .app-pagination-slot,
+  .app-pagination-page,
+  .app-pagination-arrow,
+  .app-pagination-range {
+    transition: none;
+    animation: none;
+  }
+
+  .app-pagination-visible {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  .app-pagination-hidden {
+    opacity: 0;
+    transform: none;
+  }
+
+  .app-pagination-slot.app-pagination-presence-hidden,
+  .app-pagination-more-wrap.app-pagination-presence-hidden {
+    opacity: 0;
+    transform: none;
+  }
+}

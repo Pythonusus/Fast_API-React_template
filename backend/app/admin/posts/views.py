@@ -9,7 +9,7 @@ Mirror this package (same layout as ``app.db.<entity>``):
    migrate the DB as usual).
 2. Create ``app/admin/<entity>/`` with an empty ``__init__.py`` and a
    ``views.py`` that defines ``class <Entity>Admin(ModelView)`` — copy
-   this file and adjust ``label``, ``fields``, search/sort, hooks.
+   this file and adjust ``menu_label``, ``fields``, search/sort, hooks.
 3. In ``app/admin/__init__.py`` ``create_admin()``::
 
        from app.admin.<entity>.views import <Entity>Admin
@@ -31,7 +31,7 @@ from starlette_admin.fields import (
     DateTimeField,
     IntegerField,
     StringField,
-    TextAreaField,
+    TinyMCEEditorField,
 )
 from starlette_admin.helpers import pydantic_error_to_form_validation_errors
 
@@ -53,9 +53,9 @@ class PostAdmin(ModelView):
     ``nullable=False`` only blocks SQL NULL — empty strings still need this.
     """
 
-    # Display labels (singular / plural)
-    label = "Post"
-    label_plural = "Posts"
+    # Sidebar / page title (plural) and singular entity name
+    menu_label = "Посты"
+    display_name = "Пост"
 
     # Font Awesome newspaper icon
     icon = "fa fa-newspaper"
@@ -74,11 +74,46 @@ class PostAdmin(ModelView):
 
     # Editable form fields
     fields = [
-        IntegerField("id", read_only=True),
-        StringField("title", label="Title", required=True),
-        TextAreaField("content", label="Content", required=True),
-        DateTimeField("created_at", read_only=True, label="Created"),
-        DateTimeField("updated_at", read_only=True, label="Updated"),
+        IntegerField("id", label="ID", read_only=True),
+        StringField("title", label="Заголовок", required=True),
+        # Do not set required=True: TinyMCE hides the <textarea>, and the
+        # browser then refuses submit with "invalid form control is not
+        # focusable". Emptiness is still enforced in validate() via PostCreate.
+        #
+        # Toolbar + plugins are the open-source TinyMCE 6 set (jsDelivr CDN,
+        # no Tiny Cloud API key).
+        TinyMCEEditorField(
+            "content",
+            label="Содержание",
+            height=420,
+            menubar="file edit view insert format tools help",
+            statusbar=True,
+            toolbar=(
+                "undo redo | blocks fontfamily fontsize | "
+                "bold italic underline strikethrough | "
+                "forecolor backcolor | "
+                "alignleft aligncenter alignright alignjustify | "
+                "bullist numlist outdent indent | "
+                "blockquote subscript superscript | "
+                "link unlink charmap emoticons hr | "
+                "removeformat | searchreplace visualblocks code fullscreen "
+                "preview | help"
+            ),
+            extra_options={
+                "plugins": (
+                    "advlist autolink lists link charmap preview anchor "
+                    "searchreplace visualblocks code fullscreen insertdatetime "
+                    "emoticons help wordcount"
+                ),
+                "toolbar_mode": "sliding",
+                "branding": False,
+                "promotion": False,
+                "link_default_target": "_blank",
+                "link_assume_external_targets": True,
+            },
+        ),
+        DateTimeField("created_at", read_only=True, label="Создан"),
+        DateTimeField("updated_at", read_only=True, label="Обновлён"),
     ]
 
     # Auto-managed fields — hide on create
@@ -88,7 +123,7 @@ class PostAdmin(ModelView):
     exclude_fields_from_edit = ["id", "created_at"]
 
     # -------------------------------------------------------------------------
-    # Framework hooks — override fixed method names; starlette-admin calls them.
+    # Framework hooks — override fixed method names; the admin panel calls them.
     # You do not register these yourself (no decorator / no add_hook).
     #
     # Create / edit submit order (simplified):
@@ -108,7 +143,7 @@ class PostAdmin(ModelView):
         """
         Cross-field / schema validation before create or edit is saved.
 
-        Called by starlette-admin after field-level checks, by this exact
+        Called by the admin panel after field-level checks, by this exact
         method name. Raise ``FormValidationError`` to redisplay the form
         with errors and skip the DB write.
 
@@ -134,7 +169,7 @@ class PostAdmin(ModelView):
         obj: Post,
     ) -> None:
         """
-        Called by starlette-admin before a new row is inserted.
+        Called by the admin panel before a new row is inserted.
 
         Use for defaults or side effects (validation belongs in ``validate``).
 
@@ -151,7 +186,7 @@ class PostAdmin(ModelView):
         obj: Post,
     ) -> None:
         """
-        Called by starlette-admin after a new row is committed.
+        Called by the admin panel after a new row is committed.
 
         Use for notifications, cache invalidation, or logging.
 
@@ -168,7 +203,7 @@ class PostAdmin(ModelView):
         obj: Post,
     ) -> None:
         """
-        Called by starlette-admin before an existing row is updated.
+        Called by the admin panel before an existing row is updated.
 
         Args:
             request: HTTP request
@@ -183,7 +218,7 @@ class PostAdmin(ModelView):
         obj: Post,
     ) -> None:
         """
-        Called by starlette-admin after an edit is committed.
+        Called by the admin panel after an edit is committed.
 
         Args:
             request: HTTP request
@@ -197,7 +232,7 @@ class PostAdmin(ModelView):
         obj: Post,
     ) -> None:
         """
-        Called by starlette-admin before a row is deleted.
+        Called by the admin panel before a row is deleted.
 
         Args:
             request: HTTP request
@@ -211,7 +246,7 @@ class PostAdmin(ModelView):
         obj: Post,
     ) -> None:
         """
-        Called by starlette-admin after a delete is committed.
+        Called by admin after a delete is committed.
 
         Args:
             request: HTTP request

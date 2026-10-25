@@ -1,0 +1,107 @@
+/**
+ * Posts page: header layout + equal-height cards with clamped body.
+ *
+ * At ``≤519px`` (same as ``.app-header-title`` hide), the description
+ * drops and the toolbar shares the title row.
+ */
+
+.app-posts-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+  margin-bottom: var(--space-6);
+}
+
+.app-posts-header-title {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
+}
+
+.app-posts-header-desc {
+  grid-column: 1;
+  grid-row: 2;
+  min-width: 0;
+  margin: 0;
+}
+
+.app-posts-header .app-posts-toolbar {
+  grid-column: 2;
+  grid-row: 2;
+  place-self: center end;
+}
+
+/* 519px matches app title hide in ``header.css`` (Radix Themes ``xs``). */
+@media (width <= 519px) {
+  .app-posts-header-title {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .app-posts-header-desc {
+    display: none;
+  }
+
+  .app-posts-header .app-posts-toolbar {
+    grid-column: 2;
+    grid-row: 1;
+    place-self: center end;
+  }
+}
+
+/* Equal-height cards: flex column + clamped HTML preview with ellipsis. */
+.app-posts-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 16rem;
+}
+
+/* Appended via “Show more”; ``--app-enter-index`` set inline for stagger. */
+.app-posts-card-enter {
+  animation: app-posts-card-in var(--app-duration-enter) var(--app-ease) both;
+  animation-delay: calc(var(--app-enter-index, 0) * var(--app-stagger));
+}
+
+@keyframes app-posts-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-posts-card-enter {
+    animation: none;
+  }
+}
+
+.app-posts-card-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.app-posts-card-body {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.app-posts-card-body.app-inner-html {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+  line-clamp: 6;
+}
+
+.app-posts-card-body.app-inner-html > :last-child {
+  margin-bottom: 0;
+}

@@ -1,0 +1,150 @@
+/**
+ * Base list toolbar: icon strip + floating search / sort / date popovers.
+ */
+
+.app-list-toolbar-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.app-list-toolbar-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-2);
+  background: transparent;
+  color: var(--gray-11);
+  cursor: pointer;
+}
+
+.app-list-toolbar-icon:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.app-list-toolbar-icon:hover:not(:disabled) {
+  color: var(--accent-11);
+  background: var(--accent-a3);
+}
+
+.app-list-toolbar-icon-open {
+  color: var(--accent-11);
+  border-color: var(--accent-a6);
+  background: var(--accent-a3);
+}
+
+.app-list-toolbar-icon-active::after {
+  content: "";
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 999px;
+  background: var(--accent-9);
+}
+
+.app-list-toolbar-clear {
+  overflow: hidden;
+  width: 2.5rem;
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    width var(--app-duration) var(--app-ease),
+    opacity var(--app-duration-fast) var(--app-ease),
+    transform var(--app-duration) var(--app-ease),
+    margin-inline-start var(--app-duration) var(--app-ease),
+    border-color var(--app-duration-fast) var(--app-ease);
+}
+
+.app-list-toolbar-clear-hidden {
+  width: 0;
+  margin-inline-start: calc(var(--space-1) * -1);
+  border-color: transparent;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.75);
+}
+
+.app-list-toolbar-popover-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.app-list-toolbar-label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  color: var(--gray-11);
+  font-size: var(--font-size-1);
+  line-height: var(--line-height-1);
+}
+
+/* Monochrome sort glyph from ``app/assets/sort-arrows.svg`` (mask → currentcolor). */
+.app-list-toolbar-sort-icon {
+  display: block;
+  width: 22px;
+  height: 22px;
+  background-color: currentcolor;
+  mask: url("../../../assets/sort-arrows.svg") center / contain no-repeat;
+
+  /* Safari still needs the prefixed mask property. */
+  /* stylelint-disable-next-line property-no-vendor-prefix */
+  -webkit-mask: url("../../../assets/sort-arrows.svg") center / contain
+    no-repeat;
+}
+
+.app-list-toolbar-field-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-1);
+  background: transparent;
+  color: var(--gray-10);
+  cursor: pointer;
+}
+
+.app-list-toolbar-field-clear:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.app-list-toolbar-field-clear:hover:not(:disabled) {
+  color: var(--gray-12);
+}
+
+/* Keep the native calendar glyph on the trailing edge of the field. */
+.app-list-toolbar-date input[type="date"] {
+  position: relative;
+}
+
+.app-list-toolbar-date input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 50%;
+  right: 0.35rem;
+  left: auto;
+  margin: 0;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-list-toolbar-icon,
+  .app-list-toolbar-clear {
+    transition: none;
+  }
+}

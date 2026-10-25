@@ -17,12 +17,12 @@ from app.settings import settings
 # The core of the backend service.
 app = FastAPI(title=settings.app_title)
 
-# Signed session cookies for starlette-admin auth (see app.admin.auth).
+# Signed session cookies for admin auth (see app.admin.auth).
 # Must use the same secret_key as Admin(...). Cookie max_age is the longer
 # remember-me bound; shorter sessions still expire via server-side TTL in
 # AdminAuthProvider.authenticate(). Parent middleware wraps mounted apps,
 # so /admin sees request.session.
-# Cookies in starlette-admin are http-only by default.
+# Admin session cookies are http-only by default.
 # JavaScript cannot read the cookie via document.cookie;
 # https_only=False in development so local HTTP login works; in production
 # the Secure flag is set so the cookie is HTTPS-only.
@@ -41,7 +41,7 @@ app.add_middleware(
 # Feature routers: each module owns its own APIRouter and is mounted here.
 app.include_router(posts_router)
 
-# Mount starlette-admin at settings.admin_url_prefix.
+# Mount the admin panel at settings.admin_url_prefix.
 # Keep vite.config.ts and nginx.conf proxies in sync if changed.
 create_admin().mount_to(app)
 

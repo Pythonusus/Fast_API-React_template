@@ -72,7 +72,7 @@
 .app-header-nav-link {
   position: relative;
   text-decoration: none;
-  transition: color 220ms ease;
+  transition: color var(--app-duration) var(--app-ease);
 }
 
 /* scaleX(0) makes the underline invisible in default state */
@@ -85,7 +85,7 @@
   background-color: currentcolor;
   transform: scaleX(0);
   transform-origin: center;
-  transition: transform 220ms ease;
+  transition: transform var(--app-duration) var(--app-ease);
 }
 
 .app-header-nav-link:hover,

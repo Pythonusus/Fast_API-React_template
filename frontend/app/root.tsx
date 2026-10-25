@@ -30,6 +30,7 @@
  */
 import "@radix-ui/themes/styles.css";
 import "~/styles/app.css";
+import "~/styles/inner-html.css";
 import "~/styles/themes.css";
 
 import { Box, Container, Flex, Section, Theme } from "@radix-ui/themes";
@@ -78,7 +79,11 @@ export const Layout = ({ children }: { children: ReactNode }) => {
         {/* Injects route `links` exports as `<link>` tags. */}
         <Links />
       </head>
-      <body>
+      {/*
+        Extensions (e.g. ColorZilla’s ``cz-shortcut-listen``) often mutate
+        ``<body>`` before hydrate; suppress so that is not reported as a bug.
+      */}
+      <body suppressHydrationWarning>
         {/*
           Radix UI theme provider: all Radix components and custom components with
           necessary css vars inside inherit these design tokens.

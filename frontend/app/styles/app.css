@@ -1,8 +1,24 @@
 /* App-wide base styles
  *
  * Global resets and shared layout defaults used across the whole frontend.
- * Theme colors live in themes.css; component-specific styles live under styles/components/.
+ *
+ * Styles layout:
+ * - ``app/styles/app.css``       — resets, fonts, motion tokens, layout defaults
+ * - ``app/styles/themes.css``    — light/dark Radix token overrides
+ * - ``app/styles/inner-html.css`` — shared prose for ``dangerouslySetInnerHTML``
+ * - Co-located ``*.css`` next to a component or route — UI unique to that module
+ *
+ * Motion: use ``var(--app-duration*)`` / ``var(--app-ease)`` in component CSS.
+ * JS timeouts that must match live in ``app/styles/motion.ts`` — keep both in sync.
  */
+
+:root {
+  --app-duration-fast: 180ms;
+  --app-duration: 220ms;
+  --app-duration-enter: 350ms;
+  --app-stagger: 45ms;
+  --app-ease: ease;
+}
 
 /* Include padding and border in an element's width/height calculations.
  * Avoids layout surprises when adding padding to sized boxes. */

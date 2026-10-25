@@ -5,6 +5,7 @@
  * results update local state:
  * - ``goToPage`` — replace the list with that page (numbers / Prev / Next).
  * - ``loadMore`` — append the next page under the current items.
+ * - ``applyQuery`` — set search/sort/filter and reload page 1.
  *
  * Extracted from the route because replace + append, loading flags, and
  * errors are easier to reason about (and reuse) outside the JSX.
@@ -14,7 +15,9 @@ import { useCallback, useEffect, useState } from "react";
 import { fetchPosts } from "~/api/posts";
 import { BACKEND_LOAD_FAILED } from "~/common-texts/errors";
 import { POSTS_PAGE_SIZE } from "~/config";
-import type { Post, PostsPage } from "~/types/posts";
+import { APP_DURATION_ENTER_MS, APP_STAGGER_MS } from "~/styles/motion";
+import type { Post, PostsListQuery, PostsPage } from "~/types/posts";
+import { EMPTY_POSTS_QUERY } from "~/types/posts";
 
 export type UsePostsOptions = {
   /** Rows per request. Defaults to ``POSTS_PAGE_SIZE``. */
@@ -35,6 +38,9 @@ export const usePosts = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState<PostsListQuery>(EMPTY_POSTS_QUERY);
+  /** Post ids just appended by ``loadMore`` — used for enter animation. */
+  const [enteringPostIds, setEnteringPostIds] = useState<number[]>([]);
 
   const applyPageMeta = (result: PostsPage) => {
     setPage(result.page);
@@ -50,13 +56,49 @@ export const usePosts = ({
       try {
         setIsLoading(true);
         setError(null);
-        const result = await fetchPosts({ page: nextPage, pageSize });
+        const result = await fetchPosts({
+          page: nextPage,
+          pageSize,
+          query,
+        });
+        setEnteringPostIds([]);
         setPosts(result.posts);
         setRangeFrom(
           result.posts.length === 0
             ? 0
             : (result.page - 1) * result.pageSize + 1,
         );
+        applyPageMeta(result);
+      } catch (error_) {
+        setError(
+          error_ instanceof Error ? error_.message : BACKEND_LOAD_FAILED,
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [pageSize, query],
+  );
+
+  /**
+   * Apply search / sort / filter and reload from page 1.
+   *
+   * Called by the posts toolbar when the user clicks Apply or Clear.
+   */
+  const applyQuery = useCallback(
+    async (nextQuery: PostsListQuery) => {
+      setQuery(nextQuery);
+      try {
+        setIsLoading(true);
+        setError(null);
+        const result = await fetchPosts({
+          page: 1,
+          pageSize,
+          query: nextQuery,
+        });
+        setEnteringPostIds([]);
+        setPosts(result.posts);
+        setRangeFrom(result.posts.length === 0 ? 0 : 1);
         applyPageMeta(result);
       } catch (error_) {
         setError(
@@ -78,7 +120,12 @@ export const usePosts = ({
     try {
       setIsLoadingMore(true);
       setError(null);
-      const result = await fetchPosts({ page: page + 1, pageSize });
+      const result = await fetchPosts({
+        page: page + 1,
+        pageSize,
+        query,
+      });
+      setEnteringPostIds(result.posts.map((post) => post.id));
       setPosts((current) => [...current, ...result.posts]);
       // ``rangeFrom`` stays put so the label covers the full loaded window.
       applyPageMeta(result);
@@ -87,7 +134,25 @@ export const usePosts = ({
     } finally {
       setIsLoadingMore(false);
     }
-  }, [hasNextPage, isLoading, isLoadingMore, page, pageSize]);
+  }, [hasNextPage, isLoading, isLoadingMore, page, pageSize, query]);
+
+  // Drop enter markers after the last staggered card finishes animating.
+  useEffect(() => {
+    if (enteringPostIds.length === 0) {
+      return;
+    }
+
+    const timer = globalThis.setTimeout(
+      () => {
+        setEnteringPostIds([]);
+      },
+      APP_DURATION_ENTER_MS +
+        Math.max(0, enteringPostIds.length - 1) * APP_STAGGER_MS,
+    );
+    return () => {
+      globalThis.clearTimeout(timer);
+    };
+  }, [enteringPostIds]);
 
   const goToPreviousPage = useCallback(() => {
     if (hasPreviousPage && !isLoading && !isLoadingMore) {
@@ -105,7 +170,12 @@ export const usePosts = ({
   useEffect(() => {
     const loadFirstPage = async () => {
       try {
-        const result = await fetchPosts({ page: 1, pageSize });
+        const result = await fetchPosts({
+          page: 1,
+          pageSize,
+          query: EMPTY_POSTS_QUERY,
+        });
+        setEnteringPostIds([]);
         setPosts(result.posts);
         setRangeFrom(result.posts.length === 0 ? 0 : 1);
         applyPageMeta(result);
@@ -125,6 +195,12 @@ export const usePosts = ({
   const rangeTo =
     rangeFrom === 0 || posts.length === 0 ? 0 : rangeFrom + posts.length - 1;
 
+  const hasActiveQuery =
+    Boolean(query.search.trim()) ||
+    Boolean(query.createdAtGte.trim()) ||
+    Boolean(query.createdAtLte.trim()) ||
+    query.orderBy !== EMPTY_POSTS_QUERY.orderBy;
+
   return {
     posts,
     page,
@@ -138,9 +214,13 @@ export const usePosts = ({
     isLoading,
     isLoadingMore,
     error,
+    query,
+    hasActiveQuery,
+    enteringPostIds,
     goToPage,
     goToPreviousPage,
     goToNextPage,
     loadMore,
+    applyQuery,
   };
 };

@@ -5,14 +5,22 @@ Each handler:
 1. Gets an async DB session via ``Depends(get_session)``.
 2. Calls a helper in ``app.db.posts.crud``.
 3. Returns data shaped by ``PostRead`` (or 404 / 204).
+
+List endpoint query params (fastapi-filter ``PostFilter``):
+
+- ``search`` — free-text on title/content
+- ``order_by`` — e.g. ``-created_at`` or ``title``
+- ``created_at__gte`` / ``created_at__lte`` — inclusive date range
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi_filter import FilterDepends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.engine import get_session
 from app.db.posts import crud
 from app.db.posts.models import Post
+from app.db.posts.query import PostFilter
 from app.schemas.posts import (
     PostCreate,
     PostRead,
@@ -45,11 +53,21 @@ async def read_posts(
         le=settings.max_pagination_size,
         description="Max rows to return.",
     ),
+    post_filter: PostFilter = FilterDepends(PostFilter),
     session: AsyncSession = Depends(get_session),
 ) -> PostsListResponse:
-    """List posts (newest first) plus total count for pagination."""
-    items = await crud.list_posts(session, skip=skip, limit=limit)
-    total = await crud.count_posts(session)
+    """
+    List posts with optional search, sort, and filters.
+
+    ``total`` counts rows after the same search/filters (ignoring skip/limit).
+    """
+    items = await crud.list_posts(
+        session,
+        skip=skip,
+        limit=limit,
+        post_filter=post_filter,
+    )
+    total = await crud.count_posts(session, post_filter=post_filter)
     return PostsListResponse(
         items=[PostRead.model_validate(post) for post in items],
         total=total,

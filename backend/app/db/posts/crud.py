@@ -10,12 +10,16 @@ codes or FastAPI. Routes should:
 
 ``get_session`` commits on success and rolls back on error, so these
 helpers ``flush`` (send SQL, get DB-generated values) but do not ``commit``.
+
+List/count take a ``PostFilter`` from fastapi-filter so both share the same
+WHERE / ORDER BY rules as the public posts toolbar.
 """
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.posts.models import Post
+from app.db.posts.query import PostFilter
 from app.schemas.posts import PostCreate, PostUpdate
 from app.settings import settings
 
@@ -31,9 +35,20 @@ async def get_post(session: AsyncSession, post_id: int) -> Post | None:
     return await session.get(Post, post_id)
 
 
-async def count_posts(session: AsyncSession) -> int:
-    """Return the total number of posts (for pagination UI)."""
-    result = await session.execute(select(func.count()).select_from(Post))
+async def count_posts(
+    session: AsyncSession,
+    *,
+    post_filter: PostFilter,
+) -> int:
+    """
+    Return the number of posts matching search/filters (for pagination UI).
+
+    Uses the same WHERE clauses as ``list_posts`` so ``total`` matches the
+    filtered result set.
+    """
+    stmt = select(func.count()).select_from(Post)
+    stmt = post_filter.filter(stmt)
+    result = await session.execute(stmt)
     return int(result.scalar_one())
 
 
@@ -43,19 +58,18 @@ async def list_posts(
     *,
     skip: int = 0,
     limit: int = settings.max_pagination_size,
+    post_filter: PostFilter,
 ) -> list[Post]:
     """
-    Return posts, newest first.
+    Return posts with optional search, sort, and filters.
 
-    ``skip`` / ``limit`` are simple offset pagination.
+    ``skip`` / ``limit`` are simple offset pagination. Default order comes
+    from ``PostFilter.order_by`` (newest first).
     """
-    # Build a SELECT; chain filters/options before execute.
-    stmt = (
-        select(Post)
-        .order_by(Post.created_at.desc())
-        .offset(skip)
-        .limit(limit)
-    )
+    stmt = select(Post)
+    stmt = post_filter.filter(stmt)
+    stmt = post_filter.sort(stmt)
+    stmt = stmt.offset(skip).limit(limit)
 
     # execute() runs the SQL; scalars().all() unwraps ORM rows from the result.
     # When using session.execute() without scalars() in result we would get
@@ -66,6 +80,7 @@ async def list_posts(
 
 # Below functions are not used in the project yet.
 # Post creation is allowed only to admin now.
+
 
 async def create_post(session: AsyncSession, data: PostCreate) -> Post:
     """

@@ -113,7 +113,7 @@ Example: a public `/products` page that loads data from the backend after hydrat
 
 4. **API helper (if needed)** — add a typed function in `app/api/` with a relative `/api/...` URL; put shared response types in `app/types/`; reuse `fetchMessageError` / shared error strings.
 
-5. **Styles / shared components (optional)** — colocate CSS under `app/components/<name>/`, or put page-only rules in `app/styles/components/`. Prefer Radix props first. Put reusable UI in `app/components/`.
+5. **Styles / shared components (optional)** — colocate CSS under `app/components/<name>/`, or put page-only rules in `app/styles/components/`. Prefer Radix props first. Put reusable domain-agnostic UI in `app/components/ui/`; put feature wrappers (e.g. posts toolbar) under `app/components/<feature>/`.
 
 6. **Shared strings** — if the same copy is used elsewhere, add it to `app/common-texts/`; otherwise leave it inline.
 
