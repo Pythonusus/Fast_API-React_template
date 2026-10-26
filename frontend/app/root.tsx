@@ -35,6 +35,7 @@ import "~/styles/themes.css";
 
 import { Box, Container, Flex, Section, Theme } from "@radix-ui/themes";
 import { ThemeProvider } from "next-themes";
+import { NuqsAdapter } from "nuqs/adapters/react-router/v8";
 import { type ReactNode } from "react";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 
@@ -159,7 +160,13 @@ const App = () => {
       - Any other URL will render `routes/404.tsx` here.
       The root shell remains mounted, only outlet content changes.
     */
-    <Outlet />
+    <NuqsAdapter>
+      {/*
+        ``NuqsAdapter`` lets routes read and write the URL query string
+        (search, sort, and filter).
+      */}
+      <Outlet />
+    </NuqsAdapter>
   );
 };
 

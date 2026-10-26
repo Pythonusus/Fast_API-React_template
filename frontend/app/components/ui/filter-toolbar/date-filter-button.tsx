@@ -8,8 +8,8 @@ import { Button, Popover, Select, TextField } from "@radix-ui/themes";
 import { useId, useState } from "react";
 
 import {
-  buildDateFilterBounds,
   DATE_FILTER_PRESETS,
+  isDateFilterActive,
   isDateFilterPreset,
   todayIsoDate,
   type DateFilterPreset,
@@ -21,8 +21,6 @@ export type DateFilterApply = {
   datePreset: DateFilterPreset;
   dateFrom: string;
   dateTo: string;
-  dateGte: string;
-  dateLte: string;
 };
 
 export type DateFilterProps = {
@@ -34,26 +32,6 @@ export type DateFilterProps = {
   ariaLabel?: string;
   /** Label above the preset select (e.g. “Posted”). */
   selectLabel?: string;
-};
-
-const isActive = ({
-  datePreset,
-  dateFrom,
-  dateTo,
-}: {
-  datePreset: DateFilterPreset;
-  dateFrom: string;
-  dateTo: string;
-}): boolean => {
-  if (datePreset === "any") {
-    return false;
-  }
-
-  if (datePreset === "custom") {
-    return Boolean(dateFrom.trim()) || Boolean(dateTo.trim());
-  }
-
-  return true;
 };
 
 export const DateFilter = ({
@@ -99,11 +77,7 @@ export const DateFilter = ({
           aria-label={ariaLabel}
           className={iconClassName({
             open,
-            active: isActive({
-              datePreset: appliedPreset,
-              dateFrom: appliedFrom,
-              dateTo: appliedTo,
-            }),
+            active: isDateFilterActive(appliedPreset, appliedFrom, appliedTo),
           })}
           disabled={disabled}
           type="button"
@@ -122,17 +96,13 @@ export const DateFilter = ({
           className="app-filter-toolbar-popover-body"
           onSubmit={(event) => {
             event.preventDefault();
-            const bounds = buildDateFilterBounds({
-              preset: datePreset,
-              fromDate,
-              toDate,
-            });
+            const isCustom = datePreset === "custom";
+            const nextFrom = isCustom ? fromDate.trim() : "";
+            const nextTo = isCustom ? toDate.trim() : "";
             onApply({
-              datePreset,
-              dateFrom: fromDate,
-              dateTo: toDate,
-              dateGte: bounds.gte,
-              dateLte: bounds.lte,
+              datePreset: isCustom && !nextFrom && !nextTo ? "any" : datePreset,
+              dateFrom: nextFrom,
+              dateTo: nextTo,
             });
             setOpen(false);
           }}

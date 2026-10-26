@@ -1,32 +1,24 @@
 /**
  * Posts query params ↔ URL query params.
  *
- * The query string is the source of truth so a reload, the back button, and
- * a shared link open the same search, sort, and date preset. Relative
- * presets (``week`` / ``month`` / ``year``) are stored by name and turned
- * into ``created_at`` bounds when the params are read, so “past week” is
- * always the week before that load.
- *
- * Omitted params mean the defaults: empty search, newest first, any date.
+ * nuqs keeps ``search``, ``order_by``, ``date_preset``, ``date_from``, and
+ * ``date_to`` in the page URL. Defaults are omitted. Unknown sort and date
+ * values fall back. Relative presets (``week`` / ``month`` / ``year``) are
+ * stored by name and turned into ``created_at`` bounds when the list is
+ * fetched, so “past week” is always the week before that load.
  */
+import { createParser, parseAsStringLiteral } from "nuqs";
+
 import {
   buildDateFilterBounds,
-  isDateFilterPreset,
+  DATE_FILTER_PRESET_VALUES,
+  isDateFilterActive,
 } from "~/components/ui/filter-toolbar/date-range";
 import type { PostsFilter, PostsListQuery } from "~/types/posts";
 import { DEFAULT_POSTS_ORDER_BY, POSTS_ORDER_BY_VALUES } from "~/types/posts";
 
-const ORDER_BY_VALUES = new Set<string>(POSTS_ORDER_BY_VALUES);
-
-const RELATIVE_DATE_PRESETS = ["week", "month", "year"] as const;
-
-type RelativeDatePreset = (typeof RELATIVE_DATE_PRESETS)[number];
-
-const isRelativeDatePreset = (preset: string): preset is RelativeDatePreset =>
-  (RELATIVE_DATE_PRESETS as readonly string[]).includes(preset);
-
 /** ``YYYY-MM-DD`` that is a real calendar day (URL input is not trusted). */
-const isIsoDate = (value: string): boolean => {
+const isCalendarDay = (value: string): boolean => {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!match) {
     return false;
@@ -43,126 +35,59 @@ const isIsoDate = (value: string): boolean => {
   );
 };
 
-const appendCustomDates = (
-  params: URLSearchParams,
-  filter: PostsFilter,
-): void => {
-  if (filter.datePreset !== "custom") {
-    return;
-  }
+/** Trimmed search text. Blank input is the default and stays out of the URL. */
+const parseAsSearch = createParser({
+  parse: (value) => value.trim(),
+  serialize: (value) => value.trim(),
+}).withDefault("");
 
-  const dateFrom = isIsoDate(filter.dateFrom) ? filter.dateFrom : "";
-  const dateTo = isIsoDate(filter.dateTo) ? filter.dateTo : "";
-  if (!dateFrom && !dateTo) {
-    return;
-  }
-
-  params.set("date_preset", "custom");
-  if (dateFrom) {
-    params.set("date_from", dateFrom);
-  }
-
-  if (dateTo) {
-    params.set("date_to", dateTo);
-  }
-};
-
-const emptyDate = {
-  createdAtGte: "",
-  createdAtLte: "",
-  datePreset: "any" as const,
-  dateFrom: "",
-  dateTo: "",
-};
+/** Real ``YYYY-MM-DD``, or empty when the URL value is missing or invalid. */
+const parseAsCalendarDay = createParser({
+  parse: (value) => (isCalendarDay(value) ? value : null),
+  serialize: (value) => value,
+}).withDefault("");
 
 /**
- * Read posts query params from the page URL.
- *
- * Unknown ``order_by`` / ``date_preset`` values fall back to the defaults.
- * A custom range is kept when at least one of ``date_from`` / ``date_to``
- * is a real calendar day.
+ * URL fields for the posts list. Keys here are camelCase; ``postsQueryUrlKeys``
+ * maps them onto the snake_case query string.
  */
-export const parsePostsQueryParams = (params: URLSearchParams): PostsFilter => {
-  const search = params.get("search")?.trim() ?? "";
-  const orderByRaw = params.get("order_by")?.trim() ?? "";
-  const orderBy = ORDER_BY_VALUES.has(orderByRaw)
-    ? orderByRaw
-    : DEFAULT_POSTS_ORDER_BY;
-  const presetRaw = params.get("date_preset")?.trim() ?? "any";
-  const datePreset = isDateFilterPreset(presetRaw) ? presetRaw : "any";
+export const postsQueryParsers = {
+  search: parseAsSearch,
+  orderBy: parseAsStringLiteral(POSTS_ORDER_BY_VALUES).withDefault(
+    DEFAULT_POSTS_ORDER_BY,
+  ),
+  datePreset: parseAsStringLiteral(DATE_FILTER_PRESET_VALUES).withDefault(
+    "any",
+  ),
+  dateFrom: parseAsCalendarDay,
+  dateTo: parseAsCalendarDay,
+};
 
-  if (isRelativeDatePreset(datePreset)) {
-    const bounds = buildDateFilterBounds({
-      preset: datePreset,
-      fromDate: "",
-      toDate: "",
-    });
-    return {
-      search,
-      orderBy,
-      createdAtGte: bounds.gte,
-      createdAtLte: bounds.lte,
-      datePreset,
-      dateFrom: "",
-      dateTo: "",
-    };
-  }
+export const postsQueryUrlKeys = {
+  search: "search",
+  orderBy: "order_by",
+  datePreset: "date_preset",
+  dateFrom: "date_from",
+  dateTo: "date_to",
+} as const;
 
-  if (datePreset === "custom") {
-    const dateFromRaw = params.get("date_from")?.trim() ?? "";
-    const dateToRaw = params.get("date_to")?.trim() ?? "";
-    const dateFrom = isIsoDate(dateFromRaw) ? dateFromRaw : "";
-    const dateTo = isIsoDate(dateToRaw) ? dateToRaw : "";
-    if (dateFrom || dateTo) {
-      const bounds = buildDateFilterBounds({
-        preset: "custom",
-        fromDate: dateFrom,
-        toDate: dateTo,
-      });
-      return {
-        search,
-        orderBy,
-        createdAtGte: bounds.gte,
-        createdAtLte: bounds.lte,
-        datePreset: "custom",
-        dateFrom,
-        dateTo,
-      };
-    }
-  }
+/** True when search, sort, or the date filter is not the default. */
+export const hasActivePostsQuery = (query: PostsFilter): boolean =>
+  Boolean(query.search.trim()) ||
+  query.orderBy !== DEFAULT_POSTS_ORDER_BY ||
+  isDateFilterActive(query.datePreset, query.dateFrom, query.dateTo);
 
+/** API query fields. The date preset stays in the URL only. */
+export const toPostsListQuery = (query: PostsFilter): PostsListQuery => {
+  const bounds = buildDateFilterBounds({
+    preset: query.datePreset,
+    fromDate: query.datePreset === "custom" ? query.dateFrom : "",
+    toDate: query.datePreset === "custom" ? query.dateTo : "",
+  });
   return {
-    search,
-    orderBy,
-    ...emptyDate,
+    search: query.search,
+    orderBy: query.orderBy,
+    createdAtGte: bounds.gte,
+    createdAtLte: bounds.lte,
   };
 };
-
-/** Serialize posts query params, dropping defaults so the URL stays short. */
-export const toPostsQueryParams = (filter: PostsFilter): URLSearchParams => {
-  const params = new URLSearchParams();
-  const search = filter.search.trim();
-  if (search) {
-    params.set("search", search);
-  }
-
-  if (filter.orderBy !== DEFAULT_POSTS_ORDER_BY) {
-    params.set("order_by", filter.orderBy);
-  }
-
-  if (isRelativeDatePreset(filter.datePreset)) {
-    params.set("date_preset", filter.datePreset);
-    return params;
-  }
-
-  appendCustomDates(params, filter);
-  return params;
-};
-
-/** API query fields from a filter (date preset stays in the URL only). */
-export const toPostsListQuery = (filter: PostsFilter): PostsListQuery => ({
-  search: filter.search,
-  orderBy: filter.orderBy,
-  createdAtGte: filter.createdAtGte,
-  createdAtLte: filter.createdAtLte,
-});

@@ -6,6 +6,7 @@
  */
 import { Cross2Icon } from "@radix-ui/react-icons";
 
+import { hasActivePostsQuery } from "./query-params";
 import { POSTS_SORT_OPTIONS } from "./sort-options";
 
 import { DateFilter } from "~/components/ui/filter-toolbar/date-filter-button";
@@ -22,18 +23,12 @@ export type PostsToolbarProps = {
   onApply: (query: PostsFilter) => void;
 };
 
-const hasActiveFilter = (query: PostsFilter): boolean =>
-  Boolean(query.search.trim()) ||
-  query.orderBy !== DEFAULT_POSTS_ORDER_BY ||
-  Boolean(query.createdAtGte.trim()) ||
-  Boolean(query.createdAtLte.trim());
-
 export const PostsToolbar = ({
   query,
   disabled = false,
   onApply,
 }: PostsToolbarProps) => {
-  const anythingActive = hasActiveFilter(query);
+  const anythingActive = hasActivePostsQuery(query);
 
   return (
     <section aria-label="Posts filters" className="app-filter-toolbar">
@@ -64,14 +59,7 @@ export const PostsToolbar = ({
           dateTo={query.dateTo}
           disabled={disabled}
           onApply={(next) => {
-            onApply({
-              ...query,
-              createdAtGte: next.dateGte,
-              createdAtLte: next.dateLte,
-              datePreset: next.datePreset,
-              dateFrom: next.dateFrom,
-              dateTo: next.dateTo,
-            });
+            onApply({ ...query, ...next });
           }}
           selectLabel="Posted"
         />

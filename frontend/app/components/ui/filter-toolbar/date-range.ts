@@ -5,7 +5,15 @@
  * fastapi-filter (or any API that takes ISO-like local datetimes).
  */
 
-export type DateFilterPreset = "any" | "week" | "month" | "year" | "custom";
+export const DATE_FILTER_PRESET_VALUES = [
+  "any",
+  "week",
+  "month",
+  "year",
+  "custom",
+] as const;
+
+export type DateFilterPreset = (typeof DATE_FILTER_PRESET_VALUES)[number];
 
 export type DateFilterBounds = {
   gte: string;
@@ -23,9 +31,26 @@ export const DATE_FILTER_PRESETS: {
   { value: "custom", label: "Custom range" },
 ];
 
-/** True when ``value`` is one of ``DATE_FILTER_PRESETS``. */
+/** True when ``value`` is one of ``DATE_FILTER_PRESET_VALUES``. */
 export const isDateFilterPreset = (value: string): value is DateFilterPreset =>
-  DATE_FILTER_PRESETS.some((option) => option.value === value);
+  (DATE_FILTER_PRESET_VALUES as readonly string[]).includes(value);
+
+/** True when the preset actually narrows the range. */
+export const isDateFilterActive = (
+  preset: DateFilterPreset,
+  fromDate: string,
+  toDate: string,
+): boolean => {
+  if (preset === "any") {
+    return false;
+  }
+
+  if (preset === "custom") {
+    return Boolean(fromDate.trim() || toDate.trim());
+  }
+
+  return true;
+};
 
 const pad = (value: number): string => String(value).padStart(2, "0");
 

@@ -7,30 +7,30 @@ import { useId, useState } from "react";
 import "./filter-toolbar.css";
 import { iconClassName } from "./icon-class";
 
-export type SortButtonOption = {
-  value: string;
+export type SortButtonOption<Value extends string = string> = {
+  value: Value;
   label: string;
 };
 
-export type SortButtonProps = {
+export type SortButtonProps<Value extends string = string> = {
   /** Applied sort value. */
-  value: string;
+  value: Value;
   /** Baseline used for the active dot (usually newest first). */
-  defaultValue: string;
-  options: readonly SortButtonOption[];
+  defaultValue: Value;
+  options: readonly SortButtonOption<Value>[];
   disabled?: boolean;
-  onChange: (orderBy: string) => void;
+  onChange: (orderBy: Value) => void;
   ariaLabel?: string;
 };
 
-export const SortButton = ({
+export const SortButton = <Value extends string>({
   value,
   defaultValue,
   options,
   disabled = false,
   onChange,
   ariaLabel = "Sort",
-}: SortButtonProps) => {
+}: SortButtonProps<Value>) => {
   const sortId = useId();
   const [open, setOpen] = useState(false);
 
@@ -61,7 +61,7 @@ export const SortButton = ({
           <Select.Root
             disabled={disabled}
             onValueChange={(next) => {
-              onChange(next);
+              onChange(next as Value);
               setOpen(false);
             }}
             value={value}

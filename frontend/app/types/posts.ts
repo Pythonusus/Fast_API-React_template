@@ -49,27 +49,23 @@ export type PostsListQuery = {
   createdAtLte: string;
 };
 
-export const EMPTY_POSTS_QUERY: PostsListQuery = {
-  search: "",
-  orderBy: DEFAULT_POSTS_ORDER_BY,
-  createdAtGte: "",
-  createdAtLte: "",
-};
-
 /**
  * Posts filter shown in the toolbar and stored in the page URL.
  *
- * ``datePreset`` / ``dateFrom`` / ``dateTo`` are the user's choice.
- * ``createdAtGte`` / ``createdAtLte`` are the bounds sent to the API.
+ * API date bounds are derived from ``datePreset`` / ``dateFrom`` / ``dateTo``
+ * when the list is fetched.
  */
-export type PostsFilter = PostsListQuery & {
+export type PostsFilter = {
+  search: string;
+  orderBy: PostsOrderBy;
   datePreset: DateFilterPreset;
   dateFrom: string;
   dateTo: string;
 };
 
 export const EMPTY_POSTS_FILTER: PostsFilter = {
-  ...EMPTY_POSTS_QUERY,
+  search: "",
+  orderBy: DEFAULT_POSTS_ORDER_BY,
   datePreset: "any",
   dateFrom: "",
   dateTo: "",

@@ -16,6 +16,7 @@
  * Extracted from the route because replace + append, loading flags, and
  * errors are easier to reason about (and reuse) outside the JSX.
  */
+import { useQueryStates } from "nuqs";
 import {
   useCallback,
   useEffect,
@@ -24,13 +25,13 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import { useSearchParams } from "react-router";
 
 import { fetchPosts } from "~/api/posts";
 import { BACKEND_LOAD_FAILED } from "~/common-texts/errors";
 import {
-  parsePostsQueryParams,
-  toPostsQueryParams,
+  hasActivePostsQuery,
+  postsQueryParsers,
+  postsQueryUrlKeys,
   toPostsListQuery,
 } from "~/components/posts-toolbar/query-params";
 import { POSTS_PAGE_SIZE } from "~/config";
@@ -62,15 +63,27 @@ const useIsHydrated = (): boolean =>
 export const usePosts = ({
   pageSize = POSTS_PAGE_SIZE,
 }: UsePostsOptions = {}) => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const filterKey = searchParams.toString();
-  const urlFilter = useMemo(
-    () => parsePostsQueryParams(new URLSearchParams(filterKey)),
-    [filterKey],
+  const [queryParams, setQueryParams] = useQueryStates(postsQueryParsers, {
+    history: "push",
+    urlKeys: postsQueryUrlKeys,
+  });
+  const { search, orderBy, datePreset, dateFrom, dateTo } = queryParams;
+  const filterKey = [search, orderBy, datePreset, dateFrom, dateTo].join("\0");
+  const urlQuery = useMemo(
+    (): PostsFilter => ({
+      search,
+      orderBy,
+      datePreset,
+      dateFrom,
+      dateTo,
+    }),
+    [dateFrom, datePreset, dateTo, orderBy, search],
   );
+  /** Bounds are derived here so a relative preset is computed once per URL. */
+  const listQuery = useMemo(() => toPostsListQuery(urlQuery), [urlQuery]);
   const isHydrated = useIsHydrated();
   /** Empty until hydration so the prerendered toolbar matches the HTML. */
-  const filter = isHydrated ? urlFilter : EMPTY_POSTS_FILTER;
+  const filter = isHydrated ? urlQuery : EMPTY_POSTS_FILTER;
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [page, setPage] = useState(1);
@@ -115,7 +128,7 @@ export const usePosts = ({
         const result = await fetchPosts({
           page: nextPage,
           pageSize,
-          query: toPostsListQuery(urlFilter),
+          query: listQuery,
         });
         if (seq !== requestSeq.current) {
           return;
@@ -143,7 +156,7 @@ export const usePosts = ({
         }
       }
     },
-    [applyPageMeta, pageSize, urlFilter],
+    [applyPageMeta, listQuery, pageSize],
   );
 
   /**
@@ -154,17 +167,20 @@ export const usePosts = ({
    */
   const applyQuery = useCallback(
     (nextFilter: PostsFilter) => {
-      const nextParams = toPostsQueryParams(nextFilter);
-      const currentParams = toPostsQueryParams(
-        parsePostsQueryParams(new URLSearchParams(filterKey)),
-      );
-      if (nextParams.toString() === currentParams.toString()) {
+      const next = { ...nextFilter, search: nextFilter.search.trim() };
+      if (
+        next.search === search &&
+        next.orderBy === orderBy &&
+        next.datePreset === datePreset &&
+        next.dateFrom === dateFrom &&
+        next.dateTo === dateTo
+      ) {
         return;
       }
 
-      setSearchParams(nextParams);
+      void setQueryParams(next);
     },
-    [filterKey, setSearchParams],
+    [dateFrom, datePreset, dateTo, orderBy, search, setQueryParams],
   );
 
   /** Append the next page under the current list (load more). */
@@ -180,7 +196,7 @@ export const usePosts = ({
       const result = await fetchPosts({
         page: page + 1,
         pageSize,
-        query: toPostsListQuery(urlFilter),
+        query: listQuery,
       });
       if (seq !== requestSeq.current) {
         return;
@@ -207,8 +223,8 @@ export const usePosts = ({
     isLoading,
     isLoadingMore,
     page,
+    listQuery,
     pageSize,
-    urlFilter,
   ]);
 
   // Drop enter markers after the last staggered card finishes animating.
@@ -251,14 +267,13 @@ export const usePosts = ({
 
     const seq = ++requestSeq.current;
     const keyAtStart = filterKey;
-    const nextFilter = urlFilter;
 
     const loadFirstPage = async () => {
       try {
         const result = await fetchPosts({
           page: 1,
           pageSize,
-          query: toPostsListQuery(nextFilter),
+          query: listQuery,
         });
         if (seq !== requestSeq.current) {
           return;
@@ -287,16 +302,12 @@ export const usePosts = ({
     };
 
     void loadFirstPage();
-  }, [applyPageMeta, filterKey, isHydrated, pageSize, urlFilter]);
+  }, [applyPageMeta, filterKey, isHydrated, listQuery, pageSize]);
 
   const rangeTo =
     rangeFrom === 0 || posts.length === 0 ? 0 : rangeFrom + posts.length - 1;
 
-  const hasActiveQuery =
-    Boolean(filter.search.trim()) ||
-    Boolean(filter.createdAtGte.trim()) ||
-    Boolean(filter.createdAtLte.trim()) ||
-    filter.orderBy !== EMPTY_POSTS_FILTER.orderBy;
+  const hasActiveQuery = hasActivePostsQuery(filter);
 
   return {
     posts,
