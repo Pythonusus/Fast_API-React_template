@@ -50,6 +50,7 @@ export const DateFilter = ({
   const [datePreset, setDatePreset] = useState(appliedPreset);
   const [fromDate, setFromDate] = useState(appliedFrom);
   const [toDate, setToDate] = useState(appliedTo);
+  // Adjust state during render when applied props change (React docs).
   const [tracked, setTracked] = useState({
     datePreset: appliedPreset,
     dateFrom: appliedFrom,
@@ -70,8 +71,18 @@ export const DateFilter = ({
     setToDate(appliedTo);
   }
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) {
+      // Discard uncommitted edits so the fields match the active dot.
+      setDatePreset(appliedPreset);
+      setFromDate(appliedFrom);
+      setToDate(appliedTo);
+    }
+    setOpen(nextOpen);
+  };
+
   return (
-    <Popover.Root onOpenChange={setOpen} open={open}>
+    <Popover.Root onOpenChange={handleOpenChange} open={open}>
       <Popover.Trigger>
         <button
           aria-label={ariaLabel}

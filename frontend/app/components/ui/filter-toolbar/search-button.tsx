@@ -27,14 +27,23 @@ export const SearchButton = ({
   const searchId = useId();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(value);
+  // Adjust state during render when the applied value changes (React docs).
   const [tracked, setTracked] = useState(value);
   if (tracked !== value) {
     setTracked(value);
     setDraft(value);
   }
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) {
+      // Discard uncommitted edits so the field matches the active dot.
+      setDraft(value);
+    }
+    setOpen(nextOpen);
+  };
+
   return (
-    <Popover.Root onOpenChange={setOpen} open={open}>
+    <Popover.Root onOpenChange={handleOpenChange} open={open}>
       <Popover.Trigger>
         <button
           aria-label={ariaLabel}

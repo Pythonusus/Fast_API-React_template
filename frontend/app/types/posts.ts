@@ -6,19 +6,27 @@
  */
 import type { DateFilterPreset } from "~/components/ui/filter-toolbar/date-range";
 
-/** Sort values the posts list accepts (fastapi-filter ``order_by``). */
-export const POSTS_ORDER_BY_VALUES = [
-  "-created_at",
-  "created_at",
-  "title",
-  "-title",
+/**
+ * Posts list sort presets (fastapi-filter ``order_by``) with UI labels.
+ * Single source for values, types, and toolbar options.
+ */
+export const POSTS_SORT_OPTIONS = [
+  { value: "-created_at", label: "Newest first" },
+  { value: "created_at", label: "Oldest first" },
+  { value: "title", label: "Title A–Z" },
+  { value: "-title", label: "Title Z–A" },
 ] as const;
 
-/** One entry of ``POSTS_ORDER_BY_VALUES``. */
-export type PostsOrderBy = (typeof POSTS_ORDER_BY_VALUES)[number];
+/** One entry's ``value`` from ``POSTS_SORT_OPTIONS``. */
+export type PostsOrderBy = (typeof POSTS_SORT_OPTIONS)[number]["value"];
+
+/** Sort values only — for URL parsers (derived from ``POSTS_SORT_OPTIONS``). */
+export const POSTS_ORDER_BY_VALUES = POSTS_SORT_OPTIONS.map(
+  (option) => option.value,
+) as [PostsOrderBy, ...PostsOrderBy[]];
 
 /** Default ``order_by`` for list requests (newest first). */
-export const DEFAULT_POSTS_ORDER_BY: PostsOrderBy = "-created_at";
+export const DEFAULT_POSTS_ORDER_BY: PostsOrderBy = POSTS_SORT_OPTIONS[0].value;
 
 /** Single post from ``GET /api/posts/{id}`` or a list item. */
 export type Post = {

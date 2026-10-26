@@ -7,7 +7,6 @@
 import { Cross2Icon } from "@radix-ui/react-icons";
 
 import { hasActivePostsQuery } from "./query-params";
-import { POSTS_SORT_OPTIONS } from "./sort-options";
 
 import { DateFilter } from "~/components/ui/filter-toolbar/date-filter-button";
 import "~/components/ui/filter-toolbar/filter-toolbar.css";
@@ -15,7 +14,11 @@ import { iconClassName } from "~/components/ui/filter-toolbar/icon-class";
 import { SearchButton } from "~/components/ui/filter-toolbar/search-button";
 import { SortButton } from "~/components/ui/filter-toolbar/sort-button";
 import type { PostsFilter } from "~/types/posts";
-import { DEFAULT_POSTS_ORDER_BY, EMPTY_POSTS_FILTER } from "~/types/posts";
+import {
+  DEFAULT_POSTS_ORDER_BY,
+  EMPTY_POSTS_FILTER,
+  POSTS_SORT_OPTIONS,
+} from "~/types/posts";
 
 export type PostsToolbarProps = {
   query: PostsFilter;
