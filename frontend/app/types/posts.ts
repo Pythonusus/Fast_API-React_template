@@ -4,9 +4,21 @@
  * Datetimes arrive as ISO-8601 strings in the app timezone (see backend
  * ``settings.timezone`` / ``PostRead`` serializers).
  */
+import type { DateFilterPreset } from "~/components/ui/filter-toolbar/date-range";
+
+/** Sort values the posts list accepts (fastapi-filter ``order_by``). */
+export const POSTS_ORDER_BY_VALUES = [
+  "-created_at",
+  "created_at",
+  "title",
+  "-title",
+] as const;
+
+/** One entry of ``POSTS_ORDER_BY_VALUES``. */
+export type PostsOrderBy = (typeof POSTS_ORDER_BY_VALUES)[number];
 
 /** Default ``order_by`` for list requests (newest first). */
-export const DEFAULT_POSTS_ORDER_BY = "-created_at";
+export const DEFAULT_POSTS_ORDER_BY: PostsOrderBy = "-created_at";
 
 /** Single post from ``GET /api/posts/{id}`` or a list item. */
 export type Post = {
@@ -42,6 +54,25 @@ export const EMPTY_POSTS_QUERY: PostsListQuery = {
   orderBy: DEFAULT_POSTS_ORDER_BY,
   createdAtGte: "",
   createdAtLte: "",
+};
+
+/**
+ * Posts filter shown in the toolbar and stored in the page URL.
+ *
+ * ``datePreset`` / ``dateFrom`` / ``dateTo`` are the user's choice.
+ * ``createdAtGte`` / ``createdAtLte`` are the bounds sent to the API.
+ */
+export type PostsFilter = PostsListQuery & {
+  datePreset: DateFilterPreset;
+  dateFrom: string;
+  dateTo: string;
+};
+
+export const EMPTY_POSTS_FILTER: PostsFilter = {
+  ...EMPTY_POSTS_QUERY,
+  datePreset: "any",
+  dateFrom: "",
+  dateTo: "",
 };
 
 /**

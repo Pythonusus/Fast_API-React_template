@@ -1,5 +1,5 @@
 /**
- * Shared date-range presets for list toolbars.
+ * Date-range presets for the filter toolbar.
  *
  * Output is inclusive ``gte`` / ``lte`` datetime strings suitable for
  * fastapi-filter (or any API that takes ISO-like local datetimes).
@@ -23,7 +23,17 @@ export const DATE_FILTER_PRESETS: {
   { value: "custom", label: "Custom range" },
 ];
 
+/** True when ``value`` is one of ``DATE_FILTER_PRESETS``. */
+export const isDateFilterPreset = (value: string): value is DateFilterPreset =>
+  DATE_FILTER_PRESETS.some((option) => option.value === value);
+
 const pad = (value: number): string => String(value).padStart(2, "0");
+
+/** Local calendar day as ``YYYY-MM-DD`` (the custom range's default end). */
+export const todayIsoDate = (): string => {
+  const date = new Date();
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+};
 
 /** Format a ``Date`` as ``YYYY-MM-DDTHH:MM:SS`` for filter APIs. */
 export const formatFilterDateTime = (date: Date): string => {
@@ -65,13 +75,9 @@ export const buildDateFilterBounds = ({
   if (preset === "custom") {
     const from = fromDate.trim();
     const to = toDate.trim();
-    if (!from || !to) {
-      return EMPTY_BOUNDS;
-    }
-
     return {
-      gte: startOfDay(from),
-      lte: endOfDay(to),
+      gte: from ? startOfDay(from) : "",
+      lte: to ? endOfDay(to) : "",
     };
   }
 

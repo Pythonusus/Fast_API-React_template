@@ -1,5 +1,5 @@
 /**
- * Posts page: toolbar (search/sort/filter) + grid + pagination.
+ * Posts page: filter toolbar (search/sort/date) + grid + pagination.
  *
  * The shell is prerendered at build time. After hydration, ``usePosts``
  * loads the first page. Numbered controls replace the grid; Show more
