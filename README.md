@@ -87,7 +87,7 @@ React 19 + React Router 8 (framework mode) + Vite 8 + Radix Themes + next-themes
 | React components | PascalCase exports | `Header`, `HomePageCards`, `AboutRoute` |
 | Hooks | `use` + camelCase | `useMirrorMessage` |
 | API helpers | `fetch` + camelCase | `fetchHello`, `fetchMirror` |
-| Shared constants / error strings | SCREAMING_SNAKE_CASE | `BACKEND_LOAD_FAILED`, `HTML_LANG` |
+| Shared constants / error strings | SCREAMING_SNAKE_CASE | `BACKEND_UNAVAILABLE_HINT`, `HTML_LANG` |
 | Types | PascalCase | `TextResponse` |
 | CSS classes | kebab-case (often `app-` prefix for shell UI) | `app-header`, `app-shell` |
 | Env keys (client) | `VITE_` prefix | `VITE_HTML_LANG` |
@@ -111,7 +111,7 @@ Example: a public `/products` page that loads data from the backend after hydrat
 
 3. **Prerender the shell (optional)** — in `react-router.config.ts`, add `"/products"` to `prerender` for public marketing/content pages whose shell is known at build time. Skip auth-only, personalized, or parameterized routes. Do not prerender the 404 splat.
 
-4. **API helper (if needed)** — add a typed function in `app/api/` with a relative `/api/...` URL; put shared response types in `app/types/`; reuse `fetchMessageError` / shared error strings.
+4. **API helper (if needed)** — add a typed function in `app/api/` with a relative `/api/...` URL; put shared response types in `app/types/`; reuse `fetchDataError` / shared error strings.
 
 5. **Styles / shared components (optional)** — colocate CSS under `app/components/<name>/`, or put page-only rules in `app/styles/components/`. Prefer Radix props first. Put reusable domain-agnostic UI in `app/components/ui/`; put feature wrappers (e.g. posts toolbar) under `app/components/<feature>/`.
 

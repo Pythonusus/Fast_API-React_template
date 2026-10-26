@@ -13,7 +13,7 @@
  * - Load more — append the next page with ``loadMore``.
  */
 
-import { fetchMessageError } from "~/common-texts/errors";
+import { fetchDataError } from "~/common-texts/errors";
 import { POSTS_MAX_PAGE_SIZE, POSTS_PAGE_SIZE } from "~/config";
 import type {
   Post,
@@ -75,7 +75,7 @@ export const fetchPosts = async ({
   const response = await fetch(`/api/posts?${params}`);
 
   if (!response.ok) {
-    throw new Error(fetchMessageError(response.status));
+    throw new Error(fetchDataError(response.status));
   }
 
   const data = (await response.json()) as PostsListResponse;
@@ -101,7 +101,7 @@ export const fetchPost = async (postId: number): Promise<Post> => {
   const response = await fetch(`/api/posts/${postId}`);
 
   if (!response.ok) {
-    throw new Error(fetchMessageError(response.status));
+    throw new Error(fetchDataError(response.status));
   }
 
   return response.json() as Promise<Post>;

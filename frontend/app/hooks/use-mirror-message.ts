@@ -21,7 +21,7 @@
 import { useState } from "react";
 
 import { fetchMirror } from "~/api/example-api";
-import { MIRROR_REQUEST_FAILED } from "~/common-texts/errors";
+import { BACKEND_UNAVAILABLE_HINT } from "~/common-texts/errors";
 
 export const useMirrorMessage = () => {
   const [inputMessage, setInputMessage] = useState("");
@@ -35,10 +35,8 @@ export const useMirrorMessage = () => {
       setMirrorError("");
       const { message } = await fetchMirror(inputMessage);
       setMirrorMessage(message);
-    } catch (error) {
-      setMirrorError(
-        error instanceof Error ? error.message : MIRROR_REQUEST_FAILED,
-      );
+    } catch {
+      setMirrorError(BACKEND_UNAVAILABLE_HINT);
     } finally {
       setIsMirroring(false);
     }

@@ -5,47 +5,20 @@
  * of `App` when a nested route throws during render, or when a loader/action fails.
  *
  * Header, footer, and theme providers live in `Layout`, so this component only
- * renders the in-page error card.
+ * renders the in-page error card. Visitors see the shared problem notice.
+ * The caught value is not rendered and is not written to the browser console.
  */
 import { Button, Card, Flex, Heading, Text } from "@radix-ui/themes";
-import { isRouteErrorResponse, useRouteError } from "react-router";
+import { useRouteError } from "react-router";
 
 import {
+  BACKEND_UNAVAILABLE_HINT,
   UNEXPECTED_RENDER_ERROR,
-  UNEXPECTED_RENDER_ERROR_HINT,
 } from "~/common-texts/errors";
-import { DEVELOPMENT } from "~/config";
-
-/**
- * Picks a developer-facing message from the caught value.
- *
- * - In production (`import.meta.env.DEV === false`): returns `undefined` so
- *   users only see the generic copy from `common-texts/errors.ts`.
- * - In development: returns a short message to speed up debugging.
- */
-const getErrorMessage = (error: unknown): string | undefined => {
-  if (!DEVELOPMENT) {
-    return undefined;
-  }
-
-  if (isRouteErrorResponse(error)) {
-    return `${error.status} ${error.statusText}`;
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return String(error);
-};
 
 export const ErrorBoundary = () => {
-  const error = useRouteError();
-  const details = getErrorMessage(error);
-
-  if (DEVELOPMENT) {
-    console.error("Route error caught by ErrorBoundary:", error);
-  }
+  // Read the error so React Router treats this boundary as handling it.
+  useRouteError();
 
   return (
     <Card>
@@ -54,13 +27,8 @@ export const ErrorBoundary = () => {
           {UNEXPECTED_RENDER_ERROR}
         </Heading>
         <Text as="p" color="gray" size="3">
-          {UNEXPECTED_RENDER_ERROR_HINT}
+          {BACKEND_UNAVAILABLE_HINT}
         </Text>
-        {details ? (
-          <Text as="p" color="red" size="2">
-            {details}
-          </Text>
-        ) : null}
         <Button
           onClick={() => {
             globalThis.location.reload();

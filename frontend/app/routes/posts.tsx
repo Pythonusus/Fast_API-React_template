@@ -15,7 +15,8 @@ import { Grid, Heading, Section, Text } from "@radix-ui/themes";
 import type { CSSProperties } from "react";
 import type { MetaFunction } from "react-router";
 
-import { START_BACKEND_SERVER_HINT } from "~/common-texts/errors";
+import { BACKEND_UNAVAILABLE_HINT } from "~/common-texts/errors";
+import { LOADING } from "~/common-texts/ui";
 import { PostContent } from "~/components/post-content";
 import { PostsToolbar } from "~/components/posts-toolbar";
 import { CardBase } from "~/components/ui/card-base";
@@ -97,13 +98,13 @@ const PostsRoute = () => {
 
       {error ? (
         <Text as="p" color="red" mb="4" size="3">
-          {error} {START_BACKEND_SERVER_HINT}
+          {error} {BACKEND_UNAVAILABLE_HINT}
         </Text>
       ) : null}
 
       {isLoading && posts.length === 0 ? (
         <Text as="p" color="gray" mb="4" size="3">
-          Loading…
+          {LOADING}
         </Text>
       ) : null}
 

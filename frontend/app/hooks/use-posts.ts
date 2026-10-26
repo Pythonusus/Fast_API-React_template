@@ -27,7 +27,7 @@ import {
 } from "react";
 
 import { fetchPosts } from "~/api/posts";
-import { BACKEND_LOAD_FAILED } from "~/common-texts/errors";
+import { BACKEND_UNAVAILABLE } from "~/common-texts/errors";
 import {
   hasActivePostsQuery,
   postsQueryParsers,
@@ -142,14 +142,12 @@ export const usePosts = ({
             : (result.page - 1) * result.pageSize + 1,
         );
         applyPageMeta(result);
-      } catch (error_) {
+      } catch {
         if (seq !== requestSeq.current) {
           return;
         }
 
-        setError(
-          error_ instanceof Error ? error_.message : BACKEND_LOAD_FAILED,
-        );
+        setError(BACKEND_UNAVAILABLE);
       } finally {
         if (seq === requestSeq.current) {
           setIsPageLoading(false);
@@ -206,12 +204,12 @@ export const usePosts = ({
       setPosts((current) => [...current, ...result.posts]);
       // ``rangeFrom`` stays put so the label covers the full loaded window.
       applyPageMeta(result);
-    } catch (error_) {
+    } catch {
       if (seq !== requestSeq.current) {
         return;
       }
 
-      setError(error_ instanceof Error ? error_.message : BACKEND_LOAD_FAILED);
+      setError(BACKEND_UNAVAILABLE);
     } finally {
       if (seq === requestSeq.current) {
         setIsLoadingMore(false);
@@ -287,14 +285,12 @@ export const usePosts = ({
         setIsPageLoading(false);
         setIsLoadingMore(false);
         setSettledKey(keyAtStart);
-      } catch (error_) {
+      } catch {
         if (seq !== requestSeq.current) {
           return;
         }
 
-        setError(
-          error_ instanceof Error ? error_.message : BACKEND_LOAD_FAILED,
-        );
+        setError(BACKEND_UNAVAILABLE);
         setIsPageLoading(false);
         setIsLoadingMore(false);
         setSettledKey(keyAtStart);

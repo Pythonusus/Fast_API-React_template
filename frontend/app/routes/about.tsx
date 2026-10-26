@@ -2,7 +2,7 @@
  * About page template.
  *
  * The full page is prerendered into static HTML at build time. The backend
- * message card shows "Loading..." until `fetchAbout()` completes after hydration.
+ * message card shows `LOADING` until `fetchAbout()` completes after hydration.
  *
  * Flow:
  *   Build      → Static HTML with shell and loading state
@@ -28,10 +28,10 @@ import type { MetaFunction } from "react-router";
 
 import { fetchAbout } from "~/api/example-api";
 import {
-  BACKEND_LOAD_FAILED,
   BACKEND_UNAVAILABLE,
-  START_BACKEND_SERVER_HINT,
+  BACKEND_UNAVAILABLE_HINT,
 } from "~/common-texts/errors";
+import { LOADING } from "~/common-texts/ui";
 
 /**
  * Function to set the meta tags for the about page.
@@ -50,10 +50,10 @@ export const meta: MetaFunction = () => [
 /**
  * About route component.
  *
- * `aboutMessage` starts as "Loading..." and is replaced once `fetchAbout()` resolves.
+ * `aboutMessage` starts as `LOADING` and is replaced once `fetchAbout()` resolves.
  */
 const AboutRoute = () => {
-  const [aboutMessage, setAboutMessage] = useState("Loading...");
+  const [aboutMessage, setAboutMessage] = useState(LOADING);
   const [aboutError, setAboutError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -62,7 +62,7 @@ const AboutRoute = () => {
    * Here the effect fetches backend data once the page is on screen.
    *
    * - `[]` — run only once after mount (not on every re-render).
-   * - Render first with "Loading...", then `fetchAbout()` updates state when it resolves.
+   * - Render first with `LOADING`, then `fetchAbout()` updates state when it resolves.
    * - `void` — async call is fire-and-forget; errors are handled in try/catch below.
    */
   useEffect(() => {
@@ -71,10 +71,8 @@ const AboutRoute = () => {
         const { message } = await fetchAbout();
         setAboutMessage(message);
         setAboutError(null);
-      } catch (error) {
-        setAboutError(
-          error instanceof Error ? error.message : BACKEND_LOAD_FAILED,
-        );
+      } catch {
+        setAboutError(BACKEND_UNAVAILABLE_HINT);
         setAboutMessage(BACKEND_UNAVAILABLE);
       } finally {
         setIsLoading(false);
@@ -117,7 +115,7 @@ const AboutRoute = () => {
         </Text>
         {aboutError ? (
           <Text as="p" color="gray" mt="2" size="2">
-            {START_BACKEND_SERVER_HINT}
+            {aboutError}
           </Text>
         ) : null}
       </Card>

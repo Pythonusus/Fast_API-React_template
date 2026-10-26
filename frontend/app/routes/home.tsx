@@ -2,7 +2,7 @@
  * Home page template.
  *
  * The full page is prerendered into static HTML at build time. The backend
- * message card shows "Loading..." until `fetchHello()` completes after hydration.
+ * message card shows `LOADING` until `fetchHello()` completes after hydration.
  * The mirror form is fully interactive immediately — it only fetches when the
  * user clicks "Mirror text".
  *
@@ -26,10 +26,10 @@ import type { MetaFunction } from "react-router";
 
 import { fetchHello } from "~/api/example-api";
 import {
-  BACKEND_LOAD_FAILED,
   BACKEND_UNAVAILABLE,
-  START_BACKEND_SERVER_HINT,
+  BACKEND_UNAVAILABLE_HINT,
 } from "~/common-texts/errors";
+import { LOADING } from "~/common-texts/ui";
 import { HomePageCards } from "~/components/home-page-cards";
 import { useMirrorMessage } from "~/hooks/use-mirror-message";
 
@@ -50,11 +50,11 @@ export const meta: MetaFunction = () => [
 /**
  * Home route component.
  *
- * `helloMessage` starts as "Loading..." and is replaced once `fetchHello()` resolves.
+ * `helloMessage` starts as `LOADING` and is replaced once `fetchHello()` resolves.
  * Mirror form state lives in `useMirrorMessage` and fetches only on button click.
  */
 const HomeRoute = () => {
-  const [helloMessage, setHelloMessage] = useState("Loading...");
+  const [helloMessage, setHelloMessage] = useState(LOADING);
   const [helloError, setHelloError] = useState<string | null>(null);
   const [isHelloLoading, setIsHelloLoading] = useState(true);
   const {
@@ -71,7 +71,7 @@ const HomeRoute = () => {
    * Here the effect fetches backend data once the page is on screen.
    *
    * - `[]` — run only once after mount (not on every re-render).
-   * - Render first with "Loading...", then `fetchHello()` updates state when it resolves.
+   * - Render first with `LOADING`, then `fetchHello()` updates state when it resolves.
    * - `void` — async call is fire-and-forget; errors are handled in try/catch below.
    */
   useEffect(() => {
@@ -80,10 +80,8 @@ const HomeRoute = () => {
         const { message } = await fetchHello();
         setHelloMessage(message);
         setHelloError(null);
-      } catch (error) {
-        setHelloError(
-          error instanceof Error ? error.message : BACKEND_LOAD_FAILED,
-        );
+      } catch {
+        setHelloError(BACKEND_UNAVAILABLE_HINT);
         setHelloMessage(BACKEND_UNAVAILABLE);
       } finally {
         setIsHelloLoading(false);
@@ -127,7 +125,7 @@ const HomeRoute = () => {
           </Text>
           {helloError ? (
             <Text as="p" color="gray" mt="2" size="2">
-              {START_BACKEND_SERVER_HINT}
+              {helloError}
             </Text>
           ) : null}
         </Card>
