@@ -3,7 +3,12 @@
  *
  * Datetimes arrive as ISO-8601 strings in the app timezone (see backend
  * ``settings.timezone`` / ``PostRead`` serializers).
+ *
+ * Wire shapes use Zod schemas; TypeScript types are inferred so the compile
+ * types stay aligned with runtime checks in ``app/api/posts.ts``.
  */
+import { z } from "zod";
+
 import type { DateFilterPreset } from "~/components/ui/filter-toolbar/date-range";
 
 /**
@@ -29,19 +34,23 @@ export const POSTS_ORDER_BY_VALUES = POSTS_SORT_OPTIONS.map(
 export const DEFAULT_POSTS_ORDER_BY: PostsOrderBy = POSTS_SORT_OPTIONS[0].value;
 
 /** Single post from ``GET /api/posts/{id}`` or a list item. */
-export type Post = {
-  id: number;
-  title: string;
-  content: string;
-  created_at: string;
-  updated_at: string;
-};
+export const postSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  content: z.string(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
 
-/** Raw JSON body from ``GET /api/posts`` (``PostsListResponse``). */
-export type PostsListResponse = {
-  items: Post[];
-  total: number;
-};
+export type Post = z.infer<typeof postSchema>;
+
+/** Raw JSON body from ``GET /api/posts``. */
+export const postsListResponseSchema = z.object({
+  items: z.array(postSchema),
+  total: z.number().int().nonnegative(),
+});
+
+export type PostsListResponse = z.infer<typeof postsListResponseSchema>;
 
 /**
  * Search / sort / filter sent to ``GET /api/posts`` (fastapi-filter).

@@ -6,7 +6,7 @@
  * consumed by hooks, routes, or multiple components.
  *
  * What to add under `app/types/`:
- * - Backend DTO / JSON payload shapes (e.g. `TextResponse`, `User`, `Paginated<T>`)
+ * - Zod schemas for backend JSON payloads, plus `z.infer` types
  * - Shared domain unions/enums used in more than one feature
  * - Types imported by both API clients and UI (keeps contracts in one place)
  *
@@ -21,7 +21,15 @@
  *
  * Rule of thumb: if only one component/file imports it, keep it next to that
  * file; if `app/api` or two+ features need it, put it here.
+ *
+ * Runtime: `app/api/*` parses OK responses with these schemas via
+ * `parseResponseJson` so a bad body fails at the fetch layer, not in render.
  */
+import { z } from "zod";
 
 /** Generic `{ message: string }` body returned by the example FastAPI endpoints. */
-export type TextResponse = { message: string };
+export const textResponseSchema = z.object({
+  message: z.string(),
+});
+
+export type TextResponse = z.infer<typeof textResponseSchema>;

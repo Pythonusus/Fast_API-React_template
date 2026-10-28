@@ -13,15 +13,15 @@
  * - Load more — append the next page with ``loadMore``.
  */
 
+import { parseResponseJson } from "~/api/parse-json";
 import { fetchDataError } from "~/common-texts/errors";
 import { POSTS_MAX_PAGE_SIZE, POSTS_PAGE_SIZE } from "~/config";
-import type {
-  Post,
-  PostsListQuery,
-  PostsListResponse,
-  PostsPage,
+import type { Post, PostsListQuery, PostsPage } from "~/types/posts";
+import {
+  DEFAULT_POSTS_ORDER_BY,
+  postSchema,
+  postsListResponseSchema,
 } from "~/types/posts";
-import { DEFAULT_POSTS_ORDER_BY } from "~/types/posts";
 
 export type FetchPostsOptions = {
   /** 1-based page index. Defaults to 1. */
@@ -81,7 +81,7 @@ export const fetchPosts = async ({
     throw new Error(fetchDataError(response.status));
   }
 
-  const data = (await response.json()) as PostsListResponse;
+  const data = await parseResponseJson(response, postsListResponseSchema);
   const totalPages = Math.ceil(data.total / safePageSize);
 
   return {
@@ -100,12 +100,15 @@ export const fetchPosts = async ({
  *
  * ``GET /api/posts/{post_id}``
  */
-export const fetchPost = async (postId: number): Promise<Post> => {
-  const response = await fetch(`/api/posts/${postId}`);
+export const fetchPost = async (
+  postId: number,
+  signal?: AbortSignal,
+): Promise<Post> => {
+  const response = await fetch(`/api/posts/${postId}`, { signal });
 
   if (!response.ok) {
     throw new Error(fetchDataError(response.status));
   }
 
-  return response.json() as Promise<Post>;
+  return parseResponseJson(response, postSchema);
 };

@@ -15,3 +15,7 @@ export const UNEXPECTED_RENDER_ERROR =
  */
 export const fetchDataError = (status: number): string =>
   `Failed to fetch data: ${status}`;
+
+/** HTTP 200 (or other OK) whose body is not valid JSON or fails the schema. */
+export const INVALID_RESPONSE_BODY =
+  "Backend returned data in an unexpected format.";

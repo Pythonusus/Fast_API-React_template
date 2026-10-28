@@ -8,8 +8,9 @@ Use relative URLs like ("/api/hello"):
   reverse-proxies `/api/*` requests to the backend service.
 */
 
+import { parseResponseJson } from "~/api/parse-json";
 import { fetchDataError } from "~/common-texts/errors";
-import type { TextResponse } from "~/types/api";
+import { textResponseSchema, type TextResponse } from "~/types/api";
 
 // Fetch hello message from the backend.
 export const fetchHello = async (
@@ -21,7 +22,7 @@ export const fetchHello = async (
     throw new Error(fetchDataError(response.status));
   }
 
-  return response.json() as Promise<TextResponse>;
+  return parseResponseJson(response, textResponseSchema);
 };
 
 // Fetch about message from the backend.
@@ -34,7 +35,7 @@ export const fetchAbout = async (
     throw new Error(fetchDataError(response.status));
   }
 
-  return response.json() as Promise<TextResponse>;
+  return parseResponseJson(response, textResponseSchema);
 };
 
 // Send message to the backend mirror endpoint.
@@ -55,5 +56,5 @@ export const fetchMirror = async (
     throw new Error(fetchDataError(response.status));
   }
 
-  return response.json() as Promise<TextResponse>;
+  return parseResponseJson(response, textResponseSchema);
 };
