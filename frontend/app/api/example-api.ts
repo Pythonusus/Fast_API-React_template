@@ -12,8 +12,10 @@ import { fetchDataError } from "~/common-texts/errors";
 import type { TextResponse } from "~/types/api";
 
 // Fetch hello message from the backend.
-export const fetchHello = async (): Promise<TextResponse> => {
-  const response = await fetch("/api/hello");
+export const fetchHello = async (
+  signal?: AbortSignal,
+): Promise<TextResponse> => {
+  const response = await fetch("/api/hello", { signal });
 
   if (!response.ok) {
     throw new Error(fetchDataError(response.status));
@@ -23,8 +25,10 @@ export const fetchHello = async (): Promise<TextResponse> => {
 };
 
 // Fetch about message from the backend.
-export const fetchAbout = async (): Promise<TextResponse> => {
-  const response = await fetch("/api/about");
+export const fetchAbout = async (
+  signal?: AbortSignal,
+): Promise<TextResponse> => {
+  const response = await fetch("/api/about", { signal });
 
   if (!response.ok) {
     throw new Error(fetchDataError(response.status));
@@ -34,13 +38,17 @@ export const fetchAbout = async (): Promise<TextResponse> => {
 };
 
 // Send message to the backend mirror endpoint.
-export const fetchMirror = async (message: string): Promise<TextResponse> => {
+export const fetchMirror = async (
+  message: string,
+  signal?: AbortSignal,
+): Promise<TextResponse> => {
   const response = await fetch("/api/mirror", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ message }),
+    signal,
   });
 
   if (!response.ok) {

@@ -15,6 +15,11 @@
  *
  * Extracted from the route because replace + append, loading flags, and
  * errors are easier to reason about (and reuse) outside the JSX.
+ *
+ * One list fetch is in flight at a time. Starting another (page change,
+ * load more, or a URL filter change) aborts the previous ``fetch`` and
+ * ignores its result. ``applyQuery`` only writes the URL; the load effect
+ * below owns that request.
  */
 import { useQueryStates } from "nuqs";
 import {
@@ -26,6 +31,7 @@ import {
   useSyncExternalStore,
 } from "react";
 
+import { isAbortError } from "~/api/abort";
 import { fetchPosts } from "~/api/posts";
 import { BACKEND_UNAVAILABLE } from "~/common-texts/errors";
 import {
@@ -108,6 +114,21 @@ export const usePosts = ({
   const [enteringPostIds, setEnteringPostIds] = useState<number[]>([]);
   /** Latest in-flight request. Older responses are ignored. */
   const requestSeq = useRef(0);
+  /** Controller for that request. Aborted when a newer one starts or on unmount. */
+  const abortRef = useRef<AbortController | null>(null);
+
+  /**
+   * Cancel the previous list fetch and open a new one.
+   * Callers apply state only when ``seq`` is still ``requestSeq``.
+   */
+  const beginRequest = useCallback(() => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    requestSeq.current += 1;
+
+    return { seq: requestSeq.current, signal: controller.signal };
+  }, []);
 
   const applyPageMeta = useCallback((result: PostsPage) => {
     setPage(result.page);
@@ -120,7 +141,7 @@ export const usePosts = ({
   /** Replace the list with one page of the current filter (page controls). */
   const goToPage = useCallback(
     async (nextPage: number) => {
-      const seq = ++requestSeq.current;
+      const { seq, signal } = beginRequest();
       setIsPageLoading(true);
       setIsLoadingMore(false);
       setError(null);
@@ -129,6 +150,7 @@ export const usePosts = ({
           page: nextPage,
           pageSize,
           query: listQuery,
+          signal,
         });
         if (seq !== requestSeq.current) {
           return;
@@ -142,8 +164,8 @@ export const usePosts = ({
             : (result.page - 1) * result.pageSize + 1,
         );
         applyPageMeta(result);
-      } catch {
-        if (seq !== requestSeq.current) {
+      } catch (error_) {
+        if (seq !== requestSeq.current || isAbortError(error_)) {
           return;
         }
 
@@ -154,7 +176,7 @@ export const usePosts = ({
         }
       }
     },
-    [applyPageMeta, listQuery, pageSize],
+    [applyPageMeta, beginRequest, listQuery, pageSize],
   );
 
   /**
@@ -187,14 +209,17 @@ export const usePosts = ({
       return;
     }
 
-    const seq = ++requestSeq.current;
+    // ``beginRequest`` aborts any fetch already running, including a second
+    // Show more click that passed the guard before this render.
+    const { seq, signal } = beginRequest();
+    setIsLoadingMore(true);
+    setError(null);
     try {
-      setIsLoadingMore(true);
-      setError(null);
       const result = await fetchPosts({
         page: page + 1,
         pageSize,
         query: listQuery,
+        signal,
       });
       if (seq !== requestSeq.current) {
         return;
@@ -204,8 +229,8 @@ export const usePosts = ({
       setPosts((current) => [...current, ...result.posts]);
       // ``rangeFrom`` stays put so the label covers the full loaded window.
       applyPageMeta(result);
-    } catch {
-      if (seq !== requestSeq.current) {
+    } catch (error_) {
+      if (seq !== requestSeq.current || isAbortError(error_)) {
         return;
       }
 
@@ -217,6 +242,7 @@ export const usePosts = ({
     }
   }, [
     applyPageMeta,
+    beginRequest,
     hasNextPage,
     isLoading,
     isLoadingMore,
@@ -257,13 +283,14 @@ export const usePosts = ({
 
   // First load and every URL filter change: replace with page 1.
   // Loading is derived from ``settledKey`` so this effect only writes state
-  // after the request resolves.
+  // after the request resolves. Cleanup aborts the fetch on filter change
+  // and when the page unmounts.
   useEffect(() => {
     if (!isHydrated) {
       return;
     }
 
-    const seq = ++requestSeq.current;
+    const { seq, signal } = beginRequest();
     const keyAtStart = filterKey;
 
     const loadFirstPage = async () => {
@@ -272,6 +299,7 @@ export const usePosts = ({
           page: 1,
           pageSize,
           query: listQuery,
+          signal,
         });
         if (seq !== requestSeq.current) {
           return;
@@ -285,8 +313,8 @@ export const usePosts = ({
         setIsPageLoading(false);
         setIsLoadingMore(false);
         setSettledKey(keyAtStart);
-      } catch {
-        if (seq !== requestSeq.current) {
+      } catch (error_) {
+        if (seq !== requestSeq.current || isAbortError(error_)) {
           return;
         }
 
@@ -298,7 +326,11 @@ export const usePosts = ({
     };
 
     void loadFirstPage();
-  }, [applyPageMeta, filterKey, isHydrated, listQuery, pageSize]);
+
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, [applyPageMeta, beginRequest, filterKey, isHydrated, listQuery, pageSize]);
 
   const rangeTo =
     rangeFrom === 0 || posts.length === 0 ? 0 : rangeFrom + posts.length - 1;

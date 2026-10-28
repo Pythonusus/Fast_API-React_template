@@ -26,6 +26,7 @@ import { Card, Heading, Section, Text } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import type { MetaFunction } from "react-router";
 
+import { isAbortError } from "~/api/abort";
 import { fetchAbout } from "~/api/example-api";
 import {
   BACKEND_UNAVAILABLE,
@@ -64,22 +65,36 @@ const AboutRoute = () => {
    * - `[]` — run only once after mount (not on every re-render).
    * - Render first with `LOADING`, then `fetchAbout()` updates state when it resolves.
    * - `void` — async call is fire-and-forget; errors are handled in try/catch below.
+   * - The cleanup aborts the request if the user leaves before it finishes,
+   *   so a late response cannot overwrite state or show a false error.
    */
   useEffect(() => {
+    const controller = new AbortController();
+
     const loadAboutMessage = async () => {
       try {
-        const { message } = await fetchAbout();
+        const { message } = await fetchAbout(controller.signal);
         setAboutMessage(message);
         setAboutError(null);
-      } catch {
+      } catch (error) {
+        if (isAbortError(error)) {
+          return;
+        }
+
         setAboutError(BACKEND_UNAVAILABLE_HINT);
         setAboutMessage(BACKEND_UNAVAILABLE);
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
       }
     };
 
     void loadAboutMessage();
+
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   /**

@@ -17,9 +17,13 @@
  * This hook is extracted because the mirror form owns multiple related states
  * (`inputMessage`, `isMirroring`, `mirrorError`, `mirrorMessage`) and an async
  * submit handler — keeping that inside `HomeRoute` would bury the UI.
+ *
+ * A new click aborts any in-flight mirror request so an older response cannot
+ * overwrite a newer one. Leaving the page aborts the request on unmount.
  */
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import { isAbortError } from "~/api/abort";
 import { fetchMirror } from "~/api/example-api";
 import { BACKEND_UNAVAILABLE_HINT } from "~/common-texts/errors";
 
@@ -28,17 +32,34 @@ export const useMirrorMessage = () => {
   const [mirrorMessage, setMirrorMessage] = useState("");
   const [isMirroring, setIsMirroring] = useState(false);
   const [mirrorError, setMirrorError] = useState("");
+  const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
 
   const mirror = async () => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    setIsMirroring(true);
+    setMirrorError("");
     try {
-      setIsMirroring(true);
-      setMirrorError("");
-      const { message } = await fetchMirror(inputMessage);
+      const { message } = await fetchMirror(inputMessage, controller.signal);
       setMirrorMessage(message);
-    } catch {
+    } catch (error) {
+      if (isAbortError(error)) {
+        return;
+      }
+
       setMirrorError(BACKEND_UNAVAILABLE_HINT);
     } finally {
-      setIsMirroring(false);
+      if (!controller.signal.aborted) {
+        setIsMirroring(false);
+      }
     }
   };
 

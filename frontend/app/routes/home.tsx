@@ -24,6 +24,7 @@ import {
 import { useEffect, useState } from "react";
 import type { MetaFunction } from "react-router";
 
+import { isAbortError } from "~/api/abort";
 import { fetchHello } from "~/api/example-api";
 import {
   BACKEND_UNAVAILABLE,
@@ -73,22 +74,36 @@ const HomeRoute = () => {
    * - `[]` — run only once after mount (not on every re-render).
    * - Render first with `LOADING`, then `fetchHello()` updates state when it resolves.
    * - `void` — async call is fire-and-forget; errors are handled in try/catch below.
+   * - The cleanup aborts the request if the user leaves before it finishes,
+   *   so a late response cannot overwrite state or show a false error.
    */
   useEffect(() => {
+    const controller = new AbortController();
+
     const loadHelloMessage = async () => {
       try {
-        const { message } = await fetchHello();
+        const { message } = await fetchHello(controller.signal);
         setHelloMessage(message);
         setHelloError(null);
-      } catch {
+      } catch (error) {
+        if (isAbortError(error)) {
+          return;
+        }
+
         setHelloError(BACKEND_UNAVAILABLE_HINT);
         setHelloMessage(BACKEND_UNAVAILABLE);
       } finally {
-        setIsHelloLoading(false);
+        if (!controller.signal.aborted) {
+          setIsHelloLoading(false);
+        }
       }
     };
 
     void loadHelloMessage();
+
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   /**

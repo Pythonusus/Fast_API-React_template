@@ -30,6 +30,8 @@ export type FetchPostsOptions = {
   pageSize?: number;
   /** Search / sort / filter (backend fastapi-filter params). */
   query?: Partial<PostsListQuery>;
+  /** Cancel this request when a newer list fetch starts or the page unmounts. */
+  signal?: AbortSignal;
 };
 
 /**
@@ -41,6 +43,7 @@ export const fetchPosts = async ({
   page = 1,
   pageSize = POSTS_PAGE_SIZE,
   query = {},
+  signal,
 }: FetchPostsOptions = {}): Promise<PostsPage> => {
   const safePage = Math.max(1, Math.trunc(page));
   const safePageSize = Math.min(
@@ -72,7 +75,7 @@ export const fetchPosts = async ({
     params.set("created_at__lte", createdAtLte);
   }
 
-  const response = await fetch(`/api/posts?${params}`);
+  const response = await fetch(`/api/posts?${params}`, { signal });
 
   if (!response.ok) {
     throw new Error(fetchDataError(response.status));
