@@ -14,6 +14,7 @@
 import { Grid, Heading, Section, Text } from "@radix-ui/themes";
 import type { CSSProperties } from "react";
 import type { MetaFunction } from "react-router";
+import { Link } from "react-router";
 
 import { BACKEND_UNAVAILABLE_HINT } from "~/common-texts/errors";
 import { LOADING } from "~/common-texts/ui";
@@ -22,6 +23,7 @@ import { PostsToolbar } from "~/components/posts-toolbar";
 import { CardBase } from "~/components/ui/card-base";
 import { Pagination } from "~/components/ui/pagination";
 import { usePosts } from "~/hooks/use-posts";
+import { formatDate } from "~/utils/format-date";
 
 import "./posts.css";
 
@@ -37,17 +39,6 @@ export const meta: MetaFunction = () => [
     content: "Posts grid page with search, sort, filters, and pagination.",
   },
 ];
-
-const formatPostDate = (iso: string): string => {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) {
-    return iso;
-  }
-
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-  }).format(date);
-};
 
 /** Posts route component. */
 const PostsRoute = () => {
@@ -150,10 +141,15 @@ const PostsRoute = () => {
                   mb="2"
                   size="4"
                 >
-                  {post.title}
+                  <Link
+                    className="app-posts-card-link"
+                    to={`/posts/${post.id}`}
+                  >
+                    {post.title}
+                  </Link>
                 </Heading>
                 <Text as="p" color="gray" mb="3" size="2">
-                  {formatPostDate(post.created_at)}
+                  {formatDate(post.created_at)}
                 </Text>
                 <PostContent
                   className="app-posts-card-body"

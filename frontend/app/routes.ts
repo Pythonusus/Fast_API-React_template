@@ -24,6 +24,10 @@ export default [
     file: "routes/posts.tsx",
   },
   {
+    path: "posts/:postId",
+    file: "routes/post-detail.tsx",
+  },
+  {
     path: "*",
     file: "routes/404.tsx",
   },

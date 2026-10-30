@@ -95,16 +95,28 @@ export const fetchPosts = async ({
   };
 };
 
+/** The backend answered 404 for the requested post id. */
+export class PostNotFoundError extends Error {
+  constructor() {
+    super("Post not found");
+    this.name = "PostNotFoundError";
+  }
+}
+
 /**
  * Fetch a single post by id.
  *
- * ``GET /api/posts/{post_id}``
+ * ``GET /api/posts/{post_id}``. Throws ``PostNotFoundError`` on 404.
  */
 export const fetchPost = async (
   postId: number,
   signal?: AbortSignal,
 ): Promise<Post> => {
   const response = await fetch(`/api/posts/${postId}`, { signal });
+
+  if (response.status === 404) {
+    throw new PostNotFoundError();
+  }
 
   if (!response.ok) {
     throw new Error(fetchDataError(response.status));

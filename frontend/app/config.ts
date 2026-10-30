@@ -23,7 +23,7 @@ export const HTML_LANG = "ru-RU";
 
 // Default page size for ``GET /api/posts`` list pagination.
 // Keep this ≤ ``POSTS_MAX_PAGE_SIZE``.
-export const POSTS_PAGE_SIZE = 12;
+export const POSTS_PAGE_SIZE = 18;
 
 // Backend ``limit`` upper bound — keep in sync with
 // ``settings.max_pagination_size`` in backend/app/settings.py.
