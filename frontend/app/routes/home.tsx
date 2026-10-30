@@ -2,14 +2,14 @@
  * Home page template.
  *
  * The full page is prerendered into static HTML at build time. The backend
- * message card shows `LOADING` until `fetchHello()` completes after hydration.
- * The mirror form is fully interactive immediately — it only fetches when the
- * user clicks "Mirror text".
+ * message card shows `LOADING` until `fetchHello()` completes after hydration
+ * (see ``useBackendMessage``). The mirror form is fully interactive immediately
+ * — it only fetches when the user clicks "Mirror text".
  *
  * Flow:
  *   Build      → Static HTML with shell and loading state
  *   Page load  → User sees that prerendered content immediately
- *   Hydration  → `useEffect` fetches data from the backend
+ *   Hydration  → Hook fetches data from the backend
  *   On error   → Shows error message. The app does not crash entirely.
  */
 import {
@@ -21,17 +21,11 @@ import {
   Text,
   TextArea,
 } from "@radix-ui/themes";
-import { useEffect, useState } from "react";
 import type { MetaFunction } from "react-router";
 
-import { isAbortError } from "~/api/abort";
 import { fetchHello } from "~/api/example-api";
-import {
-  BACKEND_UNAVAILABLE,
-  BACKEND_UNAVAILABLE_HINT,
-} from "~/common-texts/errors";
-import { LOADING } from "~/common-texts/ui";
 import { HomePageCards } from "~/components/home-page-cards";
+import { useBackendMessage } from "~/hooks/use-backend-message";
 import { useMirrorMessage } from "~/hooks/use-mirror-message";
 
 /**
@@ -51,13 +45,15 @@ export const meta: MetaFunction = () => [
 /**
  * Home route component.
  *
- * `helloMessage` starts as `LOADING` and is replaced once `fetchHello()` resolves.
- * Mirror form state lives in `useMirrorMessage` and fetches only on button click.
+ * Backend message state lives in ``useBackendMessage``.
+ * Mirror form state lives in ``useMirrorMessage`` and fetches only on click.
  */
 const HomeRoute = () => {
-  const [helloMessage, setHelloMessage] = useState(LOADING);
-  const [helloError, setHelloError] = useState<string | null>(null);
-  const [isHelloLoading, setIsHelloLoading] = useState(true);
+  const {
+    message: helloMessage,
+    error: helloError,
+    messageColor: helloMessageColor,
+  } = useBackendMessage(fetchHello);
   const {
     inputMessage,
     isMirroring,
@@ -67,60 +63,6 @@ const HomeRoute = () => {
     setInputMessage,
   } = useMirrorMessage();
 
-  /*
-   * `useEffect` runs a side effect after React renders the component.
-   * Here the effect fetches backend data once the page is on screen.
-   *
-   * - `[]` — run only once after mount (not on every re-render).
-   * - Render first with `LOADING`, then `fetchHello()` updates state when it resolves.
-   * - `void` — async call is fire-and-forget; errors are handled in try/catch below.
-   * - The cleanup aborts the request if the user leaves before it finishes,
-   *   so a late response cannot overwrite state or show a false error.
-   */
-  useEffect(() => {
-    const controller = new AbortController();
-
-    const loadHelloMessage = async () => {
-      try {
-        const { message } = await fetchHello(controller.signal);
-        setHelloMessage(message);
-        setHelloError(null);
-      } catch (error) {
-        if (isAbortError(error)) {
-          return;
-        }
-
-        setHelloError(BACKEND_UNAVAILABLE_HINT);
-        setHelloMessage(BACKEND_UNAVAILABLE);
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsHelloLoading(false);
-        }
-      }
-    };
-
-    void loadHelloMessage();
-
-    return () => {
-      controller.abort();
-    };
-  }, []);
-
-  /**
-   * Determine the color of the hello message based on the state.
-   *
-   * - `gray` — loading
-   * - `red` — error
-   * - `undefined` — use default color
-   */
-  let helloMessageColor: "gray" | "red" | undefined;
-  if (isHelloLoading) {
-    helloMessageColor = "gray";
-  } else if (helloError) {
-    helloMessageColor = "red";
-  }
-
-  /* Resulting HTML output: */
   return (
     <Section p="0">
       <Heading as="h1" mb="2" size="8">

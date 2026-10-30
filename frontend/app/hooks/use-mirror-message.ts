@@ -4,12 +4,12 @@
  * ## When to extract a hook vs keep logic inline
  *
  * Keep state and effects **inline in the component** when:
- * - The logic is used in one place only (see mount-time fetch in `routes/about.tsx`).
- * - The fetch is a simple mount-time request with a few state variables.
+ * - The logic is used in one place only.
  * - Splitting it out would add a file without improving readability.
  *
  * Extract a **custom hook** when:
- * - The same state + handlers are reused across components.
+ * - The same state + handlers are reused across components (see
+ *   ``useBackendMessage`` for Home / About).
  * - The component JSX is getting crowded with state declarations and async logic.
  * - You want to test or reason about the behavior separately from rendering.
  * - Several pieces of state and handlers belong together (input, loading, error, submit).

@@ -2,37 +2,20 @@
  * About page template.
  *
  * The full page is prerendered into static HTML at build time. The backend
- * message card shows `LOADING` until `fetchAbout()` completes after hydration.
+ * message card shows `LOADING` until `fetchAbout()` completes after hydration
+ * (see ``useBackendMessage``).
  *
  * Flow:
  *   Build      → Static HTML with shell and loading state
  *   Page load  → User sees that prerendered content immediately
- *   Hydration  → `useEffect` fetches data from the backend
+ *   Hydration  → Hook fetches data from the backend
  *   On error   → Shows error message. The app does not crash entirely.
  */
 import { Card, Heading, Section, Text } from "@radix-ui/themes";
-/**
- * React hooks used on this page:
- *
- * `useState` — gives the component memory. Each call creates a value that persists
- * between re-renders (e.g. `aboutMessage`). When you call the setter
- * (`setAboutMessage`), React re-renders the component with the new value and
- * updates the UI.
- *
- * `useEffect` — runs code *after* React paints the UI. Use it for side effects
- * like fetching data, not for rendering itself. The `[]` at the end means
- * "run once when the component first appears on screen".
- */
-import { useEffect, useState } from "react";
 import type { MetaFunction } from "react-router";
 
-import { isAbortError } from "~/api/abort";
 import { fetchAbout } from "~/api/example-api";
-import {
-  BACKEND_UNAVAILABLE,
-  BACKEND_UNAVAILABLE_HINT,
-} from "~/common-texts/errors";
-import { LOADING } from "~/common-texts/ui";
+import { useBackendMessage } from "~/hooks/use-backend-message";
 
 /**
  * Function to set the meta tags for the about page.
@@ -51,67 +34,11 @@ export const meta: MetaFunction = () => [
 /**
  * About route component.
  *
- * `aboutMessage` starts as `LOADING` and is replaced once `fetchAbout()` resolves.
+ * Backend message state lives in ``useBackendMessage`` (shared with Home).
  */
 const AboutRoute = () => {
-  const [aboutMessage, setAboutMessage] = useState(LOADING);
-  const [aboutError, setAboutError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { message, error, messageColor } = useBackendMessage(fetchAbout);
 
-  /*
-   * `useEffect` runs a side effect after React renders the component.
-   * Here the effect fetches backend data once the page is on screen.
-   *
-   * - `[]` — run only once after mount (not on every re-render).
-   * - Render first with `LOADING`, then `fetchAbout()` updates state when it resolves.
-   * - `void` — async call is fire-and-forget; errors are handled in try/catch below.
-   * - The cleanup aborts the request if the user leaves before it finishes,
-   *   so a late response cannot overwrite state or show a false error.
-   */
-  useEffect(() => {
-    const controller = new AbortController();
-
-    const loadAboutMessage = async () => {
-      try {
-        const { message } = await fetchAbout(controller.signal);
-        setAboutMessage(message);
-        setAboutError(null);
-      } catch (error) {
-        if (isAbortError(error)) {
-          return;
-        }
-
-        setAboutError(BACKEND_UNAVAILABLE_HINT);
-        setAboutMessage(BACKEND_UNAVAILABLE);
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    void loadAboutMessage();
-
-    return () => {
-      controller.abort();
-    };
-  }, []);
-
-  /**
-   * Determine the color of the backend message based on the state.
-   *
-   * - `gray` — loading
-   * - `red` — error
-   * - `undefined` — use default color
-   */
-  let messageColor: "gray" | "red" | undefined;
-  if (isLoading) {
-    messageColor = "gray";
-  } else if (aboutError) {
-    messageColor = "red";
-  }
-
-  /* Resulting HTML output: */
   return (
     <Section p="0">
       <header>
@@ -126,11 +53,11 @@ const AboutRoute = () => {
 
       <Card>
         <Text as="p" color={messageColor} size="3">
-          Backend message: {aboutMessage}
+          Backend message: {message}
         </Text>
-        {aboutError ? (
+        {error ? (
           <Text as="p" color="gray" mt="2" size="2">
-            {aboutError}
+            {error}
           </Text>
         ) : null}
       </Card>
