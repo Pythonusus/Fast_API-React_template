@@ -3,22 +3,15 @@
  * Global resets and shared layout defaults used across the whole frontend.
  *
  * Styles layout:
- * - ``app/styles/app.css``       — resets, fonts, motion tokens, layout defaults
+ * - ``app/styles/app.css``       — resets, fonts, layout defaults
  * - ``app/styles/themes.css``    — light/dark Radix token overrides
  * - ``app/styles/inner-html.css`` — shared prose for ``dangerouslySetInnerHTML``
+ * - ``app/styles/motion.ts``     — motion timings (JS constants + CSS vars via root)
  * - Co-located ``*.css`` next to a component or route — UI unique to that module
  *
  * Motion: use ``var(--app-duration*)`` / ``var(--app-ease)`` in component CSS.
- * JS timeouts that must match live in ``app/styles/motion.ts`` — keep both in sync.
+ * Those variables are defined once in ``motion.ts`` and injected in ``root.tsx``.
  */
-
-:root {
-  --app-duration-fast: 180ms;
-  --app-duration: 220ms;
-  --app-duration-enter: 350ms;
-  --app-stagger: 45ms;
-  --app-ease: ease;
-}
 
 /* Include padding and border in an element's width/height calculations.
  * Avoids layout surprises when adding padding to sized boxes. */

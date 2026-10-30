@@ -8,10 +8,11 @@
  *
  * Both modes call the same ``fetchPosts`` helper; they differ only in how
  * results update local state:
- * - ``goToPage`` — replace the list with that page (numbers / Prev / Next).
+ * - ``goToPage`` / filter load effect — ``replaceWith`` (clear enter, set
+ *   posts, range, meta).
  * - ``loadMore`` — append the next page under the current items.
  * - ``applyQuery`` — write the filter to the URL; the load effect then
- *   reloads page 1.
+ *   reloads page 1 via ``replaceWith``.
  *
  * Extracted from the route because replace + append, loading flags, and
  * errors are easier to reason about (and reuse) outside the JSX.
@@ -138,6 +139,23 @@ export const usePosts = ({
     setHasPreviousPage(result.hasPreviousPage);
   }, []);
 
+  /**
+   * Replace the visible list with one fetched page (page jump / filter load).
+   * Shared so range math and meta stay in one place; ``loadMore`` appends
+   * instead and keeps ``rangeFrom``.
+   */
+  const replaceWith = useCallback(
+    (result: PostsPage) => {
+      setEnteringPostIds([]);
+      setPosts(result.posts);
+      setRangeFrom(
+        result.posts.length === 0 ? 0 : (result.page - 1) * result.pageSize + 1,
+      );
+      applyPageMeta(result);
+    },
+    [applyPageMeta],
+  );
+
   /** Replace the list with one page of the current filter (page controls). */
   const goToPage = useCallback(
     async (nextPage: number) => {
@@ -156,14 +174,7 @@ export const usePosts = ({
           return;
         }
 
-        setEnteringPostIds([]);
-        setPosts(result.posts);
-        setRangeFrom(
-          result.posts.length === 0
-            ? 0
-            : (result.page - 1) * result.pageSize + 1,
-        );
-        applyPageMeta(result);
+        replaceWith(result);
       } catch (error_) {
         if (seq !== requestSeq.current || isAbortError(error_)) {
           return;
@@ -176,7 +187,7 @@ export const usePosts = ({
         }
       }
     },
-    [applyPageMeta, beginRequest, listQuery, pageSize],
+    [beginRequest, listQuery, pageSize, replaceWith],
   );
 
   /**
@@ -305,10 +316,7 @@ export const usePosts = ({
           return;
         }
 
-        setEnteringPostIds([]);
-        setPosts(result.posts);
-        setRangeFrom(result.posts.length === 0 ? 0 : 1);
-        applyPageMeta(result);
+        replaceWith(result);
         setError(null);
         setIsPageLoading(false);
         setIsLoadingMore(false);
@@ -330,7 +338,7 @@ export const usePosts = ({
     return () => {
       abortRef.current?.abort();
     };
-  }, [applyPageMeta, beginRequest, filterKey, isHydrated, listQuery, pageSize]);
+  }, [beginRequest, filterKey, isHydrated, listQuery, pageSize, replaceWith]);
 
   const rangeTo =
     rangeFrom === 0 || posts.length === 0 ? 0 : rangeFrom + posts.length - 1;

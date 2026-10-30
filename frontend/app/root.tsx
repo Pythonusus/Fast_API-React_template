@@ -42,6 +42,7 @@ import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 import { Footer } from "~/components/footer";
 import { Header } from "~/components/header";
 import { HTML_LANG } from "~/config";
+import { MOTION_ROOT_CSS } from "~/styles/motion";
 
 /*
   Conventional name: React Router looks for a named `ErrorBoundary` export on
@@ -75,6 +76,11 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       <head>
         <meta charSet="utf-8" />
         <meta content="width=device-width, initial-scale=1" name="viewport" />
+        {/*
+          Motion CSS variables from ``motion.ts`` (single source with JS timeouts).
+          Inline so prerendered HTML includes the same values as client timeouts.
+        */}
+        <style>{MOTION_ROOT_CSS}</style>
         {/* Injects route `meta` exports (title, description, etc.). */}
         <Meta />
         {/* Injects route `links` exports as `<link>` tags. */}

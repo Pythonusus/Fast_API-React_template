@@ -3,9 +3,9 @@
  *
  * This module exports the full route table for the app as a `RouteConfig`.
  * - `index("routes/home.tsx")` registers the root (`/`) index route.
- * - The object route registers `/about` and maps it to `routes/about.tsx`.
+ * - The object route registers `/<page-name>` and maps it to `routes/<page-name>.tsx`.
  * - `path: "*"` is the splat (catch-all) route. It matches any URL that is
- *   not `/` or `/about` and renders the 404 page.
+ *   not one of the routes above and renders the 404 page.
  *
  * Keep this file focused on route declarations only; route UI and data-loading
  * logic should live inside each route module under `app/routes/`.
