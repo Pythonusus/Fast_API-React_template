@@ -9,7 +9,7 @@
  */
 import { z } from "zod";
 
-import type { DateFilterPreset } from "~/components/ui/filter-toolbar/date-range";
+import type { DateFilterPreset } from "~/utils/date-filter";
 
 /**
  * Posts list sort presets (fastapi-filter ``order_by``) with UI labels.

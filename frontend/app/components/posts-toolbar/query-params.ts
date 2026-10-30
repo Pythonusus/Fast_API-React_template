@@ -9,13 +9,13 @@
  */
 import { createParser, parseAsStringLiteral } from "nuqs";
 
+import type { PostsFilter, PostsListQuery } from "~/types/posts";
+import { DEFAULT_POSTS_ORDER_BY, POSTS_ORDER_BY_VALUES } from "~/types/posts";
 import {
   buildDateFilterBounds,
   DATE_FILTER_PRESET_VALUES,
   isDateFilterActive,
-} from "~/components/ui/filter-toolbar/date-range";
-import type { PostsFilter, PostsListQuery } from "~/types/posts";
-import { DEFAULT_POSTS_ORDER_BY, POSTS_ORDER_BY_VALUES } from "~/types/posts";
+} from "~/utils/date-filter";
 
 /** ``YYYY-MM-DD`` that is a real calendar day (URL input is not trusted). */
 const isCalendarDay = (value: string): boolean => {

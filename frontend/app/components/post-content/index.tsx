@@ -4,8 +4,9 @@
  * Uses the shared ``app-inner-html`` class from ``~/styles/inner-html.css``
  * so other HTML-bearing components can reuse the same prose rules.
  *
- * Content is trusted admin-authored HTML stored in the DB. Do not pass
- * untrusted user input here without sanitizing first.
+ * HTML is sanitized with nh3 on the backend before storage/serve. This
+ * component does not sanitize again — do not pass unsanitized or untrusted
+ * markup here.
  */
 
 export type PostContentProps = {

@@ -1,8 +1,9 @@
 /**
- * Date-range presets for the filter toolbar.
+ * Shared date-range presets for list filters (URL + toolbar + API bounds).
  *
- * Output is inclusive ``gte`` / ``lte`` datetime strings suitable for
- * fastapi-filter (or any API that takes ISO-like local datetimes).
+ * Lives under ``utils/`` so domain types can import presets without depending
+ * on ``components/ui``. Output is inclusive ``gte`` / ``lte`` datetime strings
+ * suitable for fastapi-filter (or any API that takes ISO-like local datetimes).
  */
 
 export const DATE_FILTER_PRESET_VALUES = [
