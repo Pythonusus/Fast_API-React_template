@@ -4,18 +4,35 @@ Main API module for backend application.
 Contains FastAPI application and API endpoints.
 """
 
+import asyncio
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.admin import create_admin
+from app.routers.admin_media import router as admin_media_router
+from app.routers.files import router as files_router
 from app.routers.posts import router as posts_router
 from app.schemas.api import MirrorRequest
 from app.settings import settings
+from app.storage import ensure_bucket
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    # Create the attachments bucket if it is missing.
+    # Connection errors, bad credentials, and missing permissions raise
+    # here, so the process exits instead of failing later on upload.
+    # boto3 is blocking, so run it in a worker thread.
+    await asyncio.to_thread(ensure_bucket)
+    yield
+
 
 # FastAPI application instance.
 # The core of the backend service.
-app = FastAPI(title=settings.app_title)
+app = FastAPI(title=settings.app_title, lifespan=lifespan)
 
 # Signed session cookies for admin auth (see app.admin.auth).
 # Must use the same secret_key as Admin(...). Cookie max_age is the longer
@@ -40,6 +57,8 @@ app.add_middleware(
 
 # Feature routers: each module owns its own APIRouter and is mounted here.
 app.include_router(posts_router)
+app.include_router(files_router)
+app.include_router(admin_media_router)
 
 # Mount the admin panel at settings.admin_url_prefix.
 # Keep vite.config.ts and nginx.conf proxies in sync if changed.

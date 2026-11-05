@@ -1,0 +1,80 @@
+# Development override. Use it together with compose.yaml:
+#
+#   docker compose -f compose.yaml -f compose.dev.yaml up --build
+#   make docker-dev
+#
+# Backend and frontend run their dev servers with the source bind-mounted,
+# so saving a file reloads the app. db and minio stay as in compose.yaml
+# and share its volumes. Do not run this and `make docker-start` together:
+# they are the same Compose project and would replace each other's containers.
+#
+# A backend dependency change needs an image rebuild. Frontend
+# dependencies are the host frontend/node_modules from npm install.
+# Code-only edits do not need a rebuild.
+#
+# Open http://localhost:5173
+# API is proxied through Vite. Direct API: http://localhost:8080
+# S3_PUBLIC_URL inside the backend container is http://localhost:5173/s3/
+# so presigned URLs come back through the Vite /s3 proxy.
+
+services:
+  backend:
+    build:
+      dockerfile: Dockerfile.backend.dev
+
+    environment:
+      # Session cookies stay usable on http://localhost.
+      DEVELOPMENT: "true"
+      # fastapi reads PORT. .env PORT is the prod host port (8100).
+      PORT: "8080"
+      # Browser fetches presigned URLs from the Vite origin.
+      S3_PUBLIC_URL: http://localhost:5173/s3/
+      # Bind mounts often do not deliver inotify events into the container.
+      WATCHFILES_FORCE_POLLING: "true"
+
+    volumes:
+      - ./backend:/app
+
+    # A new Postgres volume has no tables. Apply migrations, then start.
+    command:
+      [
+        "sh",
+        "-c",
+        "alembic upgrade head && exec fastapi dev app/api.py --host 0.0.0.0 --port 8080 --reload-dir app",
+      ]
+
+    ports:
+      - "8080:8080"
+
+    # The frontend waits for service_healthy. The dev image has no
+    # HEALTHCHECK of its own, so this one has to stay.
+    # start_interval probes quickly while the process is coming up.
+    # interval is the steady rate, so /api/health does not flood the log.
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/api/health', timeout=2)",
+        ]
+      interval: 300s
+      timeout: 3s
+      start_period: 30s
+      start_interval: 5s
+      retries: 10
+
+  frontend:
+    build:
+      dockerfile: Dockerfile.frontend.dev
+
+    environment:
+      DEV_BACKEND_URL: http://backend:8080
+      DEV_S3_URL: http://minio:9000
+      CHOKIDAR_USEPOLLING: "true"
+
+    volumes:
+      - ./frontend:/app
+
+    ports:
+      - "5173:5173"

@@ -124,6 +124,37 @@ def _verify_password(password: str, password_hash: str) -> bool:
     )
 
 
+def session_admin_username(request: Request) -> str | None:
+    """Return the logged-in admin, or None if the session is missing or expired.
+
+    Same checks as ``AdminAuthProvider.authenticate``: signed session markers
+    plus the server-side TTL. An expired or timestamp-less session is cleared.
+    Used by admin routes that are not mounted under starlette-admin, such as
+    the post media upload.
+    """
+    session = request.session
+    username = session.get("username")
+    authenticated = session.get("authenticated", False)
+    if not (username and authenticated):
+        return None
+
+    login_time = session.get("login_time")
+    if login_time is None:
+        session.clear()
+        return None
+
+    remember_me = session.get("remember_me", False)
+    max_age = (
+        settings.session_remember_me_max_age
+        if remember_me
+        else settings.session_max_age
+    )
+    if time.time() - login_time > max_age:
+        session.clear()
+        return None
+    return username
+
+
 # Precomputed bcrypt hash of a throwaway string.
 # When the submitted username does NOT match settings.admin_username we still
 # call bcrypt.checkpw against this hash so response time stays close to the
@@ -239,34 +270,8 @@ class AdminAuthProvider(AuthProvider):
         Returns:
             ``AdminUser`` when the session is valid, otherwise ``None``
         """
-        session = request.session
-
-        # Basic markers from login(). Missing either → treat as logged out.
-        username = session.get("username")
-        authenticated = session.get("authenticated", False)
-        if not (username and authenticated):
-            return None
-
-        # Server-side TTL (in addition to cookie max_age).
-        # Needed when the cookie still exists but the intended session
-        # lifetime (especially remember_me=False) has already passed.
-        login_time = session.get("login_time")
-        if login_time is None:
-            # No timestamp → invalid (forged cookie or leftover from an
-            # older app version that did not write login_time).
-            session.clear()
-            return None
-
-        remember_me = session.get("remember_me", False)
-        max_age = (
-            settings.session_remember_me_max_age
-            if remember_me
-            else settings.session_max_age
-        )
-
-        if time.time() - login_time > max_age:
-            # Expired: drop session so the next hit forces a fresh login.
-            session.clear()
+        username = session_admin_username(request)
+        if username is None:
             return None
 
         # Make identity available to ModelView hooks / custom admin routes

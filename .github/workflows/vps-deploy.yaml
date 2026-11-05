@@ -26,6 +26,13 @@ jobs:
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          S3_PUBLIC_URL: ${{ secrets.S3_PUBLIC_URL }}
+          S3_REGION: ${{ secrets.S3_REGION }}
+          MINIO_BROWSER_REDIRECT_URL: ${{ secrets.MINIO_BROWSER_REDIRECT_URL }}
+          S3_ENDPOINT_URL: ${{ secrets.S3_ENDPOINT_URL }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
           PORT: ${{ secrets.PORT }}
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
@@ -35,7 +42,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          envs: DEVELOPMENT,DATABASE_URL,POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD,PORT,TIMEZONE,VITE_HTML_LANG,SECRET_KEY,ADMIN_USERNAME,ADMIN_PASSWORD_HASH,ADMIN_TITLE,SESSION_MAX_AGE,SESSION_REMEMBER_ME_MAX_AGE
+          envs: DEVELOPMENT,DATABASE_URL,POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD,S3_PUBLIC_URL,S3_REGION,MINIO_BROWSER_REDIRECT_URL,S3_ENDPOINT_URL,S3_ACCESS_KEY,S3_SECRET_KEY,S3_BUCKET,PORT,TIMEZONE,VITE_HTML_LANG,SECRET_KEY,ADMIN_USERNAME,ADMIN_PASSWORD_HASH,ADMIN_TITLE,SESSION_MAX_AGE,SESSION_REMEMBER_ME_MAX_AGE
           script: |
             set -euo pipefail
 
@@ -64,6 +71,11 @@ jobs:
             : "${POSTGRES_DB:?POSTGRES_DB secret is required}"
             : "${POSTGRES_USER:?POSTGRES_USER secret is required}"
             : "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD secret is required}"
+            : "${S3_PUBLIC_URL:?S3_PUBLIC_URL secret is required}"
+            : "${MINIO_BROWSER_REDIRECT_URL:?MINIO_BROWSER_REDIRECT_URL secret is required}"
+            : "${S3_ACCESS_KEY:?S3_ACCESS_KEY secret is required}"
+            : "${S3_SECRET_KEY:?S3_SECRET_KEY secret is required}"
+            : "${S3_BUCKET:?S3_BUCKET secret is required}"
             : "${SECRET_KEY:?SECRET_KEY secret is required}"
             : "${ADMIN_USERNAME:?ADMIN_USERNAME secret is required}"
             : "${ADMIN_PASSWORD_HASH:?ADMIN_PASSWORD_HASH secret is required}"
@@ -75,10 +87,24 @@ jobs:
               printf 'POSTGRES_DB=%s\n' "${POSTGRES_DB}"
               printf 'POSTGRES_USER=%s\n' "${POSTGRES_USER}"
               printf 'POSTGRES_PASSWORD=%s\n' "${POSTGRES_PASSWORD}"
+              printf 'S3_PUBLIC_URL=%s\n' "${S3_PUBLIC_URL}"
+              # Optional: skip when empty so the backend default (ru-central1) applies.
+              if [ -n "${S3_REGION:-}" ]; then
+                printf 'S3_REGION=%s\n' "${S3_REGION}"
+              fi
+              printf 'MINIO_BROWSER_REDIRECT_URL=%s\n' "${MINIO_BROWSER_REDIRECT_URL}"
+              # Optional: skip when empty so the backend default (http://minio:9000) applies.
+              if [ -n "${S3_ENDPOINT_URL:-}" ]; then
+                printf 'S3_ENDPOINT_URL=%s\n' "${S3_ENDPOINT_URL}"
+              fi
+              printf 'S3_ACCESS_KEY=%s\n' "${S3_ACCESS_KEY}"
+              printf 'S3_SECRET_KEY=%s\n' "${S3_SECRET_KEY}"
+              printf 'S3_BUCKET=%s\n' "${S3_BUCKET}"
               printf 'PORT=%s\n' "${PORT}"
               printf 'SECRET_KEY=%s\n' "${SECRET_KEY}"
               printf 'ADMIN_USERNAME=%s\n' "${ADMIN_USERNAME}"
-              printf 'ADMIN_PASSWORD_HASH=%s\n' "${ADMIN_PASSWORD_HASH}"
+              # Compose treats $ in .env as interpolation. Escape so the bcrypt hash survives.
+              printf 'ADMIN_PASSWORD_HASH=%s\n' "$(printf '%s' "${ADMIN_PASSWORD_HASH}" | sed 's/\$/$$/g')"
             } > .env
 
             echo "🔨 Running deploy.sh..."

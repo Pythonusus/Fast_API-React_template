@@ -38,6 +38,21 @@ from starlette_admin.helpers import pydantic_error_to_form_validation_errors
 from app.db.posts.models import Post
 from app.schemas.posts import PostCreate
 
+# Served by app.routers.admin_media. Loaded after TinyMCE so it can wrap
+# the jQuery plugin before form.js initializes the editor.
+_MEDIA_UPLOAD_JS = "/api/admin/tinymce-media.js"
+_MEDIA_UPLOAD_URL = "/api/admin/media"
+
+
+class _PostContentField(TinyMCEEditorField):
+    """TinyMCE plus the upload script. JSON options cannot hold a function."""
+
+    def additional_js_links(self, request: Request) -> list[str]:
+        links = super().additional_js_links(request)
+        if not links:
+            return links
+        return [*links, _MEDIA_UPLOAD_JS]
+
 
 class PostAdmin(ModelView):
     """
@@ -81,8 +96,10 @@ class PostAdmin(ModelView):
         # focusable". Emptiness is still enforced in validate() via PostCreate.
         #
         # Toolbar + plugins are the open-source TinyMCE 6 set (jsDelivr CDN,
-        # no Tiny Cloud API key).
-        TinyMCEEditorField(
+        # no Tiny Cloud API key). Image and media uploads go to
+        # /api/admin/media; the URL stored in the HTML is the public object
+        # URL, so it does not expire with a presigned signature.
+        _PostContentField(
             "content",
             label="Содержание",
             height=420,
@@ -95,21 +112,27 @@ class PostAdmin(ModelView):
                 "alignleft aligncenter alignright alignjustify | "
                 "bullist numlist outdent indent | "
                 "blockquote subscript superscript | "
-                "link unlink charmap emoticons hr | "
+                "link unlink image media charmap emoticons hr | "
                 "removeformat | searchreplace visualblocks code fullscreen "
                 "preview | help"
             ),
             extra_options={
                 "plugins": (
-                    "advlist autolink lists link charmap preview anchor "
-                    "searchreplace visualblocks code fullscreen insertdatetime "
-                    "emoticons help wordcount"
+                    "advlist autolink lists link image media charmap preview "
+                    "anchor searchreplace visualblocks code fullscreen "
+                    "insertdatetime emoticons help wordcount"
                 ),
                 "toolbar_mode": "sliding",
                 "branding": False,
                 "promotion": False,
                 "link_default_target": "_blank",
                 "link_assume_external_targets": True,
+                "images_upload_url": _MEDIA_UPLOAD_URL,
+                "images_upload_credentials": True,
+                "automatic_uploads": True,
+                # Keep the absolute public URL. A relative rewrite would
+                # point at /admin/... instead of the storage prefix.
+                "convert_urls": False,
             },
         ),
         DateTimeField("created_at", read_only=True, label="Создан"),

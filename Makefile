@@ -35,6 +35,8 @@ help:
 	@echo "  make docker-start         Start all services"
 	@echo "  make docker-stop          Stop all services"
 	@echo "  make docker-down          Stop and remove all services"
+	@echo "  make docker-dev           Start dev stack with live reload (http://localhost:5173)"
+	@echo "  make docker-dev-down      Stop the dev stack"
 
 # ===== COMMON =====
 
@@ -143,6 +145,14 @@ docker-stop:
 docker-down:
 	docker compose down
 
+# Dev stack: Vite + fastapi dev, source bind-mounted. See compose.dev.yaml.
+docker-dev:
+	docker compose -f compose.yaml -f compose.dev.yaml up --build
+
+# Stop the dev stack. Named volumes (db, minio) stay.
+docker-dev-down:
+	docker compose -f compose.yaml -f compose.dev.yaml down
+
 .PHONY: help pre-commit-install pre-commit \
 	      generate-password-hash \
 	      install-backend-dev install-backend-prod \
@@ -151,4 +161,5 @@ docker-down:
 	      create-migration migrate start-backend \
 	      install-frontend build-frontend \
 	      lint-frontend fix-frontend start-frontend \
-	      docker-build docker-start docker-stop docker-down
+	      docker-build docker-start docker-stop docker-down \
+	      docker-dev docker-dev-down

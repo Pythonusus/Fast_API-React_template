@@ -51,6 +51,7 @@ HEALTHCHECK --interval=15s --timeout=3s --start-period=30s --retries=3 \
 # Without EXPOSE the container will still work, this is just documentation.
 EXPOSE 8080
 
-# CMD is the command that is executed when the container is started
-# Starts the backend application.
-CMD ["python", "main.py"]
+# Apply migrations, then start the API. upgrade head does nothing when
+# the database is already current. exec makes python PID 1 so Docker
+# can stop the process cleanly.
+CMD ["sh", "-c", "alembic upgrade head && exec python main.py"]

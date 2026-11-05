@@ -7,8 +7,9 @@ See ``.env.example`` at the repository root for names and examples.
 
 from pathlib import Path
 from typing import ClassVar
+from urllib.parse import urlsplit
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Resolve repo root from this file: backend/app/settings.py -> parents[2].
@@ -92,6 +93,70 @@ class Settings(BaseSettings):
         ),
     )
 
+    # --- S3-compatible object storage (MinIO / Yandex / AWS S3) -------------
+
+    s3_endpoint_url: str = Field(
+        default="http://minio:9000",
+        description=(
+            "[OPTIONAL] Internal S3 API endpoint used by the backend "
+            "(env: S3_ENDPOINT_URL). Defaults to the compose service "
+            "http://minio:9000. Change it (plus credentials) to switch to "
+            "Yandex Object Storage / AWS S3."
+        ),
+    )
+
+    s3_public_url: str = Field(
+        ...,
+        description=(
+            "[REQUIRED] Public URL of the S3 API as the browser sees it "
+            "(env: S3_PUBLIC_URL). A path prefix such as /s3/ is stripped "
+            "by Nginx before MinIO. Presigned URLs are signed for the "
+            "origin, then the prefix is inserted for the browser."
+        ),
+    )
+
+    s3_region: str = Field(
+        default="ru-central1",
+        description=(
+            "[OPTIONAL] SigV4 region (env: S3_REGION). "
+            "Defaults to ru-central1, Yandex Object Storage in Moscow. "
+            "AWS us-east-1 is the other common value. MinIO must use "
+            "the same region."
+        ),
+    )
+
+    @field_validator("s3_public_url")
+    @classmethod
+    def _public_url_is_absolute(cls, value: str) -> str:
+        parts = urlsplit(value.strip())
+        if parts.scheme not in ("http", "https") or not parts.netloc:
+            raise ValueError("S3_PUBLIC_URL must be an absolute http(s) URL")
+        return value.strip()
+
+    s3_access_key: str = Field(
+        ...,
+        description=(
+            "[REQUIRED] S3 access key ID (env: S3_ACCESS_KEY). "
+            "Compose maps it to MINIO_ROOT_USER for the MinIO container."
+        ),
+    )
+
+    s3_secret_key: str = Field(
+        ...,
+        description=(
+            "[REQUIRED] S3 secret access key (env: S3_SECRET_KEY). "
+            "Compose maps it to MINIO_ROOT_PASSWORD for the MinIO container."
+        ),
+    )
+
+    s3_bucket: str = Field(
+        ...,
+        description=(
+            "[REQUIRED] Bucket for post attachments (env: S3_BUCKET). "
+            "Created on backend startup if it does not exist."
+        ),
+    )
+
     # Browser/nav title for the admin panel.
     admin_title: ClassVar[str] = "Admin"
 
@@ -120,6 +185,11 @@ class Settings(BaseSettings):
     # TinyMCE content; capped to limit abuse. Enforced in Pydantic schemas
     # (API + admin) and a DB check constraint on ``posts.content``.
     post_content_max_length: ClassVar[int] = 100_000
+
+    # Max size of one image, audio, or video uploaded from the post editor.
+    # Nginx ``client_max_body_size`` on the API location must stay at least
+    # this large, or the proxy rejects the upload before the app sees it.
+    media_upload_max_bytes: ClassVar[int] = 32 * 1024 * 1024
 
 
 # Shared instance; import validates config once at startup.

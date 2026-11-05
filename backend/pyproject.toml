@@ -10,6 +10,7 @@ dependencies = [
     "alembic>=1.18.5",
     "asyncpg>=0.31.0",
     "bcrypt>=5.0.0",
+    "boto3>=1.43.123",
     "fastapi-filter[sqlalchemy]>=3.0.0",
     "fastapi[standard]>=0.141.1",
     "pydantic>=2.13.4",
