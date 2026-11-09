@@ -1,0 +1,53 @@
+<div class="post-media"
+     data-post-media
+     data-upload-url="{{ field.upload_url }}"
+     data-max="{{ field.max_count }}"
+     data-max-bytes="{{ field.max_bytes }}">
+    {% set initial = field.initial_state(data) %}
+    {# Filled server-side too, so a save without the script keeps the media. #}
+    <input type="hidden" name="{{ field.id }}" value="{{ initial.attachments | map(attribute='id') | list | tojson | forceescape }}" data-post-media-ids>
+    <input type="hidden" name="{{ field.id }}_cover" value="{{ initial.cover.id if initial.cover else '' }}" data-post-media-cover>
+    <script type="application/json" data-post-media-initial>{{ initial | tojson }}</script>
+
+    <div class="card mb-3">
+        <div class="card-header">
+            <h3 class="card-title">Обложка</h3>
+        </div>
+        <div class="card-body">
+            <div class="post-media-cover" data-post-media-cover-preview></div>
+            <div class="d-flex flex-wrap gap-2 mt-2">
+                <label class="btn btn-outline-primary mb-0">
+                    Загрузить обложку
+                    <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" hidden data-post-media-cover-input>
+                </label>
+                <button type="button" class="btn btn-outline-danger" data-post-media-cover-remove>Убрать обложку</button>
+            </div>
+            <small class="form-hint mt-2">
+                Загрузите отдельное изображение (не входит в лимит вложений) или нажмите «Обложка» на изображении в галерее.
+            </small>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                Медиа <span class="text-secondary" data-post-media-count></span>
+            </h3>
+        </div>
+        <div class="card-body">
+            <label class="post-media-dropzone" data-post-media-dropzone>
+                <span>Перетащите изображения, видео или аудио сюда или нажмите, чтобы выбрать</span>
+                <small class="text-secondary">
+                    До {{ field.max_count }} файлов, каждый до {{ (field.max_bytes / 1048576) | round | int }} МБ.
+                    Перетаскивайте миниатюры, чтобы изменить порядок.
+                </small>
+                <input type="file" multiple hidden data-post-media-input
+                       accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/ogg,video/quicktime,audio/mpeg,audio/mp4,audio/ogg,audio/wav,audio/webm">
+            </label>
+            <div class="post-media-status" data-post-media-status></div>
+            <div class="post-media-grid" data-post-media-grid></div>
+        </div>
+    </div>
+</div>
+{# Tabler hides .invalid-feedback without an .is-invalid input next to it. #}
+{% if error %}<div class="text-danger mt-2">{{ error }}</div>{% endif %}

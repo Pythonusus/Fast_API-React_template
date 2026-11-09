@@ -176,9 +176,9 @@ Also see `.env.example` in project root.
 | `POSTGRES_DB` | Database name created by postgres container on first init. | Yes | `your_database_name` |
 | `POSTGRES_USER` | Postgres username for container initialization and healthcheck. | Yes | `your_username` |
 | `POSTGRES_PASSWORD` | Postgres password for container initialization. | Yes | `your_super_secret_password` |
-| `S3_PUBLIC_URL` | Public URL of the S3 API as seen by the browser (trailing slash). Compose maps it to `MINIO_SERVER_URL`. | Yes | `https://your-domain.com/s3/` |
+| `S3_PUBLIC_URL` | Public URL of the S3 API as seen by the browser (trailing slash). The backend signs this. The MinIO console calls its API on 127.0.0.1:9000 instead. | Yes | `https://your-domain.com/s3/` |
 | `S3_REGION` | SigV4 region. Default is Yandex Moscow. | No | `ru-central1` |
-| `MINIO_BROWSER_REDIRECT_URL` | Public URL of the MinIO console (trailing slash). Drop when leaving MinIO. | Yes | `https://your-domain.com/minio/ui/` |
+| `MINIO_BROWSER_REDIRECT_URL` | MinIO console URL. Compose binds it to host loopback only; open it directly or through `ssh -L 9001:127.0.0.1:9001`. Trailing slash. Drop when leaving MinIO. | Yes | `http://127.0.0.1:9001/` |
 | `S3_ENDPOINT_URL` | Internal S3 endpoint used by the backend. | No | `http://minio:9000` |
 | `S3_ACCESS_KEY` | S3 access key for the backend. Compose also passes it to MinIO as the root user. | Yes | `minioadmin` |
 | `S3_SECRET_KEY` | S3 secret key for the backend. Compose also passes it to MinIO as the root password. | Yes | `change-me-to-a-long-random-string` |
@@ -206,7 +206,7 @@ The workflow `.github/workflows/vps-deploy.yaml` generates `.env` on the VPS fro
 | `ADMIN_PASSWORD_HASH` | bcrypt hash of admin password. | Yes | from `generate_password_hash.py` |
 | `S3_PUBLIC_URL` | Public URL of the S3 API (trailing slash). | Yes | `https://your-domain.com/s3/` |
 | `S3_REGION` | SigV4 region. Default is Yandex Moscow. | No | `ru-central1` |
-| `MINIO_BROWSER_REDIRECT_URL` | Public URL of the MinIO console (trailing slash). Drop when leaving MinIO. | Yes | `https://your-domain.com/minio/ui/` |
+| `MINIO_BROWSER_REDIRECT_URL` | MinIO console URL. Compose binds it to host loopback only; open it directly or through `ssh -L 9001:127.0.0.1:9001`. Trailing slash. Drop when leaving MinIO. | Yes | `http://127.0.0.1:9001/` |
 | `S3_ENDPOINT_URL` | Internal S3 endpoint used by the backend. | No | `http://minio:9000` |
 | `S3_ACCESS_KEY` | S3 access key. Also the MinIO root user. | Yes | `minioadmin` |
 | `S3_SECRET_KEY` | S3 secret key. Also the MinIO root password. | Yes | long random string |

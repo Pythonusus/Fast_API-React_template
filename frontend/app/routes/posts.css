@@ -81,6 +81,21 @@
   }
 }
 
+/*
+ * Whole file, scaled down to the card's height budget (``min-height`` above).
+ * Width follows the image, so a portrait stays narrow instead of cropping.
+ */
+.app-posts-card-cover {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 12rem;
+  margin-inline: auto;
+  object-fit: contain;
+  background-color: var(--gray-3);
+}
+
 .app-posts-card-title {
   display: -webkit-box;
   overflow: hidden;
@@ -113,6 +128,12 @@
 .app-posts-card-link:focus-visible::after {
   outline: 2px solid var(--focus-8);
   outline-offset: -2px;
+}
+
+/* Above the stretched card link, so sharing does not open the post. */
+.app-posts-card-share {
+  position: relative;
+  z-index: 1;
 }
 
 .app-posts-card-body {

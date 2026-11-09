@@ -13,6 +13,8 @@ Auth overview (see ``app.admin.auth`` for the full design):
   with ``add_view``
 """
 
+from pathlib import Path
+
 from starlette_admin import I18nConfig
 from starlette_admin.contrib.sqla import Admin
 from starlette_admin.i18n import SUPPORTED_LOCALES
@@ -22,6 +24,9 @@ from app.admin.posts.views import PostAdmin
 from app.db.engine import engine
 from app.db.posts.models import Post
 from app.settings import settings
+
+# Project templates and static files, checked before the built-in ones.
+ADMIN_DIR = Path(__file__).resolve().parent
 
 
 def create_admin() -> Admin:
@@ -38,6 +43,8 @@ def create_admin() -> Admin:
         title=settings.admin_title,
         # Must stay in sync with vite.config.ts and nginx.conf proxies.
         base_url=settings.admin_url_prefix,
+        templates_dir=str(ADMIN_DIR / "templates"),
+        static_dir=str(ADMIN_DIR / "static"),
         auth_provider=AdminAuthProvider(),
         # Used to sign admin CSRF / flash cookies.
         # Session cookies use the same secret via SessionMiddleware in api.py.

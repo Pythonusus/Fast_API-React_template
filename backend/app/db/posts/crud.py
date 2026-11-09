@@ -18,7 +18,7 @@ WHERE / ORDER BY rules as the public posts toolbar.
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.posts.models import Post
+from app.db.posts.models import Post, PostMedia
 from app.db.posts.query import PostFilter
 from app.schemas.posts import PostCreate, PostUpdate
 from app.settings import settings
@@ -121,12 +121,30 @@ async def update_post(
     return post
 
 
-async def delete_post(session: AsyncSession, post: Post) -> None:
+async def list_media_keys(session: AsyncSession, post_id: int) -> list[str]:
+    """S3 object keys for a post, including a separately uploaded cover.
+
+    Read from the table, not ``post.media``. ``passive_deletes`` plus the
+    FK cascade means the in-memory collection is often empty on delete.
+    """
+    result = await session.execute(
+        select(PostMedia.key).where(PostMedia.post_id == post_id)
+    )
+    return list(result.scalars().all())
+
+
+async def delete_post(session: AsyncSession, post: Post) -> list[str]:
     """
     Delete an existing post row.
+
+    Returns the storage keys to remove after the request commits.
+    The FK cascade drops ``post_media`` rows; objects in the bucket are
+    not removed until the caller deletes those keys.
 
     Pass the ORM instance from ``get_post`` (after a 404 check in the route).
     ``flush`` issues DELETE; the request-scoped session commits later.
     """
+    keys = await list_media_keys(session, post.id)
     await session.delete(post)
     await session.flush()
+    return keys

@@ -1,4 +1,30 @@
-/* Post detail page: back link and title wrapping. */
+/*
+ * Post detail page: article width, back link, title wrapping.
+ *
+ * Card has no prop to drop its surface below a breakpoint, so the panel
+ * color is cleared here. 520px matches the header title hide in
+ * ``header.css`` (Radix Themes ``xs``).
+ */
+
+.app-post-detail-article {
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
+@media (width <= 519px) {
+  .app-post-detail-article {
+    --card-background-color: transparent;
+    --base-card-surface-box-shadow: none;
+
+    padding: 0;
+    border-radius: 0;
+  }
+
+  /* Surface Card draws its border as a 1px box-shadow on ``::after``. */
+  .app-post-detail-article::after {
+    box-shadow: none;
+  }
+}
 
 .app-post-detail-back {
   display: inline-block;
@@ -17,6 +43,6 @@
 }
 
 .app-post-detail-title {
-  margin-bottom: var(--space-2);
+  margin-bottom: 0;
   overflow-wrap: anywhere;
 }

@@ -6,7 +6,9 @@ Storage and AWS S3. Switching providers only needs new ``S3_*`` settings.
 """
 
 import json
+from collections.abc import Iterable
 from functools import lru_cache
+from typing import BinaryIO
 from urllib.parse import quote, urlsplit, urlunsplit
 
 import boto3
@@ -165,15 +167,26 @@ def _create_bucket(client: BaseClient) -> None:
     )
 
 
-def put_object(key: str, body: bytes, content_type: str) -> str:
-    """Store ``body`` and return its permanent public URL."""
-    get_internal_s3_client().put_object(
-        Bucket=settings.s3_bucket,
-        Key=key,
-        Body=body,
-        ContentType=content_type,
+def upload_fileobj(key: str, fileobj: BinaryIO, content_type: str) -> None:
+    """Stream ``fileobj`` to ``key`` without reading it into memory."""
+    get_internal_s3_client().upload_fileobj(
+        fileobj,
+        settings.s3_bucket,
+        key,
+        ExtraArgs={"ContentType": content_type},
     )
-    return public_object_url(key)
+
+
+def delete_objects(keys: Iterable[str]) -> None:
+    """Delete objects one by one.
+
+    The batch DeleteObjects call needs a request checksum, and recent
+    botocore sends a CRC32 one that some S3-compatible providers reject.
+    Posts have a handful of files, so single deletes are cheap.
+    """
+    client = get_internal_s3_client()
+    for key in keys:
+        client.delete_object(Bucket=settings.s3_bucket, Key=key)
 
 
 def presign_get_url(key: str, expires_in: int = PRESIGN_EXPIRES_IN) -> str:

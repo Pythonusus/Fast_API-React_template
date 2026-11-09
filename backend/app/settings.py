@@ -93,6 +93,18 @@ class Settings(BaseSettings):
         ),
     )
 
+    # Browser/nav title for the admin panel.
+    admin_title: ClassVar[str] = "Admin"
+
+    # Admin panel mount URL.
+    # Keep in sync with frontend/vite.config.ts and nginx.conf proxies.
+    # In a real app, change "/admin" to something less obvious (e.g.
+    # "/manage-x7k2") to cut bot noise. Not a security control — auth is.
+    admin_url_prefix: ClassVar[str] = "/admin"
+
+    # Admin panel default locale.
+    admin_default_locale: ClassVar[str] = "ru"
+
     # --- S3-compatible object storage (MinIO / Yandex / AWS S3) -------------
 
     s3_endpoint_url: str = Field(
@@ -157,18 +169,6 @@ class Settings(BaseSettings):
         ),
     )
 
-    # Browser/nav title for the admin panel.
-    admin_title: ClassVar[str] = "Admin"
-
-    # Admin panel mount URL.
-    # Keep in sync with frontend/vite.config.ts and nginx.conf proxies.
-    # In a real app, change "/admin" to something less obvious (e.g.
-    # "/manage-x7k2") to cut bot noise. Not a security control — auth is.
-    admin_url_prefix: ClassVar[str] = "/admin"
-
-    # Admin panel default locale.
-    admin_default_locale: ClassVar[str] = "ru"
-
     # Server-side session TTL in seconds when remember_me is false (1 hour).
     session_max_age: ClassVar[int] = 3600
 
@@ -186,10 +186,14 @@ class Settings(BaseSettings):
     # (API + admin) and a DB check constraint on ``posts.content``.
     post_content_max_length: ClassVar[int] = 100_000
 
-    # Max size of one image, audio, or video uploaded from the post editor.
+    # Max size of one post attachment or cover upload.
     # Nginx ``client_max_body_size`` on the API location must stay at least
     # this large, or the proxy rejects the upload before the app sees it.
     media_upload_max_bytes: ClassVar[int] = 32 * 1024 * 1024
+
+    # Max gallery attachments per post. A separately uploaded cover does
+    # not count toward this limit.
+    post_media_max_count: ClassVar[int] = 10
 
 
 # Shared instance; import validates config once at startup.

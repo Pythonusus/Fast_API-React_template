@@ -1,27 +1,39 @@
-"""Upload images, audio, and video from the admin post editor."""
+"""Upload post attachments and covers from the admin post form."""
 
-from pathlib import Path
+import asyncio
+from datetime import UTC, datetime, timedelta
+from pathlib import PurePath
+from typing import Literal
 from uuid import uuid4
 
-from fastapi import APIRouter, File, HTTPException, Request, UploadFile, status
-from fastapi.responses import FileResponse
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    UploadFile,
+    status,
+)
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.admin.auth import session_admin_username
+from app.db.engine import get_session
+from app.db.posts.models import PostMedia
+from app.schemas.posts import MediaRead
 from app.settings import settings
-from app.storage import put_object
+from app.storage import delete_objects, upload_fileobj
 
 router = APIRouter(prefix="/api/admin", tags=["admin-media"])
 
-_MEDIA_JS = (
-    Path(__file__).resolve().parents[1]
-    / "admin"
-    / "static"
-    / "tinymce-media.js"
-)
+# Uploads that were never saved with a post (form closed, file removed
+# before saving) are deleted once they are this old.
+PENDING_MEDIA_TTL = timedelta(days=1)
 
-# TinyMCE stores the returned URL in post HTML, so the type must be something
-# a browser can render. SVG is omitted: objects are served from this site's
-# host, and an SVG would run as a same-origin script.
+# Files are served from this site's host, so only types a browser renders
+# as media are allowed. SVG is omitted: it would run as same-origin script.
 _EXTENSIONS = {
     "image/jpeg": ".jpg",
     "image/png": ".png",
@@ -39,21 +51,47 @@ _EXTENSIONS = {
 }
 
 
-@router.get("/tinymce-media.js", include_in_schema=False)
-def tinymce_media_script() -> FileResponse:
-    """File-picker script for the post editor. Not a secret."""
-    return FileResponse(_MEDIA_JS, media_type="application/javascript")
+def _file_size(file: UploadFile) -> int:
+    if file.size is not None:
+        return file.size
+    file.file.seek(0, 2)
+    size = file.file.tell()
+    file.file.seek(0)
+    return size
 
 
-@router.post("/media")
+def _display_name(filename: str | None) -> str:
+    name = PurePath((filename or "").replace("\\", "/")).name
+    return name[:255] or "file"
+
+
+async def _delete_stale_pending(session: AsyncSession) -> None:
+    cutoff = datetime.now(UTC) - PENDING_MEDIA_TTL
+    result = await session.execute(
+        select(PostMedia).where(
+            PostMedia.post_id.is_(None),
+            PostMedia.created_at < cutoff,
+        )
+    )
+    stale = list(result.scalars().all())
+    if not stale:
+        return
+    for media in stale:
+        await session.delete(media)
+    await session.flush()
+    await asyncio.to_thread(delete_objects, [m.key for m in stale])
+
+
+@router.post("/media", response_model=MediaRead)
 async def upload_media(
     request: Request,
     file: UploadFile = File(...),
-) -> dict[str, str]:
-    """Store one file and return ``{"location": url}`` for TinyMCE.
+    purpose: Literal["attachment", "cover"] = Form("attachment"),
+    session: AsyncSession = Depends(get_session),
+) -> PostMedia:
+    """Store one file and return it. The post form attaches it on save.
 
-    Requires the same admin session cookie as ``/admin``. The URL does not
-    expire; the bucket allows anonymous reads of object bytes.
+    Requires the same admin session cookie as ``/admin``.
     """
     if session_admin_username(request) is None:
         raise HTTPException(
@@ -66,22 +104,43 @@ async def upload_media(
     if extension is None:
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail="Only images, audio, and video can be added to a post",
+            detail="Only images, audio, and video can be attached",
+        )
+    kind = content_type.split("/", 1)[0]
+    if purpose == "cover" and kind != "image":
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="A cover must be an image",
         )
 
-    body = await file.read()
-    if not body:
+    size = _file_size(file)
+    if size == 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Empty file",
         )
-    if len(body) > settings.media_upload_max_bytes:
+    if size > settings.media_upload_max_bytes:
         raise HTTPException(
             status_code=status.HTTP_413_CONTENT_TOO_LARGE,
             detail="File is too large",
         )
 
-    # Ignore the original filename. It is user-controlled and may contain
-    # path segments. The extension comes from the allowed content type.
+    await _delete_stale_pending(session)
+
+    # The key ignores the user-controlled filename; the extension comes
+    # from the allowed content type.
     key = f"posts/{uuid4().hex}{extension}"
-    return {"location": put_object(key, body, content_type)}
+    await asyncio.to_thread(upload_fileobj, key, file.file, content_type)
+
+    media = PostMedia(
+        key=key,
+        kind=kind,
+        content_type=content_type,
+        filename=_display_name(file.filename),
+        size=size,
+        is_attachment=purpose == "attachment",
+        is_cover=False,
+    )
+    session.add(media)
+    await session.flush()
+    return media

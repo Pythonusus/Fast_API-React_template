@@ -3,6 +3,7 @@ Pydantic schemas for posts CRUD operations.
 """
 
 from datetime import UTC, datetime
+from typing import Literal
 from zoneinfo import ZoneInfo
 
 from pydantic import (
@@ -13,6 +14,22 @@ from pydantic import (
 )
 
 from app.settings import settings
+
+
+class MediaRead(BaseModel):
+    """One stored image, video, or audio file (gallery item or cover)."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int = Field(..., examples=[1])
+    kind: Literal["image", "video", "audio"]
+    content_type: str = Field(..., examples=["image/jpeg"])
+    filename: str = Field(..., description="Original file name.")
+    url: str = Field(
+        ...,
+        description="Permanent public URL of the file.",
+        examples=["https://your-domain.com/s3/blog-media/posts/1a2b.jpg"],
+    )
 
 
 class PostBase(BaseModel):
@@ -109,6 +126,17 @@ class PostRead(PostBase):
         ...,
         description="When the post was last updated"
                     "(converted to app timezone).",
+    )
+    cover: MediaRead | None = Field(
+        default=None,
+        description="Optional cover image, shown above the post body.",
+    )
+    # Read from ``Post.gallery``, which leaves the cover out even when it
+    # was picked from the attachments.
+    media: list[MediaRead] = Field(
+        default_factory=list,
+        validation_alias="gallery",
+        description="Gallery attachments in display order, without the cover.",
     )
 
     # field_serializer runs when Pydantic turns this model into JSON

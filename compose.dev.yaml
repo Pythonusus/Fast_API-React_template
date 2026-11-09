@@ -16,11 +16,19 @@
 # API is proxied through Vite. Direct API: http://localhost:8080
 # S3_PUBLIC_URL inside the backend container is http://localhost:5173/s3/
 # so presigned URLs come back through the Vite /s3 proxy.
+#
+# Both dev images default to root. Their source directories are bind-mounted,
+# so files they create would be root-owned on the host. Each service runs as
+# HOST_UID:HOST_GID. `make docker-dev` exports them; 1000 is the usual WSL uid.
 
 services:
   backend:
     build:
       dockerfile: Dockerfile.backend.dev
+
+    # See the note above. The venv stays in the image at /opt/venv and is
+    # world-readable, so this user can run it without owning the image files.
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
 
     environment:
       # Session cookies stay usable on http://localhost.
@@ -67,6 +75,8 @@ services:
   frontend:
     build:
       dockerfile: Dockerfile.frontend.dev
+
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
 
     environment:
       DEV_BACKEND_URL: http://backend:8080

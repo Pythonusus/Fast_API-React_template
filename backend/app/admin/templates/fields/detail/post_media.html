@@ -1,0 +1,24 @@
+{% if data and data.cover %}
+    <div class="mb-2"><strong>Обложка</strong></div>
+    <img class="post-media-cover-image mb-3" src="{{ data.cover.url }}" alt="">
+{% endif %}
+{% if data and data.attachments %}
+    <div class="post-media-grid">
+        {% for media in data.attachments %}
+            <div class="post-media-item{% if data.cover and media.id == data.cover.id %} is-cover{% endif %}">
+                {% if media.kind == "image" %}
+                    <a href="{{ media.url }}" target="_blank" rel="noopener"><img src="{{ media.url }}" alt="{{ media.filename }}" loading="lazy"></a>
+                {% elif media.kind == "video" %}
+                    <video src="{{ media.url }}" controls preload="metadata"></video>
+                {% else %}
+                    <div class="post-media-audio">
+                        <span class="post-media-name">{{ media.filename }}</span>
+                        <audio src="{{ media.url }}" controls preload="none"></audio>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+{% elif not (data and data.cover) %}
+    <span class="text-secondary">Нет медиа</span>
+{% endif %}

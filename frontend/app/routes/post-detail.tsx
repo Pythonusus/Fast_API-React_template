@@ -7,13 +7,15 @@
  * States: loading, not found (invalid id or backend 404), error, and loaded.
  */
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
-import { Flex, Heading, Section, Text } from "@radix-ui/themes";
+import { Card, Flex, Heading, Section, Text } from "@radix-ui/themes";
 import type { MetaFunction } from "react-router";
 import { Link, useParams } from "react-router";
 
 import { BACKEND_UNAVAILABLE_HINT } from "~/common-texts/errors";
 import { LOADING } from "~/common-texts/ui";
 import { PostContent } from "~/components/post-content";
+import { PostGallery } from "~/components/post-gallery";
+import { ShareButton } from "~/components/ui/share-button";
 import { usePost } from "~/hooks/use-post";
 import { formatDate } from "~/utils/format-date";
 
@@ -30,6 +32,25 @@ export const meta: MetaFunction = () => [
     content: "Read a single post.",
   },
 ];
+
+/** Date line and share control under the body and gallery. */
+const PostDetailFooter = ({
+  createdAt,
+  title,
+  updatedAt,
+}: {
+  createdAt: string;
+  title: string;
+  updatedAt: string;
+}) => (
+  <Flex align="center" justify="between" mt="5" width="100%">
+    <ShareButton title={title} />
+    <Text as="p" color="gray" size="2">
+      <time dateTime={createdAt}>{formatDate(createdAt)}</time>
+      {updatedAt === createdAt ? null : <> · Updated {formatDate(updatedAt)}</>}
+    </Text>
+  </Flex>
+);
 
 /** Parse the URL segment; ``null`` unless it is a positive integer. */
 const parsePostId = (value: string | undefined): number | null => {
@@ -82,22 +103,22 @@ const PostDetailRoute = () => {
       ) : null}
 
       {post ? (
-        <article>
-          <header className="app-post-detail-header">
-            <Heading as="h1" className="app-post-detail-title" size="8">
-              {post.title}
-            </Heading>
-            <Text as="p" color="gray" size="2">
-              <time dateTime={post.created_at}>
-                {formatDate(post.created_at)}
-              </time>
-              {post.updated_at === post.created_at ? null : (
-                <> · Updated {formatDate(post.updated_at)}</>
-              )}
-            </Text>
-          </header>
-          <PostContent html={post.content} />
-        </article>
+        <Card asChild size="3">
+          <article className="app-post-detail-article">
+            <header className="app-post-detail-header">
+              <Heading as="h1" className="app-post-detail-title" size="8">
+                {post.title}
+              </Heading>
+            </header>
+            <PostContent html={post.content} />
+            <PostGallery media={post.media} />
+            <PostDetailFooter
+              createdAt={post.created_at}
+              title={post.title}
+              updatedAt={post.updated_at}
+            />
+          </article>
+        </Card>
       ) : null}
     </Section>
   );

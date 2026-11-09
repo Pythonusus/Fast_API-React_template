@@ -33,6 +33,17 @@ export const POSTS_ORDER_BY_VALUES = POSTS_SORT_OPTIONS.map(
 /** Default ``order_by`` for list requests (newest first). */
 export const DEFAULT_POSTS_ORDER_BY: PostsOrderBy = POSTS_SORT_OPTIONS[0].value;
 
+/** Image, video, or audio file attached to a post (backend ``MediaRead``). */
+export const mediaSchema = z.object({
+  id: z.number(),
+  kind: z.enum(["image", "video", "audio"]),
+  content_type: z.string(),
+  filename: z.string(),
+  url: z.string(),
+});
+
+export type Media = z.infer<typeof mediaSchema>;
+
 /** Single post from ``GET /api/posts/{id}`` or a list item. */
 export const postSchema = z.object({
   id: z.number(),
@@ -40,6 +51,9 @@ export const postSchema = z.object({
   content: z.string(),
   created_at: z.string(),
   updated_at: z.string(),
+  cover: mediaSchema.nullable(),
+  /** Gallery in display order. Never includes the cover. */
+  media: z.array(mediaSchema),
 });
 
 export type Post = z.infer<typeof postSchema>;

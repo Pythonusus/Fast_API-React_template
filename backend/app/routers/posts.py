@@ -13,6 +13,8 @@ List endpoint query params (fastapi-filter ``PostFilter``):
 - ``created_at__gte`` / ``created_at__lte`` — inclusive date range
 """
 
+import asyncio
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi_filter import FilterDepends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,6 +30,7 @@ from app.schemas.posts import (
     PostUpdate,
 )
 from app.settings import settings
+from app.storage import delete_objects
 
 # prefix is shared by every route below; tags group them in OpenAPI docs.
 router = APIRouter(prefix="/api/posts", tags=["posts"])
@@ -137,4 +140,7 @@ async def delete_post(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Post not found",
         )
-    await crud.delete_post(session, post)
+    keys = await crud.delete_post(session, post)
+    await session.commit()
+    if keys:
+        await asyncio.to_thread(delete_objects, keys)

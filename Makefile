@@ -32,11 +32,19 @@ help:
 	@echo ""
 	@echo "DOCKER:"
 	@echo "  make docker-build         Build all services"
-	@echo "  make docker-start         Start all services"
+	@echo "  make docker-start         Start all services (app on \$${PORT:-8100})"
 	@echo "  make docker-stop          Stop all services"
 	@echo "  make docker-down          Stop and remove all services"
 	@echo "  make docker-dev           Start dev stack with live reload (http://localhost:5173)"
 	@echo "  make docker-dev-down      Stop the dev stack"
+	@echo "  make docker-shell-frontend  Shell in the frontend container"
+	@echo "  make docker-shell-backend   Shell in the backend container"
+	@echo "  make docker-shell-db        Shell in the Postgres container"
+	@echo "  make docker-shell-minio     Shell in the MinIO container"
+	@echo ""
+	@echo "  MinIO console is on the host loopback only: http://127.0.0.1:9001"
+	@echo "  Login is S3_ACCESS_KEY / S3_SECRET_KEY. On a VPS, tunnel it:"
+	@echo "  ssh -N -L 9001:127.0.0.1:9001 user@your-vps"
 
 # ===== COMMON =====
 
@@ -145,9 +153,29 @@ docker-stop:
 docker-down:
 	docker compose down
 
+# Open a shell in the frontend container
+# Using sh instead of bash because alpine doesn't have bash by default
+docker-shell-frontend:
+	docker compose exec frontend sh
+
+# Open a shell in the backend container
+# Using sh instead of bash because alpine doesn't have bash by default
+docker-shell-backend:
+	docker compose exec backend sh
+
+# Open a shell in the db container
+# Using sh instead of bash because alpine doesn't have bash by default
+docker-shell-db:
+	docker compose exec db sh
+
+# Open a shell in the minio container
+# Using sh instead of bash because alpine doesn't have bash by default
+docker-shell-minio:
+	docker compose exec minio sh
+
 # Dev stack: Vite + fastapi dev, source bind-mounted. See compose.dev.yaml.
 docker-dev:
-	docker compose -f compose.yaml -f compose.dev.yaml up --build
+	HOST_UID=$$(id -u) HOST_GID=$$(id -g) docker compose -f compose.yaml -f compose.dev.yaml up --build
 
 # Stop the dev stack. Named volumes (db, minio) stay.
 docker-dev-down:
@@ -162,4 +190,6 @@ docker-dev-down:
 	      install-frontend build-frontend \
 	      lint-frontend fix-frontend start-frontend \
 	      docker-build docker-start docker-stop docker-down \
+	      docker-shell-frontend docker-shell-backend \
+	      docker-shell-db docker-shell-minio \
 	      docker-dev docker-dev-down

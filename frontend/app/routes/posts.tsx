@@ -11,7 +11,7 @@
  *   Hydration  → Hook fetches page 1 from the backend
  *   On error   → Shows error message; the app does not crash entirely
  */
-import { Grid, Heading, Section, Text } from "@radix-ui/themes";
+import { Box, Flex, Grid, Heading, Section, Text } from "@radix-ui/themes";
 import type { CSSProperties } from "react";
 import type { MetaFunction } from "react-router";
 import { Link } from "react-router";
@@ -22,6 +22,7 @@ import { PostContent } from "~/components/post-content";
 import { PostsToolbar } from "~/components/posts-toolbar";
 import { CardBase } from "~/components/ui/card-base";
 import { Pagination } from "~/components/ui/pagination";
+import { ShareButton } from "~/components/ui/share-button";
 import { usePosts } from "~/hooks/use-posts";
 import { formatDate } from "~/utils/format-date";
 
@@ -138,7 +139,7 @@ const PostsRoute = () => {
                 <Heading
                   as="h2"
                   className="app-posts-card-title"
-                  mb="2"
+                  mb="3"
                   size="4"
                 >
                   <Link
@@ -148,13 +149,33 @@ const PostsRoute = () => {
                     {post.title}
                   </Link>
                 </Heading>
-                <Text as="p" color="gray" mb="3" size="2">
-                  {formatDate(post.created_at)}
-                </Text>
+                {post.cover ? (
+                  <Box mb="3">
+                    <img
+                      alt=""
+                      className="app-posts-card-cover"
+                      loading="lazy"
+                      src={post.cover.url}
+                    />
+                  </Box>
+                ) : null}
                 <PostContent
                   className="app-posts-card-body"
                   html={post.content}
                 />
+                <Flex align="center" justify="between" mt="3" width="100%">
+                  <ShareButton
+                    className="app-posts-card-share"
+                    size="1"
+                    title={post.title}
+                    url={`/posts/${post.id}`}
+                  />
+                  <Text as="p" color="gray" size="2">
+                    <time dateTime={post.created_at}>
+                      {formatDate(post.created_at)}
+                    </time>
+                  </Text>
+                </Flex>
               </CardBase>
             );
           })}

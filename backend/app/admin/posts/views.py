@@ -22,11 +22,13 @@ Mirror this package (same layout as ``app.db.<entity>``):
 No auth or SessionMiddleware changes are needed — those are shared.
 """
 
+import asyncio
 from typing import Any
 
 from pydantic import ValidationError
 from starlette.requests import Request
 from starlette_admin.contrib.sqla import ModelView
+from starlette_admin.exceptions import FormValidationError
 from starlette_admin.fields import (
     DateTimeField,
     IntegerField,
@@ -35,23 +37,12 @@ from starlette_admin.fields import (
 )
 from starlette_admin.helpers import pydantic_error_to_form_validation_errors
 
-from app.db.posts.models import Post
+from app.admin.posts.media_field import PostMediaField
+from app.db.posts import crud
+from app.db.posts.models import MediaSelection, Post
 from app.schemas.posts import PostCreate
-
-# Served by app.routers.admin_media. Loaded after TinyMCE so it can wrap
-# the jQuery plugin before form.js initializes the editor.
-_MEDIA_UPLOAD_JS = "/api/admin/tinymce-media.js"
-_MEDIA_UPLOAD_URL = "/api/admin/media"
-
-
-class _PostContentField(TinyMCEEditorField):
-    """TinyMCE plus the upload script. JSON options cannot hold a function."""
-
-    def additional_js_links(self, request: Request) -> list[str]:
-        links = super().additional_js_links(request)
-        if not links:
-            return links
-        return [*links, _MEDIA_UPLOAD_JS]
+from app.settings import settings
+from app.storage import delete_objects
 
 
 class PostAdmin(ModelView):
@@ -96,10 +87,9 @@ class PostAdmin(ModelView):
         # focusable". Emptiness is still enforced in validate() via PostCreate.
         #
         # Toolbar + plugins are the open-source TinyMCE 6 set (jsDelivr CDN,
-        # no Tiny Cloud API key). Image and media uploads go to
-        # /api/admin/media; the URL stored in the HTML is the public object
-        # URL, so it does not expire with a presigned signature.
-        _PostContentField(
+        # no Tiny Cloud API key). Images, video, and audio go to the media
+        # gallery below, not into the HTML.
+        TinyMCEEditorField(
             "content",
             label="Содержание",
             height=420,
@@ -112,29 +102,30 @@ class PostAdmin(ModelView):
                 "alignleft aligncenter alignright alignjustify | "
                 "bullist numlist outdent indent | "
                 "blockquote subscript superscript | "
-                "link unlink image media charmap emoticons hr | "
+                "link unlink charmap emoticons hr | "
                 "removeformat | searchreplace visualblocks code fullscreen "
                 "preview | help"
             ),
             extra_options={
                 "plugins": (
-                    "advlist autolink lists link image media charmap preview "
-                    "anchor searchreplace visualblocks code fullscreen "
-                    "insertdatetime emoticons help wordcount"
+                    "advlist autolink lists link charmap preview anchor "
+                    "searchreplace visualblocks code fullscreen insertdatetime "
+                    "emoticons help wordcount"
                 ),
                 "toolbar_mode": "sliding",
                 "branding": False,
                 "promotion": False,
                 "link_default_target": "_blank",
                 "link_assume_external_targets": True,
-                "images_upload_url": _MEDIA_UPLOAD_URL,
-                "images_upload_credentials": True,
-                "automatic_uploads": True,
-                # Keep the absolute public URL. A relative rewrite would
-                # point at /admin/... instead of the storage prefix.
-                "convert_urls": False,
+                # Pasted or dropped images would otherwise land in the HTML
+                # as base64. Embedded media is stripped from source edits.
+                "paste_data_images": False,
+                "invalid_elements": (
+                    "img,picture,video,audio,source,iframe,object,embed"
+                ),
             },
         ),
+        PostMediaField("media_selection", label="Медиа"),
         DateTimeField("created_at", read_only=True, label="Создан"),
         DateTimeField("updated_at", read_only=True, label="Обновлён"),
     ]
@@ -174,6 +165,15 @@ class PostAdmin(ModelView):
         Admin writes the ORM directly and does not run Pydantic unless we
         call it here. ``nullable=False`` on the model still allows ``""``.
         """
+        selection = data.get("media_selection")
+        max_count = settings.post_media_max_count
+        if (
+            isinstance(selection, MediaSelection)
+            and len(selection.attachments) > max_count
+        ):
+            raise FormValidationError(
+                {"media_selection": f"Не больше {max_count} вложений"}
+            )
         try:
             PostCreate.model_validate(
                 {
@@ -249,6 +249,17 @@ class PostAdmin(ModelView):
         """
         print(f"[ADMIN] Post updated: ID={obj.id}, Title={obj.title}")
 
+    async def after_edit_committed(self, request: Request, obj: Post) -> None:
+        """
+        Called after the edit transaction is committed.
+
+        Deletes storage objects of attachments or covers removed in the
+        form. Done only after the commit, so a failed save keeps the files.
+        """
+        keys = getattr(obj, "removed_media_keys", [])
+        if keys:
+            await asyncio.to_thread(delete_objects, keys)
+
     async def before_delete(
         self,
         request: Request,
@@ -262,6 +273,12 @@ class PostAdmin(ModelView):
             obj: Model instance being deleted
         """
         print(f"[ADMIN] Deleting post: ID={obj.id}, Title={obj.title}")
+        # Rows go with the post (FK cascade). Keys come from the table,
+        # not obj.media: that collection is often empty here because of
+        # passive_deletes. Files are removed in after_delete_committed.
+        obj.removed_media_keys = await crud.list_media_keys(
+            request.state.session, obj.id
+        )
 
     async def after_delete(
         self,
@@ -276,3 +293,9 @@ class PostAdmin(ModelView):
             obj: Deleted model instance
         """
         print(f"[ADMIN] Post deleted: ID={obj.id}")
+
+    async def after_delete_committed(self, request: Request, obj: Post) -> None:
+        """Delete the post's files once the row deletion is committed."""
+        keys = getattr(obj, "removed_media_keys", [])
+        if keys:
+            await asyncio.to_thread(delete_objects, keys)
