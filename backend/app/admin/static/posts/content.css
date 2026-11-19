@@ -1,0 +1,29 @@
+/*
+ * Post body on the admin detail page.
+ *
+ * The create/edit form caps media inside the TinyMCE iframe (content_style
+ * on PostContentField). This page renders the saved HTML directly, so the
+ * same cap lives here. 32rem matches frontend/app/styles/inner-html.css.
+ */
+
+.post-content-detail img,
+.post-content-detail video,
+.post-content-detail audio {
+  display: block;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.post-content-detail img,
+.post-content-detail video {
+  width: auto;
+  height: auto;
+  max-height: 32rem;
+  margin-inline: auto;
+  object-fit: contain;
+}
+
+.post-content-detail video,
+.post-content-detail audio {
+  width: 100%;
+}

@@ -2,11 +2,12 @@
  * Renders post body HTML from the API (TinyMCE / admin output).
  *
  * Uses the shared ``app-inner-html`` class from ``~/styles/inner-html.css``
- * so other HTML-bearing components can reuse the same prose rules.
+ * so other HTML-bearing components can reuse the same prose rules. That
+ * stylesheet also fits embedded S3 ``img`` / ``video`` / ``audio`` to the
+ * column width.
  *
- * HTML is sanitized with nh3 on the backend before storage/serve. This
- * component does not sanitize again — do not pass unsanitized or untrusted
- * markup here.
+ * Markup comes from the trusted admin editor. Do not pass unsanitized or
+ * untrusted HTML here.
  */
 
 export type PostContentProps = {

@@ -149,6 +149,15 @@
   line-clamp: 6;
 }
 
+/*
+ * List cards clamp text height. Embedded media at the start (or inside the
+ * clamp) breaks the line box and can cause horizontal overflow — hide it
+ * here; the detail page still shows embeds and the optional gallery.
+ */
+.app-posts-card-body.app-inner-html :is(img, video, audio, figure) {
+  display: none;
+}
+
 .app-posts-card-body.app-inner-html > :last-child {
   margin-bottom: 0;
 }

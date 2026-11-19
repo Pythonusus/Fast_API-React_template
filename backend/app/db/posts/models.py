@@ -72,6 +72,16 @@ class Post(Base):
             f"Max {settings.post_content_max_length} characters."
         ),
     )
+    show_gallery: Mapped[bool] = mapped_column(
+        default=True,
+        server_default="true",
+        nullable=False,
+        comment=(
+            "When true, gallery attachments are shown below the body on "
+            "the post detail page. When false, media is only visible when "
+            "embedded in the HTML body."
+        ),
+    )
 
     # Timezone-aware timestamps (Postgres TIMESTAMPTZ).
     # timezone=True means the column stores an absolute instant; Postgres

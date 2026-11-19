@@ -228,7 +228,7 @@ def test_after_delete_committed_removes_storage_objects(monkeypatch):
 def test_post_read_returns_cover_and_gallery_without_it():
     a, b = _media(1), _media(2)
     now = datetime.now(UTC)
-    post = Post(id=1, title="Title", content="<p>x</p>")
+    post = Post(id=1, title="Title", content="<p>x</p>", show_gallery=True)
     post.created_at = post.updated_at = now
     post.media_selection = MediaSelection(attachments=[a, b], cover=a)
 
@@ -236,3 +236,16 @@ def test_post_read_returns_cover_and_gallery_without_it():
 
     assert data["cover"]["id"] == 1
     assert [m["id"] for m in data["media"]] == [2]
+    assert data["show_gallery"] is True
+
+
+def test_post_read_can_hide_gallery_flag():
+    now = datetime.now(UTC)
+    post = Post(
+        id=1, title="Title", content="<p>x</p>", show_gallery=False
+    )
+    post.created_at = post.updated_at = now
+
+    data = PostRead.model_validate(post).model_dump()
+
+    assert data["show_gallery"] is False

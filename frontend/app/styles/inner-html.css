@@ -12,8 +12,9 @@
  * - Tags inside the HTML are not Radix ``Text``/``Heading``, so they need their
  *   own spacing, links, and media rules under this scoped class.
  *
- * Keep this in sync with the TinyMCE toolbar in
- * ``backend/app/admin/posts/views.py`` (headings, tables, code, hr, …).
+ * Keep this in sync with the TinyMCE toolbar / embeds in
+ * ``backend/app/admin/posts/views.py`` (headings, tables, code, hr,
+ * gallery-dragged img/video/audio, …).
  *
  * Loaded globally from ``root.tsx`` with ``app.css`` and ``themes.css``.
  */
@@ -95,10 +96,34 @@
   text-decoration: underline;
 }
 
-/* Editor images must not overflow the layout width. */
-.app-inner-html img {
+/*
+ * Embedded media (S3 gallery drops from admin) must fit the post column.
+ * Width and height are both capped. ``width``/``height: auto`` plus
+ * ``object-fit: contain`` keep the intrinsic ratio when a tall image hits
+ * the height cap. Keep the lengths in sync with TinyMCE ``content_style``
+ * in ``backend/app/admin/posts/views.py``.
+ */
+.app-inner-html img,
+.app-inner-html video,
+.app-inner-html audio {
+  display: block;
+  box-sizing: border-box;
   max-width: 100%;
+  margin: 0 0 var(--space-3);
+}
+
+.app-inner-html img,
+.app-inner-html video {
+  width: auto;
   height: auto;
+  max-height: 32rem;
+  margin-inline: auto;
+  object-fit: contain;
+}
+
+.app-inner-html video,
+.app-inner-html audio {
+  width: 100%;
 }
 
 .app-inner-html hr {

@@ -25,7 +25,9 @@ from app.db.engine import engine
 from app.db.posts.models import Post
 from app.settings import settings
 
-# Project templates and static files, checked before the built-in ones.
+# Custom templates and static files for every admin model, one folder
+# per model (``templates/posts``, ``static/posts``). Checked before the
+# built-in starlette-admin files.
 ADMIN_DIR = Path(__file__).resolve().parent
 
 

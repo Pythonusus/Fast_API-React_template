@@ -111,7 +111,7 @@ const PostDetailRoute = () => {
               </Heading>
             </header>
             <PostContent html={post.content} />
-            <PostGallery media={post.media} />
+            {post.show_gallery ? <PostGallery media={post.media} /> : null}
             <PostDetailFooter
               createdAt={post.created_at}
               title={post.title}

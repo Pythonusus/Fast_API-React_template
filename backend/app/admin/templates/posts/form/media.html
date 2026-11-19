@@ -36,10 +36,11 @@
         </div>
         <div class="card-body">
             <label class="post-media-dropzone" data-post-media-dropzone>
-                <span>Перетащите изображения, видео или аудио сюда или нажмите, чтобы выбрать</span>
+                <span>Перетащите изображения, видео, GIF или аудио сюда или нажмите, чтобы выбрать</span>
                 <small class="text-secondary">
                     До {{ field.max_count }} файлов, каждый до {{ (field.max_bytes / 1048576) | round | int }} МБ.
-                    Перетаскивайте миниатюры, чтобы изменить порядок.
+                    Перетащите миниатюру в текст поста, чтобы вставить, или на другую миниатюру — чтобы изменить порядок.
+                    Кнопка «В текст» вставляет. На телефоне перетащите изображение на другое, чтобы изменить порядок.
                 </small>
                 <input type="file" multiple hidden data-post-media-input
                        accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/ogg,video/quicktime,audio/mpeg,audio/mp4,audio/ogg,audio/wav,audio/webm">

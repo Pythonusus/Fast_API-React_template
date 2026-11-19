@@ -64,6 +64,14 @@ class PostBase(BaseModel):
         ),
         examples=["<p>Hello from <strong>TinyMCE</strong>.</p>"],
     )
+    show_gallery: bool = Field(
+        default=True,
+        description=(
+            "When true, gallery attachments are listed below the body on "
+            "the detail page. When false, media is only shown if embedded "
+            "in the HTML body."
+        ),
+    )
 
 
 class PostCreate(PostBase):
@@ -97,6 +105,14 @@ class PostUpdate(PostBase):
             f"Max {settings.post_content_max_length} characters."
         ),
         examples=["<p>Hello from <strong>TinyMCE</strong>.</p>"],
+    )
+    show_gallery: bool | None = Field(
+        default=None,
+        description=(
+            "When true, gallery attachments are listed below the body on "
+            "the detail page. When false, media is only shown if embedded "
+            "in the HTML body."
+        ),
     )
 
 

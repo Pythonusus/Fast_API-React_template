@@ -1,0 +1,39 @@
+/*
+ * Post create, edit, and detail only.
+ *
+ * The public article is 1000px wide
+ * (frontend/app/routes/post-detail.css). container-xl is border-box and
+ * pads by --tblr-page-padding, so the card inside this max-width is 1000px.
+ */
+
+.page-header > .container-xl,
+.page-body > .container-xl {
+  max-width: calc(1000px + var(--tblr-page-padding) * 2);
+}
+
+/*
+ * Cancel and the three save actions. A phone gives each button the full
+ * row so the long labels fit. From 480px they share two columns. Wider
+ * screens keep the original end-aligned row.
+ */
+@media (max-width: 767px) {
+  .card-footer .btn-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+    margin-left: 0 !important;
+  }
+
+  .card-footer .btn-list > .btn {
+    width: 100%;
+    margin: 0;
+    text-align: center;
+    white-space: normal;
+  }
+}
+
+@media (min-width: 480px) and (max-width: 767px) {
+  .card-footer .btn-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}

@@ -2,7 +2,7 @@
 Admin form field for a post's gallery attachments and cover.
 
 Files are uploaded right away to ``/api/admin/media`` by
-``static/js/post-media.js``, which creates unattached ``PostMedia`` rows.
+``static/posts/media.js``, which creates unattached ``PostMedia`` rows.
 The form then submits two hidden inputs:
 
 - ``media_selection``: JSON list of attachment ids in gallery order
@@ -19,7 +19,7 @@ from typing import Any
 from sqlalchemy import or_, select
 from starlette.datastructures import FormData
 from starlette.requests import Request
-from starlette_admin.fields import BaseField
+from starlette_admin.fields import BaseField, BooleanField
 from starlette_admin.helpers import static_url
 from starlette_admin.types import RequestAction
 
@@ -27,6 +27,16 @@ from app.db.posts.models import MediaSelection, PostMedia
 from app.settings import settings
 
 UPLOAD_URL = "/api/admin/media"
+
+
+@dataclass
+class ShowGalleryField(BooleanField):
+    """Gallery toggle; checked by default on the create form."""
+
+    async def serialize_value(self, request: Request, value: Any) -> bool:
+        if value is None:
+            return True
+        return bool(value)
 
 
 def _parse_id(raw: Any) -> int | None:
@@ -59,8 +69,8 @@ def _media_json(media: PostMedia) -> dict[str, Any]:
 
 @dataclass
 class PostMediaField(BaseField):
-    form_template: str = "fields/form/post_media.html"
-    detail_template: str = "fields/detail/post_media.html"
+    form_template: str = "posts/form/media.html"
+    detail_template: str = "posts/detail/media.html"
     exclude_from_list: bool | None = True
     exclude_from_export: bool | None = True
     exclude_from_import: bool | None = True
@@ -126,9 +136,9 @@ class PostMediaField(BaseField):
         }
 
     def additional_css_links(self, request: Request) -> list[str]:
-        return [static_url(request, "css/post-media.css", v=1)]
+        return [static_url(request, "posts/media.css", v=18)]
 
     def additional_js_links(self, request: Request) -> list[str]:
         if self._needs_form_assets(request):
-            return [static_url(request, "js/post-media.js", v=1)]
+            return [static_url(request, "posts/media.js", v=8)]
         return []

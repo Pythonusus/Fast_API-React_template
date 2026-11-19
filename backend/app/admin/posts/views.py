@@ -23,6 +23,8 @@ No auth or SessionMiddleware changes are needed — those are shared.
 """
 
 import asyncio
+import re
+from dataclasses import dataclass
 from typing import Any
 
 from pydantic import ValidationError
@@ -35,14 +37,66 @@ from starlette_admin.fields import (
     StringField,
     TinyMCEEditorField,
 )
-from starlette_admin.helpers import pydantic_error_to_form_validation_errors
+from starlette_admin.helpers import (
+    pydantic_error_to_form_validation_errors,
+    static_url,
+)
+from starlette_admin.types import RequestAction
 
-from app.admin.posts.media_field import PostMediaField
+from app.admin.posts.media_field import PostMediaField, ShowGalleryField
 from app.db.posts import crud
 from app.db.posts.models import MediaSelection, Post
 from app.schemas.posts import PostCreate
 from app.settings import settings
 from app.storage import delete_objects
+
+# datetime-local accepts no fraction, or exactly three millisecond digits.
+_DATETIME_FRACTION = re.compile(r"\.(\d+)")
+
+
+def _datetime_local_value(value: str) -> str:
+    """Drop extra fraction digits so a datetime-local input keeps the value."""
+
+    def trim(match: re.Match[str]) -> str:
+        millis = match.group(1)[:3].ljust(3, "0")
+        if millis == "000":
+            return ""
+        return f".{millis}"
+
+    return _DATETIME_FRACTION.sub(trim, value, count=1)
+
+
+@dataclass
+class PostDateTimeField(DateTimeField):
+    """Read-only timestamp whose edit value fits a datetime-local input.
+
+    Python's ``isoformat`` writes six fractional digits. The browser rejects
+    that and logs a format warning, so the form value stops at milliseconds.
+    """
+
+    # Milliseconds. The input default step is whole minutes.
+    step: str = "0.001"
+
+    async def serialize_value(self, request: Request, value: Any) -> str:
+        result = await super().serialize_value(request, value)
+        if request.state.action.is_form():
+            return _datetime_local_value(result)
+        return result
+
+
+@dataclass
+class PostContentField(TinyMCEEditorField):
+    """Post body.
+
+    The detail page is outside the TinyMCE iframe, so it loads its own cap.
+    """
+
+    detail_template: str = "posts/detail/content.html"
+
+    def additional_css_links(self, request: Request) -> list[str]:
+        if request.state.action == RequestAction.DETAIL:
+            return [static_url(request, "posts/content.css", v=2)]
+        return []
 
 
 class PostAdmin(ModelView):
@@ -87,12 +141,13 @@ class PostAdmin(ModelView):
         # focusable". Emptiness is still enforced in validate() via PostCreate.
         #
         # Toolbar + plugins are the open-source TinyMCE 6 set (jsDelivr CDN,
-        # no Tiny Cloud API key). Images, video, and audio go to the media
-        # gallery below, not into the HTML.
-        TinyMCEEditorField(
+        # no Tiny Cloud API key). Gallery files below can be dragged into the
+        # body to embed S3 media; raw file drops stay blocked (no base64).
+        PostContentField(
             "content",
             label="Содержание",
-            height=420,
+            # Tall enough to draft in without dragging the status bar.
+            height=900,
             menubar="file edit view insert format tools help",
             statusbar=True,
             toolbar=(
@@ -106,6 +161,22 @@ class PostAdmin(ModelView):
                 "removeformat | searchreplace visualblocks code fullscreen "
                 "preview | help"
             ),
+            content_style=(
+                "body { font-family: -apple-system, BlinkMacSystemFont, "
+                "San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif; "
+                "font-size: 14px; -webkit-font-smoothing: antialiased; } "
+                "img, video, audio { max-width: 100%; display: block; "
+                "margin: 0.75em 0; } "
+                # Same cap as ``.app-inner-html`` and
+                # ``static/posts/content.css`` (the admin detail page).
+                # width/height auto and object-fit
+                # keep the ratio when a tall image hits 32rem.
+                # The video/audio rule below still stretches players to the
+                # column; object-fit stops that from squashing the picture.
+                "img, video { width: auto; height: auto; max-height: 32rem; "
+                "margin-inline: auto; object-fit: contain; } "
+                "video, audio { width: 100%; }"
+            ),
             extra_options={
                 "plugins": (
                     "advlist autolink lists link charmap preview anchor "
@@ -113,21 +184,37 @@ class PostAdmin(ModelView):
                     "emoticons help wordcount"
                 ),
                 "toolbar_mode": "sliding",
+                # A phone ignores the desktop mode and scrolls the toolbar
+                # sideways. Sliding keeps one row and a button for the rest.
+                "mobile": {"toolbar_mode": "sliding"},
                 "branding": False,
                 "promotion": False,
                 "link_default_target": "_blank",
                 "link_assume_external_targets": True,
-                # Pasted or dropped images would otherwise land in the HTML
-                # as base64. Embedded media is stripped from source edits.
+                # Pasted or dropped local files must not become base64 in HTML.
+                # Gallery embeds are inserted by ``static/posts/media.js``.
                 "paste_data_images": False,
-                "invalid_elements": (
-                    "img,picture,video,audio,source,iframe,object,embed"
+                "block_unsupported_drop": True,
+                "extended_valid_elements": (
+                    "img[src|alt|width|height|class],"
+                    "video[src|controls|playsinline|width|height|class|preload],"
+                    "audio[src|controls|class|preload]"
                 ),
+                # Keep foreign embeds out; S3 gallery media is fine.
+                "invalid_elements": "iframe,object,embed,picture,source",
             },
         ),
         PostMediaField("media_selection", label="Медиа"),
-        DateTimeField("created_at", read_only=True, label="Создан"),
-        DateTimeField("updated_at", read_only=True, label="Обновлён"),
+        ShowGalleryField(
+            "show_gallery",
+            label="Показывать галерею",
+            help_text=(
+                "Если выключено, вложения на странице поста не дублируются "
+                "галереей — только то, что вставлено в текст."
+            ),
+        ),
+        PostDateTimeField("created_at", read_only=True, label="Создан"),
+        PostDateTimeField("updated_at", read_only=True, label="Обновлён"),
     ]
 
     # Auto-managed fields — hide on create
@@ -137,6 +224,20 @@ class PostAdmin(ModelView):
     exclude_fields_from_edit = ["id", "created_at"]
 
     # -------------------------------------------------------------------------
+    def _additional_css_links(self, request: Request) -> list[str]:
+        """Narrow create, edit, and detail to the public post column."""
+        links = list(super()._additional_css_links(request))
+        action = request.state.action
+        if action in (
+            RequestAction.CREATE,
+            RequestAction.EDIT,
+            RequestAction.DETAIL,
+        ):
+            link = static_url(request, "posts/layout.css", v=2)
+            if link not in links:
+                links.append(link)
+        return links
+
     # Framework hooks — override fixed method names; the admin panel calls them.
     # You do not register these yourself (no decorator / no add_hook).
     #
@@ -179,6 +280,7 @@ class PostAdmin(ModelView):
                 {
                     "title": data.get("title") or "",
                     "content": data.get("content") or "",
+                    "show_gallery": data.get("show_gallery", True),
                 }
             )
         except ValidationError as exc:

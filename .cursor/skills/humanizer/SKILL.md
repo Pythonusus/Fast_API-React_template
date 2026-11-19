@@ -2,6 +2,7 @@
 name: humanizer
 description: Detects 55 AI writing patterns and rewrites text in five voice profiles so it reads like a specific human wrote it, with an optional 0-100 AI-tell score. Use when text sounds AI-generated or like a chatbot, when preparing a blog post, README, or LinkedIn post for publication, when auditing prose for AI tells, or when editing a Markdown file in place. Triggers on phrases like "humanize this", "make this sound less AI", "make this sound human", "remove AI tells", "does this read like ChatGPT", and "rewrite so it does not sound AI-generated". Pure Markdown, zero dependencies, no network calls.
 user-invocable: true
+disable-model-invocation: true
 argument-hint: '"your text" [--mode detect|rewrite|edit] [--voice casual|professional|technical|warm|blunt] [--file path/to/file.md] [--aggressive] [--iterate N] [--score] [--purpose essay|email|marketing|technical|general] [--openings N] [--ignore-code] [--ignore-quotes]'
 allowed-tools:
   - Read

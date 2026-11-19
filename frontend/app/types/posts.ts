@@ -51,6 +51,8 @@ export const postSchema = z.object({
   content: z.string(),
   created_at: z.string(),
   updated_at: z.string(),
+  /** When false, detail page hides the gallery; embeds in body still show. */
+  show_gallery: z.boolean(),
   cover: mediaSchema.nullable(),
   /** Gallery in display order. Never includes the cover. */
   media: z.array(mediaSchema),
