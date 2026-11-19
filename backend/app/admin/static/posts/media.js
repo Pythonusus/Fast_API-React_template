@@ -5,6 +5,9 @@
   "use strict";
 
   var MEDIA_MIME = "application/x-post-media";
+  var galleryItems = function () {
+    return [];
+  };
 
   function el(tag, className, text) {
     var node = document.createElement(tag);
@@ -45,6 +48,62 @@
     return (
       '<p><audio src="' + src + '" controls preload="metadata"></audio></p>'
     );
+  }
+
+  function openGalleryDialog(editor) {
+    var items = galleryItems();
+    editor.windowManager.open({
+      title: "Галерея",
+      size: "medium",
+      body: {
+        type: "panel",
+        items: [
+          {
+            type: "htmlpanel",
+            html: '<div class="post-gallery-picker"></div>',
+          },
+        ],
+      },
+      buttons: [{ type: "cancel", text: "Закрыть" }],
+    });
+    var picker = document.querySelector(".tox-dialog .post-gallery-picker");
+    if (!picker) return;
+    if (!items.length) {
+      picker.appendChild(
+        el("p", "post-gallery-picker-empty", "Сначала загрузите файл в галерею."),
+      );
+      return;
+    }
+    items.forEach(function (media) {
+      var pick = el("button", "post-gallery-pick");
+      pick.type = "button";
+      if (media.kind === "image") {
+        var img = el("img");
+        img.src = media.url;
+        img.alt = "";
+        pick.appendChild(img);
+      }
+      pick.appendChild(el("span", "", media.filename || media.kind));
+      pick.addEventListener("click", function () {
+        editor.insertContent(mediaHtml(media));
+        editor.windowManager.close();
+      });
+      picker.appendChild(pick);
+    });
+  }
+
+  function registerGalleryPlugin() {
+    if (!window.tinymce || !tinymce.PluginManager) return;
+    if (tinymce.PluginManager.get("postgallery")) return;
+    tinymce.PluginManager.add("postgallery", function (editor) {
+      editor.ui.registry.addButton("postgallery", {
+        icon: "image",
+        tooltip: "Вставить файл из галереи",
+        onAction: function () {
+          openGalleryDialog(editor);
+        },
+      });
+    });
   }
 
   function preview(media) {
@@ -155,6 +214,9 @@
     var state = JSON.parse(
       root.querySelector("[data-post-media-initial]").textContent,
     );
+    galleryItems = function () {
+      return state.attachments.slice();
+    };
     var pending = 0;
     var errors = [];
     var dragIndex = null;
@@ -501,6 +563,8 @@
     sync();
     watchEditors();
   }
+
+  registerGalleryPlugin();
 
   document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll("[data-post-media]").forEach(init);

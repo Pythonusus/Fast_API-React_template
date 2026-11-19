@@ -175,6 +175,39 @@
   }
 }
 
+.post-gallery-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 0.5rem;
+}
+
+.post-gallery-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  padding: 0.25rem;
+  color: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid #cecece;
+  border-radius: 4px;
+}
+
+.post-gallery-pick img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.post-gallery-pick span,
+.post-gallery-picker-empty {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+}
+
 .post-media-cover-image {
   display: block;
   max-width: 100%;

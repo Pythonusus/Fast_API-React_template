@@ -159,7 +159,7 @@ class PostAdmin(ModelView):
                 "blockquote subscript superscript | "
                 "link unlink charmap emoticons hr | "
                 "removeformat | searchreplace visualblocks code fullscreen "
-                "preview | help"
+                "preview | postgallery | help"
             ),
             content_style=(
                 "body { font-family: -apple-system, BlinkMacSystemFont, "
@@ -181,7 +181,7 @@ class PostAdmin(ModelView):
                 "plugins": (
                     "advlist autolink lists link charmap preview anchor "
                     "searchreplace visualblocks code fullscreen insertdatetime "
-                    "emoticons help wordcount"
+                    "emoticons help wordcount postgallery"
                 ),
                 "toolbar_mode": "sliding",
                 # A phone ignores the desktop mode and scrolls the toolbar
