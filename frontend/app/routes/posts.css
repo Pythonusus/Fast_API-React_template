@@ -158,6 +158,15 @@
   display: none;
 }
 
+/* A table that opens the post blows the clamped card the same way. */
+.app-posts-card-body.app-inner-html > table:first-child,
+.app-posts-card-body.app-inner-html > p:first-child:empty + table,
+.app-posts-card-body.app-inner-html
+  > p:first-child:has(> br:only-child)
+  + table {
+  display: none;
+}
+
 .app-posts-card-body.app-inner-html > :last-child {
   margin-bottom: 0;
 }

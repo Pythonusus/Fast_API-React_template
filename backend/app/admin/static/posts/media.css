@@ -11,7 +11,9 @@
   cursor: pointer;
   border: 2px dashed var(--tblr-border-color);
   border-radius: var(--tblr-border-radius);
-  transition: border-color 0.15s, background-color 0.15s;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
 }
 
 .post-media-dropzone:hover,
@@ -149,8 +151,8 @@
   --tblr-btn-active-bg: transparent;
   --tblr-btn-active-color: #202020;
   --tblr-btn-border-color: #cecece;
-  --tblr-btn-hover-border-color: #bbbbbb;
-  --tblr-btn-active-border-color: #bbbbbb;
+  --tblr-btn-hover-border-color: #bbb;
+  --tblr-btn-active-border-color: #bbb;
 
   background: transparent;
   border-color: #cecece;
@@ -164,7 +166,7 @@
 }
 
 /* Up to 767px the targets stay a bit taller than on a desktop, without the 44px row. */
-@media (max-width: 767px) {
+@media (width <= 767px) {
   .post-media-toolbar .btn {
     min-height: 2rem;
   }

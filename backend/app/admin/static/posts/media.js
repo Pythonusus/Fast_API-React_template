@@ -25,10 +25,10 @@
 
   function escapeAttr(value) {
     return String(value)
-      .replace(/&/g, "&amp;")
-      .replace(/"/g, "&quot;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
+      .replaceAll("&", "&amp;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;");
   }
 
   /** HTML fragment inserted into TinyMCE for one gallery file. */
@@ -68,32 +68,36 @@
     });
     var picker = document.querySelector(".tox-dialog .post-gallery-picker");
     if (!picker) return;
-    if (!items.length) {
-      picker.appendChild(
-        el("p", "post-gallery-picker-empty", "Сначала загрузите файл в галерею."),
+    if (items.length === 0) {
+      picker.append(
+        el(
+          "p",
+          "post-gallery-picker-empty",
+          "Сначала загрузите файл в галерею.",
+        ),
       );
       return;
     }
-    items.forEach(function (media) {
+    for (const media of items) {
       var pick = el("button", "post-gallery-pick");
       pick.type = "button";
       if (media.kind === "image") {
         var img = el("img");
         img.src = media.url;
         img.alt = "";
-        pick.appendChild(img);
+        pick.append(img);
       }
-      pick.appendChild(el("span", "", media.filename || media.kind));
+      pick.append(el("span", "", media.filename || media.kind));
       pick.addEventListener("click", function () {
         editor.insertContent(mediaHtml(media));
         editor.windowManager.close();
       });
-      picker.appendChild(pick);
-    });
+      picker.append(pick);
+    }
   }
 
   function registerGalleryPlugin() {
-    if (!window.tinymce || !tinymce.PluginManager) return;
+    if (!globalThis.tinymce || !tinymce.PluginManager) return;
     if (tinymce.PluginManager.get("postgallery")) return;
     tinymce.PluginManager.add("postgallery", function (editor) {
       editor.ui.registry.addButton("postgallery", {
@@ -122,7 +126,7 @@
       return video;
     }
     var audio = el("div", "post-media-audio");
-    audio.appendChild(el("span", "post-media-name", "♪ " + media.filename));
+    audio.append(el("span", "post-media-name", "♪ " + media.filename));
     return audio;
   }
 
@@ -132,13 +136,13 @@
     if (!raw) return null;
     try {
       return JSON.parse(raw);
-    } catch (error) {
+    } catch {
       return null;
     }
   }
 
   function editorList() {
-    if (!window.tinymce || typeof tinymce.get !== "function") return null;
+    if (!globalThis.tinymce || typeof tinymce.get !== "function") return null;
     // TinyMCE 6 has no tinymce.editors. get() with no id returns every instance.
     var editors = tinymce.get();
     return Array.isArray(editors) ? editors : [];
@@ -148,10 +152,10 @@
     var editors = editorList();
     if (!editors) return false;
     var bound = 0;
-    editors.forEach(function (editor) {
+    for (const editor of editors) {
       if (editor.__postMediaBound) {
         bound += 1;
-        return;
+        continue;
       }
       editor.__postMediaBound = true;
       bound += 1;
@@ -159,10 +163,8 @@
       editor.on("dragover", function (event) {
         if (!event.dataTransfer) return;
         if (
-          Array.prototype.indexOf.call(
-            event.dataTransfer.types,
-            MEDIA_MIME,
-          ) === -1
+          Array.prototype.indexOf.call(event.dataTransfer.types, MEDIA_MIME) ===
+          -1
         ) {
           return;
         }
@@ -178,7 +180,7 @@
         event.stopPropagation();
         editor.insertContent(mediaHtml(media));
       });
-    });
+    }
     return bound > 0;
   }
 
@@ -189,11 +191,24 @@
       var done = false;
       try {
         done = bindEditorDrops();
-      } catch (error) {
+      } catch {
         done = false;
       }
       if (done || tries > 80) clearInterval(timer);
     }, 100);
+  }
+
+  function touchById(list, id) {
+    for (const element of list) {
+      if (element.identifier === id) return element;
+    }
+    return null;
+  }
+
+  function hasFiles(event) {
+    return (
+      Array.prototype.indexOf.call(event.dataTransfer.types, "Files") !== -1
+    );
   }
 
   function init(root) {
@@ -215,7 +230,7 @@
       root.querySelector("[data-post-media-initial]").textContent,
     );
     galleryItems = function () {
-      return state.attachments.slice();
+      return [...state.attachments];
     };
     var pending = 0;
     var errors = [];
@@ -227,30 +242,30 @@
 
     function setBusy() {
       if (!form) return;
-      form.querySelectorAll("[type=submit]").forEach(function (node) {
+      for (const node of form.querySelectorAll("[type=submit]")) {
         node.disabled = pending > 0;
-      });
+      }
     }
 
     function renderStatus() {
       status.replaceChildren();
       if (pending > 0) {
-        status.appendChild(el("div", "text-secondary", "Загрузка: " + pending));
+        status.append(el("div", "text-secondary", "Загрузка: " + pending));
       }
-      errors.forEach(function (message) {
-        status.appendChild(el("div", "text-danger", message));
-      });
+      for (const message of errors) {
+        status.append(el("div", "text-danger", message));
+      }
     }
 
     function renderCover() {
       coverPreview.replaceChildren();
       if (state.cover === null) {
-        coverPreview.appendChild(el("span", "text-secondary", "Нет обложки"));
+        coverPreview.append(el("span", "text-secondary", "Нет обложки"));
       } else {
         var img = el("img", "post-media-cover-image");
         img.src = state.cover.url;
         img.alt = "";
-        coverPreview.appendChild(img);
+        coverPreview.append(img);
       }
       coverRemove.hidden = state.cover === null;
     }
@@ -267,9 +282,9 @@
     var touchDrag = null;
 
     function clearDropTarget() {
-      grid.querySelectorAll(".is-drop-target").forEach(function (node) {
+      for (const node of grid.querySelectorAll(".is-drop-target")) {
         node.classList.remove("is-drop-target");
-      });
+      }
     }
 
     function itemUnderPoint(x, y) {
@@ -277,13 +292,6 @@
       var over = node && node.closest(".post-media-item");
       if (!over || !grid.contains(over)) return null;
       return over;
-    }
-
-    function touchById(list, id) {
-      for (var i = 0; i < list.length; i++) {
-        if (list[i].identifier === id) return list[i];
-      }
-      return null;
     }
 
     function bindTouchReorder(frame, item, index) {
@@ -338,7 +346,10 @@
             if (!active) return;
             var over = itemUnderPoint(x, y);
             if (!over || over === item) return;
-            moveAttachment(from, Array.prototype.indexOf.call(grid.children, over));
+            moveAttachment(
+              from,
+              Array.prototype.indexOf.call(grid.children, over),
+            );
           }
 
           touchDrag = drag;
@@ -352,33 +363,33 @@
 
     function renderGrid() {
       grid.replaceChildren();
-      state.attachments.forEach(function (media, index) {
-        var item = el("div", "post-media-item");
+      for (const [index, media] of state.attachments.entries()) {
+        const item = el("div", "post-media-item");
         if (isCover(media)) item.classList.add("is-cover");
         item.draggable = true;
         item.title =
           "Перетащите в текст поста, чтобы вставить, или на другое вложение, чтобы изменить порядок";
         var frame = el("div", "post-media-frame");
-        frame.appendChild(preview(media));
+        frame.append(preview(media));
         if (isCover(media)) {
-          frame.appendChild(el("span", "post-media-badge", "Обложка"));
+          frame.append(el("span", "post-media-badge", "Обложка"));
         }
-        item.appendChild(frame);
+        item.append(frame);
         bindTouchReorder(frame, item, index);
 
         var toolbar = el("div", "post-media-toolbar");
         var actions = el("div", "post-media-actions");
         if (media.kind === "image" && !isCover(media)) {
-          actions.appendChild(
+          actions.append(
             button("Обложка", "btn-secondary", function () {
               state.cover = media;
               sync();
             }),
           );
         }
-        actions.appendChild(
+        actions.append(
           button("В текст", "btn-secondary", function () {
-            if (!window.tinymce || !tinymce.activeEditor) {
+            if (!globalThis.tinymce || !tinymce.activeEditor) {
               errors = ["Сначала кликните в поле содержания"];
               renderStatus();
               return;
@@ -393,9 +404,9 @@
         });
         remove.title = "Удалить";
         remove.setAttribute("aria-label", "Удалить");
-        actions.appendChild(remove);
-        toolbar.appendChild(actions);
-        item.appendChild(toolbar);
+        actions.append(remove);
+        toolbar.append(actions);
+        item.append(toolbar);
 
         item.addEventListener("dragstart", function (event) {
           dragIndex = index;
@@ -423,8 +434,8 @@
           dragIndex = null;
           sync();
         });
-        grid.appendChild(item);
-      });
+        grid.append(item);
+      }
       count.textContent = state.attachments.length + " / " + max;
     }
 
@@ -442,6 +453,8 @@
     }
 
     function upload(file, purpose) {
+      // Error JSON is read before response.ok, so the catch stays inside the then.
+      /* eslint-disable promise/no-nesting */
       var body = new FormData();
       body.append("file", file);
       body.append("purpose", purpose);
@@ -462,15 +475,13 @@
             return data;
           });
       });
+      /* eslint-enable promise/no-nesting */
     }
 
     function tooLarge(file) {
       if (file.size <= maxBytes) return false;
       errors.push(
-        file.name +
-          ": файл больше " +
-          Math.round(maxBytes / 1048576) +
-          " МБ",
+        file.name + ": файл больше " + Math.round(maxBytes / 1_048_576) + " МБ",
       );
       return true;
     }
@@ -484,9 +495,10 @@
         }
         if (tooLarge(file)) return;
         pending += 1;
-        upload(file, "attachment")
+        void upload(file, "attachment")
           .then(function (media) {
             state.attachments.push(media);
+            return null;
           })
           .catch(function (error) {
             errors.push(file.name + ": " + error.message);
@@ -503,12 +515,6 @@
       addFiles(fileInput.files);
       fileInput.value = "";
     });
-
-    function hasFiles(event) {
-      return (
-        Array.prototype.indexOf.call(event.dataTransfer.types, "Files") !== -1
-      );
-    }
 
     dropzone.addEventListener("dragover", function (event) {
       if (!hasFiles(event)) return;
@@ -536,9 +542,10 @@
       }
       pending += 1;
       sync();
-      upload(file, "cover")
+      void upload(file, "cover")
         .then(function (media) {
           state.cover = media;
+          return null;
         })
         .catch(function (error) {
           errors.push(file.name + ": " + error.message);
@@ -567,6 +574,8 @@
   registerGalleryPlugin();
 
   document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll("[data-post-media]").forEach(init);
+    for (const root of document.querySelectorAll("[data-post-media]")) {
+      init(root);
+    }
   });
 })();

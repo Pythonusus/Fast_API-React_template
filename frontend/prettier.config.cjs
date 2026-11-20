@@ -30,4 +30,21 @@ module.exports = {
   // Always include parens in arrow params.
   // Example: `(x) => x + 1` instead of `x => x + 1`
   arrowParens: "always",
+
+  // Absolute path so files outside frontend/ still resolve the plugin.
+  // Prettier looks for plugins next to the config file, not next to the template.
+  plugins: [require.resolve("prettier-plugin-jinja-template")],
+
+  overrides: [
+    {
+      // The HTML parser splits `{% %}` and `{{ }}` and can break Jinja.
+      files: [
+        "**/backend/app/admin/**/*.html",
+        "../backend/app/admin/**/*.html",
+      ],
+      options: {
+        parser: "jinja-template",
+      },
+    },
+  ],
 };

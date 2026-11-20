@@ -136,9 +136,9 @@ class PostMediaField(BaseField):
         }
 
     def additional_css_links(self, request: Request) -> list[str]:
-        return [static_url(request, "posts/media.css", v=19)]
+        return [static_url(request, "posts/media.css", v=20)]
 
     def additional_js_links(self, request: Request) -> list[str]:
         if self._needs_form_assets(request):
-            return [static_url(request, "posts/media.js", v=10)]
+            return [static_url(request, "posts/media.js", v=11)]
         return []

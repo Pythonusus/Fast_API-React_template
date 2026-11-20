@@ -11,8 +11,8 @@
   "scripts": {
     "build": "react-router build",
     "dev": "react-router dev",
-    "lint": "eslint . && prettier --check . && stylelint \"app/**/*.{css,scss}\" --allow-empty-input",
-    "lint:fix": "eslint . --fix && prettier --write . && stylelint \"app/**/*.{css,scss}\" --fix --allow-empty-input",
+    "lint": "cd .. && eslint -c frontend/eslint.config.js frontend backend/app/admin && cd frontend && prettier --check --config prettier.config.cjs . \"../backend/app/admin/**/*.{css,html,js}\" && stylelint \"app/**/*.{css,scss}\" \"../backend/app/admin/**/*.css\" --allow-empty-input",
+    "lint:fix": "cd .. && eslint -c frontend/eslint.config.js frontend backend/app/admin --fix && cd frontend && prettier --write --config prettier.config.cjs . \"../backend/app/admin/**/*.{css,html,js}\" && stylelint \"app/**/*.{css,scss}\" \"../backend/app/admin/**/*.css\" --fix --allow-empty-input",
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
@@ -49,6 +49,7 @@
     "eslint-plugin-unicorn": "^65.0.1",
     "globals": "^17.9.0",
     "prettier": "^3.9.6",
+    "prettier-plugin-jinja-template": "^2.2.0",
     "stylelint": "^17.10.0",
     "stylelint-config-standard": "^40.0.0",
     "typescript": "^5.9.3",

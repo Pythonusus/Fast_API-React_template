@@ -1,4 +1,4 @@
-// CSS linting configuration for this project.
+// CSS linting configuration for frontend/app and backend/app/admin.
 // See https://stylelint.io/user-guide/rules/ for more information.
 export default {
   extends: ["stylelint-config-standard"],

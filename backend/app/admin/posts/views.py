@@ -95,7 +95,7 @@ class PostContentField(TinyMCEEditorField):
 
     def additional_css_links(self, request: Request) -> list[str]:
         if request.state.action == RequestAction.DETAIL:
-            return [static_url(request, "posts/content.css", v=2)]
+            return [static_url(request, "posts/content.css", v=3)]
         return []
 
 
@@ -155,7 +155,7 @@ class PostAdmin(ModelView):
                 "bold italic underline strikethrough | "
                 "forecolor backcolor | "
                 "alignleft aligncenter alignright alignjustify | "
-                "bullist numlist outdent indent | "
+                "bullist numlist outdent indent | table | "
                 "blockquote subscript superscript | "
                 "link unlink charmap emoticons hr | "
                 "removeformat | searchreplace visualblocks code fullscreen "
@@ -175,13 +175,15 @@ class PostAdmin(ModelView):
                 # column; object-fit stops that from squashing the picture.
                 "img, video { width: auto; height: auto; max-height: 32rem; "
                 "margin-inline: auto; object-fit: contain; } "
-                "video, audio { width: 100%; }"
+                "video, audio { width: 100%; } "
+                "table { border-collapse: collapse; width: 100%; } "
+                "td, th { border: 1px solid #ccc; padding: 0.4em; }"
             ),
             extra_options={
                 "plugins": (
                     "advlist autolink lists link charmap preview anchor "
                     "searchreplace visualblocks code fullscreen insertdatetime "
-                    "emoticons help wordcount postgallery"
+                    "emoticons help wordcount table postgallery"
                 ),
                 "toolbar_mode": "sliding",
                 # A phone ignores the desktop mode and scrolls the toolbar
@@ -225,15 +227,19 @@ class PostAdmin(ModelView):
 
     # -------------------------------------------------------------------------
     def _additional_css_links(self, request: Request) -> list[str]:
-        """Narrow create, edit, and detail to the public post column."""
+        """Page CSS for the post list, form, and detail."""
         links = list(super()._additional_css_links(request))
         action = request.state.action
-        if action in (
+        if action == RequestAction.LIST:
+            link = static_url(request, "posts/list.css", v=1)
+            if link not in links:
+                links.append(link)
+        elif action in (
             RequestAction.CREATE,
             RequestAction.EDIT,
             RequestAction.DETAIL,
         ):
-            link = static_url(request, "posts/layout.css", v=2)
+            link = static_url(request, "posts/layout.css", v=3)
             if link not in links:
                 links.append(link)
         return links

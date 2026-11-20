@@ -27,3 +27,16 @@
 .post-content-detail audio {
   width: 100%;
 }
+
+.post-content-detail table {
+  width: 100%;
+  margin: 0.75em 0;
+  border-collapse: collapse;
+}
+
+.post-content-detail th,
+.post-content-detail td {
+  padding: 0.4em 0.6em;
+  vertical-align: top;
+  border: 1px solid var(--tblr-border-color);
+}

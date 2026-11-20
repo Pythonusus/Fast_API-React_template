@@ -19,34 +19,33 @@ export default [
   // Global ignore list to skip generated/build artifacts.
   {
     ignores: [
-      "dist/**",
-      "build/**",
-      "node_modules/**",
-      ".git/**",
-      ".cache/**",
-      ".npm/**",
-      ".react-router/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/node_modules/**",
+      "**/.git/**",
+      "**/.cache/**",
+      "**/.npm/**",
+      "**/.react-router/**",
       "*.log",
-      ".idea/**",
-      ".vscode/**",
+      "**/.idea/**",
+      "**/.vscode/**",
       "*.sw?",
       ".DS_Store",
       "**/*.css",
-      "*/coverage/**",
-      "coverage/**",
-      "public/**",
-      "storybook-static/**",
-      ".next/**",
-      "out/**",
-      ".docusaurus/**",
+      "**/coverage/**",
+      "**/public/**",
+      "**/storybook-static/**",
+      "**/.next/**",
+      "**/out/**",
+      "**/.docusaurus/**",
       "*.min.js",
       "**/*.d.ts",
       "stats.json",
-      "cypress/screenshots/**",
-      "cypress/videos/**",
-      "tmp/**",
-      ".nyc_output/**",
-      "docs/api/**",
+      "**/cypress/screenshots/**",
+      "**/cypress/videos/**",
+      "**/tmp/**",
+      "**/.nyc_output/**",
+      "**/docs/api/**",
     ],
   },
   // Main lint config for application source files.
@@ -138,4 +137,24 @@ export default [
   },
   // Prettier compatibility rules should be applied last.
   eslintConfigPrettier,
+  // Admin gallery script. Loaded with a plain script tag, not as a module.
+  // `npm run lint` starts ESLint at the repo root so this path is in range.
+  {
+    files: ["backend/app/admin/**/*.js"],
+    languageOptions: {
+      sourceType: "script",
+      parserOptions: {
+        sourceType: "script",
+      },
+      globals: {
+        tinymce: "readonly",
+      },
+    },
+    rules: {
+      "unicorn/prefer-module": "off",
+      "sonarjs/no-nested-functions": "off",
+      // Listeners in a render loop close over that iteration's const bindings.
+      "sonarjs/function-inside-loop": "off",
+    },
+  },
 ];

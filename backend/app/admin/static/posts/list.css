@@ -1,0 +1,71 @@
+/*
+ * Post list on a phone.
+ *
+ * Tabler keeps the card header on one row. The search box shrinks away
+ * and the toolbar wraps into a one-button column. The footer does the
+ * same to the "showing" line. Stack both and give the buttons the row.
+ */
+
+@media (width <= 767px) {
+  .card > .card-header {
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .card > .card-header > .card-title,
+  .card > .card-header > .card-title form,
+  .card > .card-header > .card-title .input-group {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .card > .card-header > .card-actions {
+    flex: 1 1 100%;
+    width: 100%;
+    padding-left: 0;
+    margin: 0;
+  }
+
+  .card > .card-header > .card-actions > .btn-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+
+  .card > .card-header > .card-actions > .btn-list > * {
+    min-width: 0;
+    margin: 0 !important;
+  }
+
+  .card > .card-header > .card-actions > .btn-list .btn {
+    width: 100%;
+  }
+
+  .card > .card-header > .card-actions > .btn-list > .btn-primary {
+    grid-column: 1 / -1;
+  }
+
+  .card > .card-footer {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+  }
+
+  .card > .card-footer > p {
+    width: 100%;
+    text-align: center;
+  }
+
+  .card > .card-footer > .d-flex {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-left: 0 !important;
+  }
+
+  .card > .card-footer .pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
