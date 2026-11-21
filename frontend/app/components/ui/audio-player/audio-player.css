@@ -1,0 +1,125 @@
+/*
+ * Public audio bar.
+ *
+ * Radix has no media player. The volume track is taken out of flow so it
+ * can sit above the speaker icon without making the row taller.
+ */
+
+.app-audio-player {
+  display: flex;
+  flex: 0 1 18rem;
+  gap: var(--space-2);
+  align-items: center;
+  min-width: 11rem;
+  max-width: 100%;
+}
+
+.app-audio-element {
+  display: none;
+}
+
+.app-audio-time {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.app-audio-seek {
+  flex: 1 1 auto;
+  min-width: 2.5rem;
+}
+
+.app-audio-icon {
+  flex: 0 0 auto;
+}
+
+.app-audio-volume {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.app-audio-volume-pop {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  min-width: 2rem;
+  padding: var(--space-2) var(--space-2) var(--space-3);
+  margin-bottom: calc(var(--space-2) * -1);
+  pointer-events: none;
+  background: var(--color-panel-solid);
+  border: 1px solid var(--gray-6);
+  border-radius: var(--radius-3);
+  box-shadow: var(--shadow-4);
+  opacity: 0;
+  transform: translateX(-50%);
+}
+
+.app-audio-volume:hover .app-audio-volume-pop,
+.app-audio-volume:focus-within .app-audio-volume-pop,
+.app-audio-volume.is-open .app-audio-volume-pop {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.app-audio-volume-pop .app-audio-volume-slider {
+  flex-grow: 0;
+  height: 5.5rem;
+}
+
+/*
+ * One audio row: play/pause, wrapping name, then the rest of the controls.
+ * Radix has no row that pairs that button with a seek bar.
+ */
+
+.app-audio-track {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  width: 100%;
+  padding: var(--space-2);
+  overflow: visible;
+  color: inherit;
+  background: var(--gray-2);
+  border: 1px solid var(--gray-6);
+  border-radius: var(--radius-3);
+}
+
+button.app-audio-play {
+  flex: 0 0 auto;
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--gray-12);
+  background: var(--gray-4);
+  border-radius: var(--radius-2);
+}
+
+.app-audio-track-name {
+  flex: 1 1 auto;
+  align-self: center;
+  min-width: 0;
+  margin: var(--space-2) 0;
+  overflow-wrap: anywhere;
+}
+
+.app-audio-track-player {
+  flex: 0 1 18rem;
+  width: auto;
+  min-width: 11rem;
+  max-width: 70%;
+  margin: 0;
+}
+
+.app-inner-html .app-audio-host {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: var(--space-3);
+}
+
+.app-inner-html p > .app-audio-host:only-child {
+  margin-bottom: 0;
+}

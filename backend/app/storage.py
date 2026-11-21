@@ -9,7 +9,7 @@ import json
 from collections.abc import Iterable
 from functools import lru_cache
 from typing import BinaryIO
-from urllib.parse import quote, urlsplit, urlunsplit
+from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
 import boto3
 from botocore.client import BaseClient
@@ -187,6 +187,35 @@ def delete_objects(keys: Iterable[str]) -> None:
     client = get_internal_s3_client()
     for key in keys:
         client.delete_object(Bucket=settings.s3_bucket, Key=key)
+
+
+def object_key_from_public_url(url: str) -> str | None:
+    """Object key for a URL this site publishes, or ``None`` if it is not.
+
+    Import accepts only these links, so a file from another host cannot
+    be attached by pasting its address.
+    """
+    origin, prefix = public_origin_and_prefix(settings.s3_public_url)
+    marker = f"{origin}{prefix}/{settings.s3_bucket}/"
+    if not url.startswith(marker):
+        return None
+    key = unquote(url[len(marker) :].split("?", 1)[0])
+    return key or None
+
+
+def copy_object(source_key: str, dest_key: str) -> None:
+    """Copy one object to a new key in the same bucket.
+
+    Blocking boto3. Callers in async code use ``asyncio.to_thread``.
+    """
+    try:
+        get_internal_s3_client().copy_object(
+            Bucket=settings.s3_bucket,
+            Key=dest_key,
+            CopySource={"Bucket": settings.s3_bucket, "Key": source_key},
+        )
+    except ClientError as exc:
+        raise ValueError(f"Could not copy media {source_key}") from exc
 
 
 def presign_get_url(key: str, expires_in: int = PRESIGN_EXPIRES_IN) -> str:

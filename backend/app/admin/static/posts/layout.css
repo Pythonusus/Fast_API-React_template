@@ -37,3 +37,11 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+.post-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}

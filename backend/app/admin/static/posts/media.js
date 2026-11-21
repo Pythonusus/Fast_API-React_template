@@ -46,7 +46,11 @@
       );
     }
     return (
-      '<p><audio src="' + src + '" controls preload="metadata"></audio></p>'
+      '<p><audio src="' +
+      src +
+      '" data-filename="' +
+      name +
+      '" controls preload="metadata"></audio></p>'
     );
   }
 
@@ -86,6 +90,17 @@
         img.src = media.url;
         img.alt = "";
         pick.append(img);
+      } else if (media.kind === "video") {
+        var videoPick = el("video");
+        videoPick.src = media.url;
+        videoPick.muted = true;
+        videoPick.preload = "metadata";
+        var wrap = el("span", "post-gallery-pick-media");
+        wrap.append(videoPick);
+        var playMark = el("i", "fa fa-play post-gallery-pick-play");
+        playMark.setAttribute("aria-hidden", "true");
+        wrap.append(playMark);
+        pick.append(wrap);
       }
       pick.append(el("span", "", media.filename || media.kind));
       pick.addEventListener("click", function () {
@@ -223,6 +238,7 @@
     var coverPreview = root.querySelector("[data-post-media-cover-preview]");
     var coverFileInput = root.querySelector("[data-post-media-cover-input]");
     var coverRemove = root.querySelector("[data-post-media-cover-remove]");
+    var stateNode = root.querySelector("[data-post-media-state]");
     var uploadUrl = root.dataset.uploadUrl;
     var max = Number(root.dataset.max);
     var maxBytes = Number(root.dataset.maxBytes);
@@ -369,11 +385,51 @@
         item.draggable = true;
         item.title =
           "Перетащите в текст поста, чтобы вставить, или на другое вложение, чтобы изменить порядок";
+        if (media.show_in_gallery === false) {
+          item.classList.add("is-hidden-gallery");
+        }
         var frame = el("div", "post-media-frame");
         frame.append(preview(media));
+        if (media.kind === "video") {
+          var play = el("span", "post-media-play");
+          var playIcon = el("i", "fa fa-play");
+          playIcon.setAttribute("aria-hidden", "true");
+          play.append(playIcon);
+          frame.append(play);
+        }
         if (isCover(media)) {
           frame.append(el("span", "post-media-badge", "Обложка"));
         }
+        var toggle = el("input", "post-media-gallery-toggle");
+        toggle.type = "checkbox";
+        toggle.checked = media.show_in_gallery !== false;
+        toggle.title = "Показывать в галерее";
+        toggle.setAttribute("aria-label", "Показывать в галерее");
+        toggle.addEventListener("pointerdown", function (event) {
+          event.stopPropagation();
+          item.draggable = false;
+        });
+        toggle.addEventListener("pointerup", function () {
+          item.draggable = true;
+        });
+        toggle.addEventListener("pointercancel", function () {
+          item.draggable = true;
+        });
+        toggle.addEventListener(
+          "touchstart",
+          function (event) {
+            event.stopPropagation();
+          },
+          { passive: true },
+        );
+        toggle.addEventListener("click", function (event) {
+          event.stopPropagation();
+        });
+        toggle.addEventListener("change", function () {
+          media.show_in_gallery = toggle.checked;
+          sync();
+        });
+        frame.append(toggle);
         item.append(frame);
         bindTouchReorder(frame, item, index);
 
@@ -442,9 +498,18 @@
     function sync() {
       idsInput.value = JSON.stringify(
         state.attachments.map(function (media) {
-          return media.id;
+          return {
+            id: media.id,
+            show_in_gallery: media.show_in_gallery !== false,
+          };
         }),
       );
+      if (stateNode) {
+        stateNode.textContent = JSON.stringify({
+          attachments: state.attachments,
+          cover: state.cover,
+        });
+      }
       coverInput.value = state.cover === null ? "" : String(state.cover.id);
       renderCover();
       renderGrid();

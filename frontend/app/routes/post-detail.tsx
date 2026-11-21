@@ -4,22 +4,20 @@
  * Not prerendered: the id is not known at build time, so the SPA fallback
  * serves the shell and ``usePost`` loads the post after hydration.
  *
+ * Admin preview opens this same route with ``?draft=``. The draft is the
+ * unsaved form, stored in ``localStorage``, and replaces the fetched post.
+ *
  * States: loading, not found (invalid id or backend 404), error, and loaded.
  */
-import { ArrowLeftIcon } from "@radix-ui/react-icons";
-import { Card, Flex, Heading, Section, Text } from "@radix-ui/themes";
+import { Heading, Section, Text } from "@radix-ui/themes";
 import type { MetaFunction } from "react-router";
-import { Link, useParams } from "react-router";
+import { useParams, useSearchParams } from "react-router";
 
 import { BACKEND_UNAVAILABLE_HINT } from "~/common-texts/errors";
 import { LOADING } from "~/common-texts/ui";
-import { PostContent } from "~/components/post-content";
-import { PostGallery } from "~/components/post-gallery";
-import { ShareButton } from "~/components/ui/share-button";
+import { PostArticle, PostBackLink } from "~/components/post-article";
 import { usePost } from "~/hooks/use-post";
-import { formatDate } from "~/utils/format-date";
-
-import "./post-detail.css";
+import { loadPostPreview } from "~/utils/post-preview";
 
 /**
  * Function to set the meta tags for the post detail page.
@@ -33,25 +31,6 @@ export const meta: MetaFunction = () => [
   },
 ];
 
-/** Date line and share control under the body and gallery. */
-const PostDetailFooter = ({
-  createdAt,
-  title,
-  updatedAt,
-}: {
-  createdAt: string;
-  title: string;
-  updatedAt: string;
-}) => (
-  <Flex align="center" justify="between" mt="5" width="100%">
-    <ShareButton title={title} />
-    <Text as="p" color="gray" size="2">
-      <time dateTime={createdAt}>{formatDate(createdAt)}</time>
-      {updatedAt === createdAt ? null : <> · Updated {formatDate(updatedAt)}</>}
-    </Text>
-  </Flex>
-);
-
 /** Parse the URL segment; ``null`` unless it is a positive integer. */
 const parsePostId = (value: string | undefined): number | null => {
   if (!value || !/^\d+$/.test(value)) {
@@ -63,29 +42,39 @@ const parsePostId = (value: string | undefined): number | null => {
   return Number.isSafeInteger(id) && id > 0 ? id : null;
 };
 
+const PREVIEW_MISSING =
+  "This preview is missing or out of date. Open it again from the admin post page.";
+
 /** Post detail route component. */
 const PostDetailRoute = () => {
   const { postId: postIdParam } = useParams();
-  const { post, isLoading, notFound, error } = usePost(
-    parsePostId(postIdParam),
-  );
+  const [params] = useSearchParams();
+  const draftId = params.get("draft");
+  const preview = draftId ? loadPostPreview(draftId) : null;
+  const {
+    post: loaded,
+    isLoading,
+    notFound,
+    error,
+  } = usePost(draftId ? null : parsePostId(postIdParam));
+  const post = preview ?? loaded;
 
   return (
     <Section p="0">
-      <Link className="app-post-detail-back" to="/posts">
-        <Flex align="center" gap="1">
-          <ArrowLeftIcon aria-hidden />
-          <Text size="2">All posts</Text>
-        </Flex>
-      </Link>
-
-      {isLoading ? (
+      <PostBackLink />
+      {isLoading && !draftId ? (
         <Text as="p" color="gray" size="3">
           {LOADING}
         </Text>
       ) : null}
 
-      {notFound ? (
+      {draftId && !preview ? (
+        <Text as="p" color="gray" size="3">
+          {PREVIEW_MISSING}
+        </Text>
+      ) : null}
+
+      {notFound && !draftId ? (
         <>
           <Heading as="h1" mb="2" size="8">
             Post not found
@@ -102,24 +91,7 @@ const PostDetailRoute = () => {
         </Text>
       ) : null}
 
-      {post ? (
-        <Card asChild size="3">
-          <article className="app-post-detail-article">
-            <header className="app-post-detail-header">
-              <Heading as="h1" className="app-post-detail-title" size="8">
-                {post.title}
-              </Heading>
-            </header>
-            <PostContent html={post.content} />
-            {post.show_gallery ? <PostGallery media={post.media} /> : null}
-            <PostDetailFooter
-              createdAt={post.created_at}
-              title={post.title}
-              updatedAt={post.updated_at}
-            />
-          </article>
-        </Card>
-      ) : null}
+      {post ? <PostArticle post={post} /> : null}
     </Section>
   );
 };

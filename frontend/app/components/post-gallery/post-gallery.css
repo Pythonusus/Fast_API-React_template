@@ -1,10 +1,14 @@
-/* Post attachments: square-tile grid for images/video, stacked audio. */
+/*
+ * Post attachments: square image and video tiles.
+ *
+ * Audio rows live in ``components/ui/audio-player``. Radix has no tile that
+ * crops a preview and opens a viewer, so the grid is custom.
+ */
 
 .app-post-gallery {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  margin-top: var(--space-6);
 }
 
 .app-post-gallery-grid {
@@ -54,12 +58,6 @@
   color: white;
   pointer-events: none;
   background: rgb(0 0 0 / 25%);
-}
-
-.app-post-gallery-audio audio {
-  display: block;
-  width: 100%;
-  margin-top: var(--space-1);
 }
 
 /*

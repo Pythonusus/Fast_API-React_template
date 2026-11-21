@@ -1,0 +1,121 @@
+/*
+ * List card layout Radix Card props do not cover: equal height, a clamped
+ * body, a cover that keeps its ratio, and a title link stretched over the
+ * card (the body can contain its own links, so the card is not an anchor).
+ */
+
+.app-posts-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 12rem;
+}
+
+/* Appended via “Show more”; ``--app-enter-index`` set inline for stagger. */
+.app-posts-card-enter {
+  animation: app-posts-card-in var(--app-duration-enter) var(--app-ease) both;
+  animation-delay: calc(var(--app-enter-index, 0) * var(--app-stagger));
+}
+
+@keyframes app-posts-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-posts-card-enter {
+    animation: none;
+  }
+}
+
+/*
+ * Whole file, scaled down to the card's height budget (``min-height`` above).
+ * Width follows the image, so a portrait stays narrow instead of cropping.
+ */
+.app-posts-card-cover {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 12rem;
+  margin-inline: auto;
+  object-fit: contain;
+  background-color: var(--gray-3);
+}
+
+.app-posts-card-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.app-posts-card-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.app-posts-card-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.app-posts-card-link:focus-visible {
+  outline: none;
+}
+
+.app-posts-card-link:focus-visible::after {
+  outline: 2px solid var(--focus-8);
+  outline-offset: -2px;
+}
+
+/* Above the stretched card link, so sharing does not open the post. */
+.app-posts-card-share {
+  position: relative;
+  z-index: 1;
+}
+
+.app-posts-card-body {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.app-posts-card-body.app-inner-html {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+  line-clamp: 6;
+}
+
+/*
+ * List cards clamp text height. Embedded media at the start (or inside the
+ * clamp) breaks the line box and can cause horizontal overflow — hide it
+ * here; the detail page still shows embeds and the optional gallery.
+ */
+.app-posts-card-body.app-inner-html :is(img, video, audio, figure) {
+  display: none;
+}
+
+/* A table that opens the post blows the clamped card the same way. */
+.app-posts-card-body.app-inner-html > table:first-child,
+.app-posts-card-body.app-inner-html > p:first-child:empty + table,
+.app-posts-card-body.app-inner-html
+  > p:first-child:has(> br:only-child)
+  + table {
+  display: none;
+}
+
+.app-posts-card-body.app-inner-html > :last-child {
+  margin-bottom: 0;
+}

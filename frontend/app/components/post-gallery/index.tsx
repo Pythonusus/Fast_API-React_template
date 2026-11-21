@@ -1,15 +1,17 @@
 /**
- * Post attachments below the body: an image/video grid, then audio tracks.
+ * Post attachments below the body: an image/video grid, then audio rows.
  *
  * Grid tiles are square crops. A tile opens the ``Lightbox`` viewer on the
- * same page. The cover is not passed here; it is only shown on the posts list.
+ * same page. Audio is one row: play/pause, the name, then the rest of
+ * the controls. A long name wraps so the controls stay on that row. The
+ * cover is not passed here; it is only shown on the posts list.
  */
 import { PlayIcon } from "@radix-ui/react-icons";
-import { Text } from "@radix-ui/themes";
 import { useState } from "react";
 
 import { Lightbox } from "./lightbox";
 
+import { AudioTrack } from "~/components/ui/audio-player";
 import type { Media } from "~/types/posts";
 
 import "./post-gallery.css";
@@ -55,13 +57,7 @@ export const PostGallery = ({ media }: PostGalleryProps) => {
       ) : null}
 
       {audio.map((item) => (
-        <div className="app-post-gallery-audio" key={item.id}>
-          <Text as="p" size="2">
-            {item.filename}
-          </Text>
-          {/* eslint-disable-next-line jsx-a11y/media-has-caption -- uploads have no caption tracks */}
-          <audio controls preload="none" src={item.url} />
-        </div>
+        <AudioTrack key={item.id} name={item.filename} src={item.url} />
       ))}
 
       <Lightbox

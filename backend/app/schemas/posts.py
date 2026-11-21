@@ -2,8 +2,10 @@
 Pydantic schemas for posts CRUD operations.
 """
 
+import re
 from datetime import UTC, datetime
-from typing import Literal
+from typing import Any, Literal
+from urllib.parse import unquote
 from zoneinfo import ZoneInfo
 
 from pydantic import (
@@ -11,9 +13,86 @@ from pydantic import (
     ConfigDict,
     Field,
     field_serializer,
+    model_validator,
 )
 
 from app.settings import settings
+
+_AUDIO_TAG = re.compile(r"<audio\b[^>]*>", re.IGNORECASE)
+_SRC_ATTR = re.compile(
+    r"""\bsrc\s*=\s*(?:"([^"]*)"|'([^']*)')""",
+    re.IGNORECASE,
+)
+
+
+def _html_attr(value: str) -> str:
+    return (
+        value.replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;")
+    )
+
+
+def _url_tail(url: str) -> str:
+    path = unquote(url.split("?", 1)[0].split("#", 1)[0].rstrip("/"))
+    return path.rsplit("/", 1)[-1]
+
+
+def _audio_name_maps(
+    media: list[Any],
+) -> tuple[dict[str, str], dict[str, str]]:
+    names: dict[str, str] = {}
+    tails: dict[str, str] = {}
+    for item in media:
+        url = getattr(item, "url", None)
+        filename = getattr(item, "filename", None)
+        if not isinstance(url, str) or not isinstance(filename, str):
+            continue
+        if not filename:
+            continue
+        names[url] = filename
+        tail = _url_tail(url)
+        if tail:
+            tails[tail] = filename
+    return names, tails
+
+
+def _stamp_audio_tag(
+    tag: str,
+    names: dict[str, str],
+    tails: dict[str, str],
+) -> str:
+    if re.search(r"\bdata-filename\s*=", tag, re.IGNORECASE):
+        return tag
+    src = _SRC_ATTR.search(tag)
+    if src is None:
+        return tag
+    url = src.group(1) if src.group(1) is not None else src.group(2)
+    if url is None:
+        return tag
+    filename = names.get(url) or tails.get(_url_tail(url))
+    if not filename:
+        return tag
+    labeled = f'<audio data-filename="{_html_attr(filename)}"'
+    return re.sub(r"<audio", labeled, tag, count=1, flags=re.IGNORECASE)
+
+
+def stamp_audio_filenames(html: str, media: list[Any]) -> str:
+    """Put each file's display name on ``<audio>`` tags in post HTML.
+
+    Stored embeds only keep the object URL. The last path segment is the
+    storage key, not the original file name. Names come from the post's
+    media rows, including files hidden from the gallery.
+    """
+    if not html or "<audio" not in html.lower():
+        return html
+
+    names, tails = _audio_name_maps(media)
+    if not names:
+        return html
+
+    return _AUDIO_TAG.sub(
+        lambda match: _stamp_audio_tag(match.group(0), names, tails),
+        html,
+    )
 
 
 class MediaRead(BaseModel):
@@ -133,6 +212,16 @@ class PostRead(PostBase):
         from_attributes=True,
     )
 
+    @model_validator(mode="wrap")
+    @classmethod
+    def stamp_embedded_audio_names(cls, value: Any, handler: Any) -> Any:
+        """Name body audio from every media row, including hidden files."""
+        media = getattr(value, "media", None)
+        post = handler(value)
+        if isinstance(media, list):
+            post.content = stamp_audio_filenames(post.content, media)
+        return post
+
     id: int = Field(..., description="Primary key.", examples=[1])
     created_at: datetime = Field(
         ...,
@@ -141,7 +230,7 @@ class PostRead(PostBase):
     updated_at: datetime = Field(
         ...,
         description="When the post was last updated"
-                    "(converted to app timezone).",
+        "(converted to app timezone).",
     )
     cover: MediaRead | None = Field(
         default=None,

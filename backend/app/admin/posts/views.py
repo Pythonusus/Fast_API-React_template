@@ -43,10 +43,14 @@ from starlette_admin.helpers import (
 )
 from starlette_admin.types import RequestAction
 
+from app.admin.posts.import_media import (
+    apply_pending_media_import,
+    media_import_error,
+)
 from app.admin.posts.media_field import PostMediaField, ShowGalleryField
 from app.db.posts import crud
 from app.db.posts.models import MediaSelection, Post
-from app.schemas.posts import PostCreate
+from app.schemas.posts import PostCreate, PostRead
 from app.settings import settings
 from app.storage import delete_objects
 
@@ -132,9 +136,18 @@ class PostAdmin(ModelView):
     # Newest posts first
     default_sort = [("created_at", "desc")]
 
+    # The list page already offers Export and Import (CSV and JSON).
+    # ``id`` is in the file for reference and ignored on import, so a
+    # round-trip always creates a new post instead of overwriting one.
+    detail_template = "posts/detail.html"
+    create_template = "posts/create.html"
+    edit_template = "posts/edit.html"
+
     # Editable form fields
     fields = [
-        IntegerField("id", label="ID", read_only=True),
+        IntegerField(
+            "id", label="ID", read_only=True, exclude_from_import=True
+        ),
         StringField("title", label="Заголовок", required=True),
         # Do not set required=True: TinyMCE hides the <textarea>, and the
         # browser then refuses submit with "invalid form control is not
@@ -215,8 +228,18 @@ class PostAdmin(ModelView):
                 "галереей — только то, что вставлено в текст."
             ),
         ),
-        PostDateTimeField("created_at", read_only=True, label="Создан"),
-        PostDateTimeField("updated_at", read_only=True, label="Обновлён"),
+        PostDateTimeField(
+            "created_at",
+            read_only=True,
+            label="Создан",
+            exclude_from_import=True,
+        ),
+        PostDateTimeField(
+            "updated_at",
+            read_only=True,
+            label="Обновлён",
+            exclude_from_import=True,
+        ),
     ]
 
     # Auto-managed fields — hide on create
@@ -239,10 +262,28 @@ class PostAdmin(ModelView):
             RequestAction.EDIT,
             RequestAction.DETAIL,
         ):
-            link = static_url(request, "posts/layout.css", v=3)
+            link = static_url(request, "posts/layout.css", v=4)
             if link not in links:
                 links.append(link)
         return links
+
+    def _additional_js_links(self, request: Request) -> list[str]:
+        """Preview buttons open the React app. They do not redraw the post."""
+        links = list(super()._additional_js_links(request))
+        action = request.state.action
+        if action in (
+            RequestAction.CREATE,
+            RequestAction.EDIT,
+            RequestAction.DETAIL,
+        ):
+            link = static_url(request, "posts/preview.js", v=3)
+            if link not in links:
+                links.append(link)
+        return links
+
+    def public_preview(self, post: Post) -> dict[str, Any]:
+        """Saved post in the same shape the public app already renders."""
+        return PostRead.model_validate(post).model_dump(mode="json")
 
     # Framework hooks — override fixed method names; the admin panel calls them.
     # You do not register these yourself (no decorator / no add_hook).
@@ -274,7 +315,11 @@ class PostAdmin(ModelView):
         """
         selection = data.get("media_selection")
         max_count = settings.post_media_max_count
-        if (
+        if isinstance(selection, list):
+            message = media_import_error(selection)
+            if message:
+                raise FormValidationError({"media_selection": message})
+        elif (
             isinstance(selection, MediaSelection)
             and len(selection.attachments) > max_count
         ):
@@ -309,6 +354,7 @@ class PostAdmin(ModelView):
             data: Form data
             obj: Model instance being created
         """
+        await self._apply_imported_media(obj)
         print(f"[ADMIN] Creating post: {obj.title}")
 
     async def after_create(
@@ -341,6 +387,7 @@ class PostAdmin(ModelView):
             data: Form data
             obj: Model instance being edited
         """
+        await self._apply_imported_media(obj)
         print(f"[ADMIN] Editing post: ID={obj.id}")
 
     async def after_edit(
@@ -401,6 +448,12 @@ class PostAdmin(ModelView):
             obj: Deleted model instance
         """
         print(f"[ADMIN] Post deleted: ID={obj.id}")
+
+    async def _apply_imported_media(self, obj: Post) -> None:
+        try:
+            await apply_pending_media_import(obj)
+        except ValueError as exc:
+            raise FormValidationError({"media_selection": str(exc)}) from exc
 
     async def after_delete_committed(self, request: Request, obj: Post) -> None:
         """Delete the post's files once the row deletion is committed."""

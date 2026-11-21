@@ -5,24 +5,42 @@
 {% if data and data.attachments %}
   <div class="post-media-grid">
     {% for media in data.attachments %}
-      <div
-        class="{{ 'post-media-item is-cover' if data.cover and media.id == data.cover.id else 'post-media-item' }}"
-      >
-        {% if media.kind == "image" %}
-          <a href="{{ media.url }}" target="_blank" rel="noopener"
-            ><img
-              src="{{ media.url }}"
-              alt="{{ media.filename }}"
-              loading="lazy"
-          /></a>
-        {% elif media.kind == "video" %}
-          <video src="{{ media.url }}" controls preload="metadata"></video>
-        {% else %}
-          <div class="post-media-audio">
-            <span class="post-media-name">{{ media.filename }}</span>
-            <audio src="{{ media.url }}" controls preload="none"></audio>
-          </div>
-        {% endif %}
+      {% set row = namespace(item_class="post-media-item") %}
+      {% if data.cover and media.id == data.cover.id %}
+        {% set row.item_class = row.item_class ~ " is-cover" %}
+      {% endif %}
+      {% if not media.show_in_gallery %}
+        {% set row.item_class = row.item_class ~ " is-hidden-gallery" %}
+      {% endif %}
+      <div class="{{ row.item_class }}">
+        <div class="post-media-detail-frame">
+          {% if media.kind == "image" %}
+            <a href="{{ media.url }}" target="_blank" rel="noopener"
+              ><img
+                src="{{ media.url }}"
+                alt="{{ media.filename }}"
+                loading="lazy"
+            /></a>
+          {% elif media.kind == "video" %}
+            <video src="{{ media.url }}" controls preload="metadata"></video>
+            <span class="post-media-play-badge" aria-hidden="true"
+              ><i class="fa fa-play"></i
+            ></span>
+          {% else %}
+            <div class="post-media-audio">
+              <span class="post-media-name">{{ media.filename }}</span>
+              <audio src="{{ media.url }}" controls preload="none"></audio>
+            </div>
+          {% endif %}
+          <input
+            class="post-media-gallery-toggle"
+            type="checkbox"
+            disabled
+            {% if media.show_in_gallery %}checked{% endif %}
+            title="Показывать в галерее"
+            aria-label="Показывать в галерее"
+          />
+        </div>
       </div>
     {% endfor %}
   </div>

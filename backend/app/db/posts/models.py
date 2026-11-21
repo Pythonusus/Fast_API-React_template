@@ -6,6 +6,7 @@ Define the structure of the database tables.
 
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Any
 
 from sqlalchemy import (
     CheckConstraint,
@@ -118,8 +119,18 @@ class Post(Base):
 
     @property
     def gallery(self) -> list["PostMedia"]:
-        """Attachments shown in the gallery. The cover is shown separately."""
-        return [m for m in self.media if m.is_attachment and not m.is_cover]
+        """Attachments listed under the body. Cover and hidden files are out.
+
+        A file with ``show_in_gallery`` false is only shown when the body
+        HTML embeds it.
+        """
+        return [
+            item
+            for item in self.media
+            if item.is_attachment
+            and not item.is_cover
+            and item.show_in_gallery is not False
+        ]
 
     @property
     def media_selection(self) -> MediaSelection:
@@ -129,7 +140,16 @@ class Post(Base):
         )
 
     @media_selection.setter
-    def media_selection(self, selection: MediaSelection) -> None:
+    def media_selection(
+        self, selection: MediaSelection | list[dict[str, Any]]
+    ) -> None:
+        # Import rows are applied in ``PostAdmin`` after validation, so a
+        # dry-run does not copy objects. ``None`` means this save is not an
+        # import. An empty list clears media on import.
+        if isinstance(selection, list):
+            self.pending_media_import = selection
+            return
+        self.pending_media_import = None
         keep: list[PostMedia] = []
         for position, item in enumerate(selection.attachments):
             item.position = position
@@ -199,6 +219,15 @@ class PostMedia(Base):
     is_cover: Mapped[bool] = mapped_column(
         default=False,
         comment="Post cover. At most one per post, enforced in code.",
+    )
+    show_in_gallery: Mapped[bool] = mapped_column(
+        default=True,
+        server_default="true",
+        nullable=False,
+        comment=(
+            "When true, this attachment is listed in the public gallery. "
+            "When false, it is only shown if the body HTML embeds it."
+        ),
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

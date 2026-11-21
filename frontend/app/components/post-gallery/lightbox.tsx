@@ -136,6 +136,7 @@ const LightboxStage = ({ item, hasMany, onStep, onClose }: StageProps) => {
           autoPlay
           className="app-lightbox-media"
           controls
+          controlsList="nodownload"
           key={item.id}
           playsInline
           src={item.url}

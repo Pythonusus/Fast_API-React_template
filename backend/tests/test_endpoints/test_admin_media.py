@@ -239,11 +239,121 @@ def test_post_read_returns_cover_and_gallery_without_it():
     assert data["show_gallery"] is True
 
 
-def test_post_read_can_hide_gallery_flag():
+def test_gallery_omits_files_hidden_from_it():
+    shown, hidden = _media(1), _media(2, "audio")
+    hidden.show_in_gallery = False
+    post = Post(title="t", content="c")
+
+    post.media_selection = MediaSelection(attachments=[shown, hidden])
+
+    assert post.gallery == [shown]
+    assert post.media_selection.attachments == [shown, hidden]
+
+
+def test_import_list_stays_pending_until_it_is_applied():
+    post = Post(title="t", content="<p>x</p>")
+
+    post.media_selection = [{"url": "http://example/a.jpg"}]
+
+    assert post.pending_media_import == [{"url": "http://example/a.jpg"}]
+    assert post.media == []
+
+
+def test_object_key_from_public_url_rejects_other_hosts():
+    from app.storage import object_key_from_public_url
+
+    assert (
+        object_key_from_public_url(public_object_url("posts/old.jpg"))
+        == "posts/old.jpg"
+    )
+    assert object_key_from_public_url("https://evil.test/posts/old.jpg") is None
+
+
+def test_apply_import_copies_media_and_rewrites_the_body(monkeypatch):
+    copied: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        "app.admin.posts.import_media.copy_object",
+        lambda source, dest: copied.append((source, dest)),
+    )
+    url = public_object_url("posts/old.jpg")
+    post = Post(title="t", content=f'<p><img src="{url}"></p>')
+    post.media_selection = [
+        {
+            "url": url,
+            "kind": "image",
+            "content_type": "image/jpeg",
+            "filename": "old.jpg",
+            "size": 12,
+            "is_attachment": True,
+            "is_cover": False,
+            "show_in_gallery": False,
+        }
+    ]
+
+    from app.admin.posts.import_media import apply_pending_media_import
+
+    asyncio.run(apply_pending_media_import(post))
+
+    assert copied and copied[0][0] == "posts/old.jpg"
+    assert post.gallery == []
+    assert post.media_selection.attachments[0].show_in_gallery is False
+    assert url not in post.content
+    assert post.media[0].url in post.content
+
+
+def test_form_value_keeps_the_gallery_flag():
+    import json
+
+    from app.admin.posts.media_field import PostMediaField
+
+    shown, hidden = _media(1), _media(2)
+    hidden.show_in_gallery = False
+    raw = PostMediaField("media_selection").form_value(
+        MediaSelection(attachments=[shown, hidden])
+    )
+
+    assert json.loads(raw) == [
+        {"id": 1, "show_in_gallery": True},
+        {"id": 2, "show_in_gallery": False},
+    ]
+
+
+def test_post_read_omits_media_hidden_from_the_gallery():
+    shown, hidden = _media(1), _media(2)
+    hidden.show_in_gallery = False
+    now = datetime.now(UTC)
+    post = Post(id=1, title="Title", content="<p>x</p>", show_gallery=True)
+    post.created_at = post.updated_at = now
+    post.media_selection = MediaSelection(attachments=[shown, hidden])
+
+    data = PostRead.model_validate(post).model_dump()
+
+    assert [item["id"] for item in data["media"]] == [1]
+
+
+def test_post_read_names_audio_hidden_from_the_gallery():
+    hidden = _media(2, kind="audio")
+    hidden.show_in_gallery = False
+    hidden.filename = "field-recording.mp3"
     now = datetime.now(UTC)
     post = Post(
-        id=1, title="Title", content="<p>x</p>", show_gallery=False
+        id=1,
+        title="Title",
+        content=f'<p><audio src="{hidden.url}" controls></audio></p>',
+        show_gallery=True,
     )
+    post.created_at = post.updated_at = now
+    post.media_selection = MediaSelection(attachments=[hidden])
+
+    data = PostRead.model_validate(post).model_dump()
+
+    assert 'data-filename="field-recording.mp3"' in data["content"]
+    assert data["media"] == []
+
+
+def test_post_read_can_hide_gallery_flag():
+    now = datetime.now(UTC)
+    post = Post(id=1, title="Title", content="<p>x</p>", show_gallery=False)
     post.created_at = post.updated_at = now
 
     data = PostRead.model_validate(post).model_dump()

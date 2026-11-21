@@ -10,7 +10,7 @@
   <input
     type="hidden"
     name="{{ field.id }}"
-    value="{{ initial.attachments | map(attribute='id') | list | tojson | forceescape }}"
+    value="{{ field.form_value(data) | forceescape }}"
     data-post-media-ids
   />
   <input
@@ -21,6 +21,7 @@
   />
   {# prettier-ignore-start #}
   <script type="application/json" data-post-media-initial>{{ initial | tojson }}</script>
+  <script type="application/json" data-post-media-state></script>
   {# prettier-ignore-end #}
 
   <div class="card mb-3">
@@ -70,7 +71,9 @@
           {{ (field.max_bytes / 1048576) | round | int }} МБ. Перетащите
           миниатюру в текст поста чтобы вставить её в текущее место курсора.
           Кнопка «В текст» делает то же самое. Перетаскивайте миниатюры в
-          галерее, чтобы изменить их порядок.
+          галерее, чтобы изменить их порядок. Галочка справа сверху оставляет
+          файл в галерее на сайте. Снимите её, если файл должен быть только в
+          тексте.
         </small>
         <input
           type="file"

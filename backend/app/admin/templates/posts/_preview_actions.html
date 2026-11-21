@@ -1,0 +1,10 @@
+<div class="post-preview-actions">
+  <button type="button" class="btn" data-post-preview-open="detail">
+    Предпросмотр поста
+  </button>
+</div>
+{% if saved_preview is defined %}
+  {# prettier-ignore-start #}
+  <script type="application/json" data-post-preview-saved>{{ saved_preview | tojson }}</script>
+  {# prettier-ignore-end #}
+{% endif %}

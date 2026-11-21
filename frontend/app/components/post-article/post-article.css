@@ -12,6 +12,12 @@
   margin-inline: auto;
 }
 
+/* The volume track sits above its icon and must paint outside the card. */
+article.app-post-detail-article,
+div.app-post-gallery-card {
+  overflow: visible;
+}
+
 @media (width <= 519px) {
   .app-post-detail-article {
     --card-background-color: transparent;
