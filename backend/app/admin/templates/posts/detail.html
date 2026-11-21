@@ -1,6 +1,7 @@
 {% extends "detail.html" %}
 {% block detail_before %}
   <div class="col-12">
+    {% include "posts/_draft_notice.html" %}
     {% with saved_preview = view.public_preview(raw_obj) %}
       {% include "posts/_preview_actions.html" %}
     {% endwith %}

@@ -32,6 +32,7 @@ from starlette.requests import Request
 from starlette_admin.contrib.sqla import ModelView
 from starlette_admin.exceptions import FormValidationError
 from starlette_admin.fields import (
+    BooleanField,
     DateTimeField,
     IntegerField,
     StringField,
@@ -56,6 +57,18 @@ from app.storage import delete_objects
 
 # datetime-local accepts no fraction, or exactly three millisecond digits.
 _DATETIME_FRACTION = re.compile(r"\.(\d+)")
+
+
+def form_saves_draft(form: Any) -> bool:
+    """True when the clicked button keeps a new post unpublished.
+
+    ``_save_draft`` is the draft button. ``_continue_editing=draft`` is
+    that same save, then the edit form. Every other submit publishes.
+    A post that is already published ignores this.
+    """
+    if form.get("_save_draft") is not None:
+        return True
+    return form.get("_continue_editing") == "draft"
 
 
 def _datetime_local_value(value: str) -> str:
@@ -86,6 +99,18 @@ class PostDateTimeField(DateTimeField):
         if request.state.action.is_form():
             return _datetime_local_value(result)
         return result
+
+
+@dataclass
+class DraftStatusField(BooleanField):
+    """Draft badge on the list and detail pages. The form buttons set it."""
+
+    read_only: bool = True
+    exclude_from_create: bool = True
+    exclude_from_edit: bool = True
+    exclude_from_import: bool = True
+    list_template: str = "posts/list/draft.html"
+    detail_template: str = "posts/detail/draft.html"
 
 
 @dataclass
@@ -125,13 +150,13 @@ class PostAdmin(ModelView):
     icon = "fa fa-newspaper"
 
     # Columns in the list table (left to right)
-    list_fields = ["id", "title", "created_at", "updated_at"]
+    list_fields = ["id", "title", "is_draft", "created_at", "updated_at"]
 
     # Fields included in search
     searchable_fields = ["title", "content"]
 
     # Sortable columns
-    sortable_fields = ["id", "title", "created_at", "updated_at"]
+    sortable_fields = ["id", "title", "is_draft", "created_at", "updated_at"]
 
     # Newest posts first
     default_sort = [("created_at", "desc")]
@@ -228,6 +253,7 @@ class PostAdmin(ModelView):
                 "галереей — только то, что вставлено в текст."
             ),
         ),
+        DraftStatusField("is_draft", label="Статус"),
         PostDateTimeField(
             "created_at",
             read_only=True,
@@ -243,10 +269,11 @@ class PostAdmin(ModelView):
     ]
 
     # Auto-managed fields — hide on create
-    exclude_fields_from_create = ["id", "created_at", "updated_at"]
+    exclude_fields_from_create = ["id", "created_at", "updated_at", "is_draft"]
 
-    # Hide immutable / auto fields on edit
-    exclude_fields_from_edit = ["id", "created_at"]
+    # Hide immutable / auto fields on edit. A published post cannot go
+    # back to a draft; the buttons below set ``is_draft`` themselves.
+    exclude_fields_from_edit = ["id", "created_at", "is_draft"]
 
     # -------------------------------------------------------------------------
     def _additional_css_links(self, request: Request) -> list[str]:
@@ -257,7 +284,11 @@ class PostAdmin(ModelView):
             link = static_url(request, "posts/list.css", v=1)
             if link not in links:
                 links.append(link)
-        elif action in (
+        if action in (RequestAction.LIST, RequestAction.DETAIL):
+            link = static_url(request, "posts/status.css", v=1)
+            if link not in links:
+                links.append(link)
+        if action in (
             RequestAction.CREATE,
             RequestAction.EDIT,
             RequestAction.DETAIL,
@@ -355,6 +386,9 @@ class PostAdmin(ModelView):
             obj: Model instance being created
         """
         await self._apply_imported_media(obj)
+        # Import has no draft button. An imported post is published.
+        if request.state.action == RequestAction.CREATE:
+            obj.is_draft = form_saves_draft(await request.form())
         print(f"[ADMIN] Creating post: {obj.title}")
 
     async def after_create(
@@ -388,6 +422,12 @@ class PostAdmin(ModelView):
             obj: Model instance being edited
         """
         await self._apply_imported_media(obj)
+        # Drafts exist only while a new post is unfinished. Saving a
+        # published post always leaves it published.
+        if request.state.action == RequestAction.EDIT and not (
+            obj.is_draft and form_saves_draft(await request.form())
+        ):
+            obj.is_draft = False
         print(f"[ADMIN] Editing post: ID={obj.id}")
 
     async def after_edit(

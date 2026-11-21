@@ -1,0 +1,6 @@
+{% if raw_obj is defined and raw_obj.is_draft %}
+  <div class="alert alert-warning" role="status">
+    Это черновик. Он сохранён в базе и виден только в админке. На сайте его нет,
+    пока вы не нажмёте «Опубликовать».
+  </div>
+{% endif %}

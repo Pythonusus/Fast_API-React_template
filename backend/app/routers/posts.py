@@ -60,8 +60,9 @@ async def read_posts(
     session: AsyncSession = Depends(get_session),
 ) -> PostsListResponse:
     """
-    List posts with optional search, sort, and filters.
+    List published posts with optional search, sort, and filters.
 
+    Drafts are stored for the admin panel and are not included.
     ``total`` counts rows after the same search/filters (ignoring skip/limit).
     """
     items = await crud.list_posts(
@@ -82,7 +83,7 @@ async def read_post(
     post_id: int,
     session: AsyncSession = Depends(get_session),
 ) -> Post:
-    """Get one post by id."""
+    """Get one published post by id. A draft id is 404."""
     post = await crud.get_post(session, post_id)
     if post is None:
         raise HTTPException(

@@ -12,7 +12,7 @@
 }
 
 /*
- * Cancel and the three save actions. A phone gives each button the full
+ * Cancel, draft, and publish actions. A phone gives each button the full
  * row so the long labels fit. From 480px they share two columns. Wider
  * screens keep the original end-aligned row.
  */

@@ -19,7 +19,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.posts.models import Post, PostMedia
-from app.db.posts.query import PostFilter
+from app.db.posts.query import PostFilter, published_posts
 from app.schemas.posts import PostCreate, PostUpdate
 from app.settings import settings
 
@@ -28,11 +28,13 @@ async def get_post(session: AsyncSession, post_id: int) -> Post | None:
     """
     Fetch one post by primary key.
 
-    ``session.get`` hits the SQLAlchemy’s in-session cache (identity map) first,
-    then the database.
-    Returns ``None`` if no row exists — the API layer turns that into 404.
+    Returns ``None`` when the row is missing or is a draft. Drafts are
+    admin-only; the route turns ``None`` into 404 so the public site and
+    the public write routes cannot read or change them.
     """
-    return await session.get(Post, post_id)
+    stmt = published_posts(select(Post).where(Post.id == post_id))
+    result = await session.execute(stmt)
+    return result.scalar_one_or_none()
 
 
 async def count_posts(
@@ -41,13 +43,14 @@ async def count_posts(
     post_filter: PostFilter,
 ) -> int:
     """
-    Return the number of posts matching search/filters (for pagination UI).
+    Return how many published posts match the search and filters.
 
     Uses the same WHERE clauses as ``list_posts`` so ``total`` matches the
     filtered result set.
     """
     stmt = select(func.count()).select_from(Post)
     stmt = post_filter.filter(stmt)
+    stmt = published_posts(stmt)
     result = await session.execute(stmt)
     return int(result.scalar_one())
 
@@ -68,6 +71,7 @@ async def list_posts(
     """
     stmt = select(Post)
     stmt = post_filter.filter(stmt)
+    stmt = published_posts(stmt)
     stmt = post_filter.sort(stmt)
     stmt = stmt.offset(skip).limit(limit)
 

@@ -83,6 +83,16 @@ class Post(Base):
             "embedded in the HTML body."
         ),
     )
+    is_draft: Mapped[bool] = mapped_column(
+        default=False,
+        server_default="false",
+        nullable=False,
+        comment=(
+            "Unpublished post. Visible in the admin panel only. The public "
+            "API omits these rows. Only a new post can be a draft; saving "
+            "a published post leaves this false."
+        ),
+    )
 
     # Timezone-aware timestamps (Postgres TIMESTAMPTZ).
     # timezone=True means the column stores an absolute instant; Postgres

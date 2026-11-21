@@ -9,10 +9,21 @@ Query params (see ``FilterDepends`` in the posts router):
 """
 
 from datetime import datetime
+from typing import Any
 
 from fastapi_filter.contrib.sqlalchemy import Filter
 
 from app.db.posts.models import Post
+
+
+def published_posts(statement: Any) -> Any:
+    """Drop drafts from a public posts query.
+
+    Draft rows stay in the database for the admin panel. List, count, and
+    detail on ``/api/posts`` all go through this so a draft id is a 404
+    and never appears in the list.
+    """
+    return statement.where(Post.is_draft.is_(False))
 
 
 class PostFilter(Filter):

@@ -7,12 +7,12 @@
  * opening it does not change the row.
  */
 import {
-  PauseIcon,
   PlayIcon,
   SpeakerLoudIcon,
   SpeakerModerateIcon,
   SpeakerOffIcon,
   SpeakerQuietIcon,
+  StopIcon,
 } from "@radix-ui/react-icons";
 import { IconButton, Slider, Text } from "@radix-ui/themes";
 import { useEffect, useRef, useState } from "react";
@@ -184,14 +184,14 @@ export const AudioPlayer = ({ src, className, name }: AudioPlayerProps) => {
     .join(" ");
   const playButton = (
     <IconButton
-      aria-label={playing ? "Pause" : "Play"}
+      aria-label={playing ? "Stop" : "Play"}
       className={name ? "app-audio-play" : "app-audio-icon"}
       color="gray"
       onClick={togglePlay}
       size="2"
       variant={name ? "soft" : "ghost"}
     >
-      {playing ? <PauseIcon /> : <PlayIcon />}
+      {playing ? <StopIcon /> : <PlayIcon />}
     </IconButton>
   );
   const controls = (

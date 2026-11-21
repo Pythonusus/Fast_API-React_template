@@ -1,0 +1,16 @@
+/*
+ * Status pills on the post list and detail pages.
+ *
+ * Tabler's solid success badge paints white text on #2fb344, which is
+ * hard to read. These rules keep those backgrounds and use dark text.
+ */
+
+.post-status.is-published {
+  color: #061208;
+  background-color: var(--tblr-success);
+}
+
+.post-status.is-draft {
+  color: #1d273b;
+  background-color: var(--tblr-warning);
+}

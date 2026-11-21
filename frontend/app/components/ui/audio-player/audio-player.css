@@ -24,6 +24,11 @@
   white-space: nowrap;
 }
 
+.app-audio-seek,
+.app-audio-volume-slider {
+  cursor: pointer;
+}
+
 .app-audio-seek {
   flex: 1 1 auto;
   min-width: 2.5rem;
@@ -31,6 +36,7 @@
 
 .app-audio-icon {
   flex: 0 0 auto;
+  cursor: pointer;
 }
 
 .app-audio-volume {
@@ -94,8 +100,14 @@ button.app-audio-play {
   width: 2.5rem;
   height: 2.5rem;
   color: var(--gray-12);
+  cursor: pointer;
   background: var(--gray-4);
   border-radius: var(--radius-2);
+}
+
+button.app-audio-play svg {
+  width: 1.8rem;
+  height: 1.8rem;
 }
 
 .app-audio-track-name {
@@ -112,6 +124,28 @@ button.app-audio-play {
   min-width: 11rem;
   max-width: 70%;
   margin: 0;
+}
+
+/*
+ * Below the same 520px cutoff as the post page, the name takes the first
+ * line and play, time, seek, and volume share the second.
+ */
+@media (width <= 519px) {
+  .app-audio-track {
+    flex-wrap: wrap;
+  }
+
+  .app-audio-track-name {
+    flex: 1 0 100%;
+    order: -1;
+    margin: 0;
+  }
+
+  .app-audio-track .app-audio-player {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
+  }
 }
 
 .app-inner-html .app-audio-host {

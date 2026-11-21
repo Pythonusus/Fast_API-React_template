@@ -1,0 +1,29 @@
+{% if draft_actions %}
+  <div class="card-footer text-black">
+    <p class="text-secondary mb-2">
+      Черновик остаётся в админке. На сайте пост появится только после
+      «Опубликовать».
+    </p>
+    <div class="btn-list ms-auto justify-content-end">
+      <a
+        href="{{ back_url(request, view.key) }}"
+        class="{{ cls('form.cancel_button') }}"
+      >
+        <i class="{{ icon('form.cancel') }} sa-animate-icon me-1"></i
+        >{{ _("Cancel") }}
+      </a>
+      <button type="submit" name="_save_draft" value="1" class="btn">
+        Сохранить черновик
+      </button>
+      <button type="submit" name="_continue_editing" value="draft" class="btn">
+        Сохранить черновик и продолжить
+      </button>
+      <button type="submit" class="{{ cls('form.save_button') }}">
+        Опубликовать
+        <i class="{{ icon('form.save') }} sa-animate-icon ms-1"></i>
+      </button>
+    </div>
+  </div>
+{% else %}
+  {% include "_form_footer.html" %}
+{% endif %}

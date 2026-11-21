@@ -2,3 +2,8 @@
 {% block form_before %}
   {% include "posts/_preview_actions.html" %}
 {% endblock %}
+{% block form_footer %}
+  {% with draft_actions = true %}
+    {% include "posts/_form_footer.html" %}
+  {% endwith %}
+{% endblock %}
