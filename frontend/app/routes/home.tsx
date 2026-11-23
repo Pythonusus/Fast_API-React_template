@@ -2,7 +2,7 @@
  * Home page template.
  *
  * The full page is prerendered into static HTML at build time. The backend
- * message card shows `LOADING` until `fetchHello()` completes after hydration
+ * message card shows "Loading…" until `fetchHello()` completes after hydration
  * (see ``useBackendMessage``). The mirror form is fully interactive immediately
  * — it only fetches when the user clicks "Mirror text".
  *

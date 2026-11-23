@@ -101,6 +101,12 @@
         playMark.setAttribute("aria-hidden", "true");
         wrap.append(playMark);
         pick.append(wrap);
+      } else {
+        var audioPick = el("span", "post-gallery-pick-media post-media-audio");
+        var notePick = el("i", "fa fa-music post-media-note");
+        notePick.setAttribute("aria-hidden", "true");
+        audioPick.append(notePick);
+        pick.append(audioPick);
       }
       pick.append(el("span", "", media.filename || media.kind));
       pick.addEventListener("click", function () {
@@ -141,7 +147,10 @@
       return video;
     }
     var audio = el("div", "post-media-audio");
-    audio.append(el("span", "post-media-name", "♪ " + media.filename));
+    var note = el("i", "fa fa-music post-media-note");
+    note.setAttribute("aria-hidden", "true");
+    audio.append(note);
+    audio.append(el("span", "post-media-name", media.filename));
     return audio;
   }
 

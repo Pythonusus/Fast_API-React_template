@@ -28,20 +28,32 @@ export const PostBackLink = () => (
   </Link>
 );
 
+/** Russian count for the gallery heading: 1 файл, 2 файла, 5 файлов. */
+const attachmentCount = (count: number): string => {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  let word = "файлов";
+
+  if (mod10 === 1 && mod100 !== 11) {
+    word = "файл";
+  } else if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+    word = "файла";
+  }
+
+  return `${count} ${word}`;
+};
+
 const PostDetailFooter = ({
-  createdAt,
   title,
   updatedAt,
 }: {
-  createdAt: string;
   title: string;
   updatedAt: string;
 }) => (
   <Flex align="center" justify="between" mt="5" width="100%">
     <ShareButton title={title} />
     <Text as="p" color="gray" size="2">
-      <time dateTime={createdAt}>{formatDate(createdAt)}</time>
-      {updatedAt === createdAt ? null : <> · Updated {formatDate(updatedAt)}</>}
+      <time dateTime={updatedAt}>{formatDate(updatedAt)}</time>
     </Text>
   </Flex>
 );
@@ -59,15 +71,21 @@ export const PostArticle = ({ post }: PostArticleProps) => {
         </header>
         <PostContent html={post.content} />
         {showGallery ? (
-          <Card className="app-post-gallery-card" mt="5" variant="surface">
-            <PostGallery media={post.media} />
-          </Card>
+          <Flex direction="column" gap="3" mt="6">
+            <Flex align="baseline" gap="3" justify="between" wrap="wrap">
+              <Heading as="h2" id="post-gallery-heading" size="4">
+                Прикрепленные медиа
+              </Heading>
+              <Text color="gray" size="2">
+                {attachmentCount(post.media.length)}
+              </Text>
+            </Flex>
+            <Card className="app-post-gallery-card" variant="surface">
+              <PostGallery media={post.media} />
+            </Card>
+          </Flex>
         ) : null}
-        <PostDetailFooter
-          createdAt={post.created_at}
-          title={post.title}
-          updatedAt={post.updated_at}
-        />
+        <PostDetailFooter title={post.title} updatedAt={post.updated_at} />
       </article>
     </Card>
   );

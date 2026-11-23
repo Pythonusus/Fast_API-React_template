@@ -1,0 +1,23 @@
+{
+  "skill_name": "system-map",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Draw a map of how admin login works in this repo. I want to see the files, what each one keeps, and how the cookie gets set.",
+      "expected_output": "One fenced text map. Paths from the repo root. No function names. The cookie, the .env values, settings, the password check, and auth.py are boxes. Arrows say where the password hash and the session cookie go.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Map how a file chosen on the admin post form ends up on the public post page. Say where the bytes are stored.",
+      "expected_output": "One fenced text map. The arrow from the form names the file bucket, not just 'uploaded'. Includes the admin media route, the media row with no post yet, the save that attaches it, and the public read path. No function names.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I want a map of the public posts list only: search, sort, dates, and drafts. Do not edit the README.",
+      "expected_output": "One fenced text map of the list path only. README.md is unchanged. Drafts are described as hidden from the public list. No function names.",
+      "files": []
+    }
+  ]
+}

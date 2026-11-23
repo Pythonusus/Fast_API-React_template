@@ -15,7 +15,7 @@
 # Open http://localhost:5173
 # API is proxied through Vite. Direct API: http://localhost:8080
 # S3_PUBLIC_URL inside the backend container is http://localhost:5173/s3/
-# so presigned URLs come back through the Vite /s3 proxy.
+# so public media URLs come back through the Vite /s3 proxy.
 #
 # Both dev images default to root. Their source directories are bind-mounted,
 # so files they create would be root-owned on the host. Each service runs as
@@ -35,7 +35,7 @@ services:
       DEVELOPMENT: "true"
       # fastapi reads PORT. .env PORT is the prod host port (8100).
       PORT: "8080"
-      # Browser fetches presigned URLs from the Vite origin.
+      # Browser fetches public media URLs from the Vite origin.
       S3_PUBLIC_URL: http://localhost:5173/s3/
       # Bind mounts often do not deliver inotify events into the container.
       WATCHFILES_FORCE_POLLING: "true"

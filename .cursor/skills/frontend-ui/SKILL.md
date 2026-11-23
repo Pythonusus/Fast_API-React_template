@@ -60,7 +60,7 @@ frontend/app/
       <name>/
         index.tsx
         <name>.css
-  hooks/  api/  types/  utils/  common-texts/  assets/
+  hooks/  api/  types/  utils/  assets/
 ```
 
 - A reusable control with no feature knowledge goes in `components/ui/<name>/`.

@@ -2,7 +2,7 @@
  * About page template.
  *
  * The full page is prerendered into static HTML at build time. The backend
- * message card shows `LOADING` until `fetchAbout()` completes after hydration
+ * message card shows "Loading…" until `fetchAbout()` completes after hydration
  * (see ``useBackendMessage``).
  *
  * Flow:

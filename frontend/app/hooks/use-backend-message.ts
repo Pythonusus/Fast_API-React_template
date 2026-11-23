@@ -1,21 +1,16 @@
 /**
  * Mount-time fetch of a ``{ message }`` backend payload.
  *
- * Used by Home and About: render with ``LOADING``, then replace from the API
+ * Used by Home and About: render with "Loading…", then replace from the API
  * after hydration. Leaving the page aborts the request so a late response
  * cannot update unmounted state or flash a false error.
  *
  * Pass any ``(signal) => Promise<{ message }>`` helper (see ``fetchHello`` /
- * ``fetchAbout``). Errors map to the shared unavailable copy.
+ * ``fetchAbout``). Errors map to the unavailable copy below.
  */
 import { useEffect, useState } from "react";
 
 import { isAbortError } from "~/api/abort";
-import {
-  BACKEND_UNAVAILABLE,
-  BACKEND_UNAVAILABLE_HINT,
-} from "~/common-texts/errors";
-import { LOADING } from "~/common-texts/ui";
 
 export type BackendMessageFetcher = (
   signal: AbortSignal,
@@ -24,7 +19,7 @@ export type BackendMessageFetcher = (
 export type BackendMessageColor = "gray" | "red" | undefined;
 
 export const useBackendMessage = (fetchMessage: BackendMessageFetcher) => {
-  const [message, setMessage] = useState(LOADING);
+  const [message, setMessage] = useState("Loading…");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -41,8 +36,8 @@ export const useBackendMessage = (fetchMessage: BackendMessageFetcher) => {
           return;
         }
 
-        setError(BACKEND_UNAVAILABLE_HINT);
-        setMessage(BACKEND_UNAVAILABLE);
+        setError("We know about the problem and are working on it.");
+        setMessage("Backend is currently unavailable.");
       } finally {
         if (!controller.signal.aborted) {
           setIsLoading(false);

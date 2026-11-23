@@ -30,7 +30,10 @@ export const PostGallery = ({ media }: PostGalleryProps) => {
   }
 
   return (
-    <section aria-label="Attachments" className="app-post-gallery">
+    <section
+      aria-labelledby="post-gallery-heading"
+      className="app-post-gallery"
+    >
       {visual.length > 0 ? (
         <div className="app-post-gallery-grid">
           {visual.map((item, index) => (

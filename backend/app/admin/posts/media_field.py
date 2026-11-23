@@ -1,6 +1,9 @@
 """
 Admin form field for a post's gallery attachments and cover.
 
+Separate model due to the complexity of the field.
+Used by app/admin/posts/views.py to display the media field in the admin panel.
+
 Files are uploaded right away to ``/api/admin/media`` by
 ``static/posts/media.js``, which creates unattached ``PostMedia`` rows.
 The form then submits two hidden inputs:
@@ -36,7 +39,13 @@ UPLOAD_URL = "/api/admin/media"
 
 @dataclass
 class ShowGalleryField(BooleanField):
-    """Gallery toggle; checked by default on the create form."""
+    """Gallery toggle; checked by default on the create form.
+
+    Hidden on the list. The column header is wider than the checkmark
+    and pushes the table into a horizontal scroll.
+    """
+
+    exclude_from_list: bool | None = True
 
     async def serialize_value(self, request: Request, value: Any) -> bool:
         if value is None:
@@ -226,9 +235,9 @@ class PostMediaField(BaseField):
         }
 
     def additional_css_links(self, request: Request) -> list[str]:
-        return [static_url(request, "posts/media.css", v=21)]
+        return [static_url(request, "posts/media.css", v=24)]
 
     def additional_js_links(self, request: Request) -> list[str]:
         if self._needs_form_assets(request):
-            return [static_url(request, "posts/media.js", v=13)]
+            return [static_url(request, "posts/media.js", v=14)]
         return []

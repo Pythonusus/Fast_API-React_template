@@ -14,7 +14,6 @@
  */
 
 import { parseResponseJson } from "~/api/parse-json";
-import { fetchDataError } from "~/common-texts/errors";
 import { POSTS_MAX_PAGE_SIZE, POSTS_PAGE_SIZE } from "~/config";
 import type { Post, PostsListQuery, PostsPage } from "~/types/posts";
 import {
@@ -78,7 +77,7 @@ export const fetchPosts = async ({
   const response = await fetch(`/api/posts?${params}`, { signal });
 
   if (!response.ok) {
-    throw new Error(fetchDataError(response.status));
+    throw new Error(`Failed to fetch data: ${response.status}`);
   }
 
   const data = await parseResponseJson(response, postsListResponseSchema);
@@ -119,7 +118,7 @@ export const fetchPost = async (
   }
 
   if (!response.ok) {
-    throw new Error(fetchDataError(response.status));
+    throw new Error(`Failed to fetch data: ${response.status}`);
   }
 
   return parseResponseJson(response, postSchema);

@@ -65,9 +65,9 @@ export default defineConfig({
         changeOrigin: false,
       },
       // Must match the /s3/ prefix of S3_PUBLIC_URL in compose.dev.yaml.
-      // changeOrigin stays off: SigV4 is signed for the browser Host
-      // (localhost:5173), and MinIO checks that header.
-      // The rewrite strips /s3 so MinIO sees the path that was signed.
+      // changeOrigin stays off so MinIO sees the browser Host
+      // (localhost:5173). The rewrite strips /s3 so MinIO sees
+      // /<bucket>/<key>.
       "/s3": {
         target: s3_url,
         changeOrigin: false,

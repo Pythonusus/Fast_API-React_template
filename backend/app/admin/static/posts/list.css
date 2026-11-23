@@ -1,4 +1,13 @@
 /*
+ * The list is a wide table. Tabler's container-xl stops at 1320px and
+ * the card then scrolls sideways. Use the width beside the sidebar.
+ */
+.page-header > .container-xl,
+.page-body > .container-xl {
+  max-width: none;
+}
+
+/*
  * Post list on a phone.
  *
  * Tabler keeps the card header on one row. The search box shrinks away
@@ -67,5 +76,53 @@
   .card > .card-footer .pagination {
     flex-wrap: wrap;
     justify-content: center;
+  }
+
+  /*
+   * Popper aligns the menu to the button, so on a phone it runs off the
+   * screen. Pin it to the viewport instead.
+   */
+  #filter-builder-dropdown .dropdown-menu {
+    position: fixed !important;
+    inset: auto 0.5rem 0.5rem !important;
+    transform: none !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    max-height: 70vh;
+  }
+}
+
+/*
+ * The menu is at most 38rem. A date input will not shrink below its
+ * calendar control, so two of them on one row overflow it. Each value
+ * takes the full line.
+ */
+#filter-builder-dropdown .dropdown-menu {
+  container-type: inline-size;
+}
+
+@container (width < 40rem) {
+  #filter-form .filter-row {
+    flex-wrap: wrap;
+  }
+
+  #filter-form .filter-row-field,
+  #filter-form .filter-row-op {
+    flex: 1 1 8rem;
+    width: auto;
+    min-width: 0;
+  }
+
+  #filter-form .filter-row > .flex-fill {
+    flex: 1 1 100% !important;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  #filter-form input[type="date"] {
+    min-width: 0;
+    max-width: 100%;
   }
 }

@@ -1,7 +1,7 @@
 """Upload post attachments and covers from the admin post form."""
 
 import asyncio
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import PurePath
 from typing import Literal
 from uuid import uuid4
@@ -28,28 +28,6 @@ from app.storage import delete_objects, upload_fileobj
 
 router = APIRouter(prefix="/api/admin", tags=["admin-media"])
 
-# Uploads that were never saved with a post (form closed, file removed
-# before saving) are deleted once they are this old.
-PENDING_MEDIA_TTL = timedelta(days=1)
-
-# Files are served from this site's host, so only types a browser renders
-# as media are allowed. SVG is omitted: it would run as same-origin script.
-_EXTENSIONS = {
-    "image/jpeg": ".jpg",
-    "image/png": ".png",
-    "image/gif": ".gif",
-    "image/webp": ".webp",
-    "audio/mpeg": ".mp3",
-    "audio/mp4": ".m4a",
-    "audio/ogg": ".ogg",
-    "audio/wav": ".wav",
-    "audio/webm": ".weba",
-    "video/mp4": ".mp4",
-    "video/webm": ".webm",
-    "video/ogg": ".ogv",
-    "video/quicktime": ".mov",
-}
-
 
 def _file_size(file: UploadFile) -> int:
     if file.size is not None:
@@ -66,7 +44,7 @@ def _display_name(filename: str | None) -> str:
 
 
 async def _delete_stale_pending(session: AsyncSession) -> None:
-    cutoff = datetime.now(UTC) - PENDING_MEDIA_TTL
+    cutoff = datetime.now(UTC) - settings.pending_media_ttl
     result = await session.execute(
         select(PostMedia).where(
             PostMedia.post_id.is_(None),
@@ -100,7 +78,7 @@ async def upload_media(
         )
 
     content_type = (file.content_type or "").split(";", 1)[0].strip().lower()
-    extension = _EXTENSIONS.get(content_type)
+    extension = settings.media_extensions.get(content_type)
     if extension is None:
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,

@@ -34,7 +34,6 @@ import {
 
 import { isAbortError } from "~/api/abort";
 import { fetchPosts } from "~/api/posts";
-import { BACKEND_UNAVAILABLE } from "~/common-texts/errors";
 import {
   hasActivePostsQuery,
   postsQueryParsers,
@@ -45,6 +44,8 @@ import { POSTS_PAGE_SIZE } from "~/config";
 import { APP_DURATION_ENTER_MS, APP_STAGGER_MS } from "~/styles/motion";
 import type { Post, PostsFilter, PostsPage } from "~/types/posts";
 import { EMPTY_POSTS_FILTER } from "~/types/posts";
+
+const BACKEND_UNAVAILABLE = "Backend is currently unavailable.";
 
 export type UsePostsOptions = {
   /** Rows per request. Defaults to ``POSTS_PAGE_SIZE``. */

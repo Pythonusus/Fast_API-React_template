@@ -13,7 +13,6 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.admin import create_admin
 from app.routers.admin_media import router as admin_media_router
-from app.routers.files import router as files_router
 from app.routers.posts import router as posts_router
 from app.schemas.api import MirrorRequest
 from app.settings import settings
@@ -57,7 +56,6 @@ app.add_middleware(
 
 # Feature routers: each module owns its own APIRouter and is mounted here.
 app.include_router(posts_router)
-app.include_router(files_router)
 app.include_router(admin_media_router)
 
 # Mount the admin panel at settings.admin_url_prefix.

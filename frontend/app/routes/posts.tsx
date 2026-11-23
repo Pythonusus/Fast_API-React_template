@@ -14,8 +14,6 @@
 import { Grid, Heading, Section, Text } from "@radix-ui/themes";
 import type { MetaFunction } from "react-router";
 
-import { BACKEND_UNAVAILABLE_HINT } from "~/common-texts/errors";
-import { LOADING } from "~/common-texts/ui";
 import { PostCard } from "~/components/post-card";
 import { PostsToolbar } from "~/components/posts-toolbar";
 import { Pagination } from "~/components/ui/pagination";
@@ -85,13 +83,13 @@ const PostsRoute = () => {
 
       {error ? (
         <Text as="p" color="red" mb="4" size="3">
-          {error} {BACKEND_UNAVAILABLE_HINT}
+          {error} We know about the problem and are working on it.
         </Text>
       ) : null}
 
       {isLoading && posts.length === 0 ? (
         <Text as="p" color="gray" mb="4" size="3">
-          {LOADING}
+          Loading…
         </Text>
       ) : null}
 

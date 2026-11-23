@@ -1,49 +1,94 @@
-{% if data and data.cover %}
-  <div class="mb-2"><strong>Обложка</strong></div>
-  <img class="post-media-cover-image mb-3" src="{{ data.cover.url }}" alt="" />
-{% endif %}
-{% if data and data.attachments %}
-  <div class="post-media-grid">
-    {% for media in data.attachments %}
-      {% set row = namespace(item_class="post-media-item") %}
-      {% if data.cover and media.id == data.cover.id %}
-        {% set row.item_class = row.item_class ~ " is-cover" %}
-      {% endif %}
-      {% if not media.show_in_gallery %}
-        {% set row.item_class = row.item_class ~ " is-hidden-gallery" %}
-      {% endif %}
-      <div class="{{ row.item_class }}">
-        <div class="post-media-detail-frame">
-          {% if media.kind == "image" %}
-            <a href="{{ media.url }}" target="_blank" rel="noopener"
-              ><img
-                src="{{ media.url }}"
-                alt="{{ media.filename }}"
-                loading="lazy"
-            /></a>
-          {% elif media.kind == "video" %}
-            <video src="{{ media.url }}" controls preload="metadata"></video>
-            <span class="post-media-play-badge" aria-hidden="true"
-              ><i class="fa fa-play"></i
-            ></span>
-          {% else %}
-            <div class="post-media-audio">
-              <span class="post-media-name">{{ media.filename }}</span>
-              <audio src="{{ media.url }}" controls preload="none"></audio>
-            </div>
-          {% endif %}
-          <input
-            class="post-media-gallery-toggle"
-            type="checkbox"
-            disabled
-            {% if media.show_in_gallery %}checked{% endif %}
-            title="Показывать в галерее"
-            aria-label="Показывать в галерее"
+<div class="post-media">
+  <div class="card mb-3">
+    <div class="card-header">
+      <h3 class="card-title">Обложка</h3>
+    </div>
+    <div class="card-body">
+      <div class="post-media-cover">
+        {% if data and data.cover %}
+          <img
+            class="post-media-cover-image"
+            src="{{ data.cover.url }}"
+            alt=""
           />
-        </div>
+        {% else %}
+          <span class="text-secondary">Нет обложки</span>
+        {% endif %}
       </div>
-    {% endfor %}
+    </div>
   </div>
-{% elif not (data and data.cover) %}
-  <span class="text-secondary">Нет медиа</span>
-{% endif %}
+
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">
+        Медиа
+        <span class="text-secondary">
+          {{ data.attachments|length if data and data.attachments else 0 }} /
+          {{ field.max_count }}
+        </span>
+      </h3>
+    </div>
+    <div class="card-body">
+      {% if data and data.attachments %}
+        <div class="post-media-grid">
+          {% for media in data.attachments %}
+            {% set row = namespace(item_class="post-media-item is-static") %}
+            {% if data.cover and media.id == data.cover.id %}
+              {% set row.item_class = row.item_class ~ " is-cover" %}
+            {% endif %}
+            {% if not media.show_in_gallery %}
+              {% set row.item_class = row.item_class ~ " is-hidden-gallery" %}
+            {% endif %}
+            <div class="{{ row.item_class }}">
+              <div class="post-media-frame">
+                {% if media.kind == "image" %}
+                  <a href="{{ media.url }}" target="_blank" rel="noopener"
+                    ><img
+                      src="{{ media.url }}"
+                      alt="{{ media.filename }}"
+                      loading="lazy"
+                  /></a>
+                {% elif media.kind == "video" %}
+                  <a href="{{ media.url }}" target="_blank" rel="noopener">
+                    <video
+                      src="{{ media.url }}"
+                      muted
+                      preload="metadata"
+                    ></video>
+                  </a>
+                  <span class="post-media-play" aria-hidden="true"
+                    ><i class="fa fa-play"></i
+                  ></span>
+                {% else %}
+                  <a
+                    class="post-media-audio"
+                    href="{{ media.url }}"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <i
+                      class="fa fa-music post-media-note"
+                      aria-hidden="true"
+                    ></i>
+                    <span class="post-media-name">{{ media.filename }}</span>
+                  </a>
+                {% endif %}
+                {% if data.cover and media.id == data.cover.id %}
+                  <span class="post-media-badge">Обложка</span>
+                {% endif %}
+                <input
+                  class="post-media-gallery-toggle"
+                  type="checkbox"
+                  disabled
+                  {% if media.show_in_gallery %}checked{% endif %}
+                  title="Показывать в галерее"
+                  aria-label="Показывать в галерее"
+                />
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>

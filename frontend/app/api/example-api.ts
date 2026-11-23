@@ -9,7 +9,6 @@ Use relative URLs like ("/api/hello"):
 */
 
 import { parseResponseJson } from "~/api/parse-json";
-import { fetchDataError } from "~/common-texts/errors";
 import { textResponseSchema, type TextResponse } from "~/types/api";
 
 // Fetch hello message from the backend.
@@ -19,7 +18,7 @@ export const fetchHello = async (
   const response = await fetch("/api/hello", { signal });
 
   if (!response.ok) {
-    throw new Error(fetchDataError(response.status));
+    throw new Error(`Failed to fetch data: ${response.status}`);
   }
 
   return parseResponseJson(response, textResponseSchema);
@@ -32,7 +31,7 @@ export const fetchAbout = async (
   const response = await fetch("/api/about", { signal });
 
   if (!response.ok) {
-    throw new Error(fetchDataError(response.status));
+    throw new Error(`Failed to fetch data: ${response.status}`);
   }
 
   return parseResponseJson(response, textResponseSchema);
@@ -53,7 +52,7 @@ export const fetchMirror = async (
   });
 
   if (!response.ok) {
-    throw new Error(fetchDataError(response.status));
+    throw new Error(`Failed to fetch data: ${response.status}`);
   }
 
   return parseResponseJson(response, textResponseSchema);

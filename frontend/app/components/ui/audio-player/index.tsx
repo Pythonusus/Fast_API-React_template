@@ -283,7 +283,8 @@ export const AudioPlayer = ({ src, className, name }: AudioPlayerProps) => {
     <div className="app-audio-track">
       {element}
       {playButton}
-      <Text as="p" className="app-audio-track-name" size="2">
+      {/* Span, not a paragraph: post prose adds a bottom margin to `p`. */}
+      <Text className="app-audio-track-name" size="2">
         {audioLabel(name)}
       </Text>
       {controls}

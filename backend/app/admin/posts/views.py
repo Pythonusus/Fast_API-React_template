@@ -25,11 +25,19 @@ No auth or SessionMiddleware changes are needed — those are shared.
 import asyncio
 import re
 from dataclasses import dataclass
+from datetime import datetime, time, timedelta
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from pydantic import ValidationError
+from sqlalchemy import and_
 from starlette.requests import Request
 from starlette_admin.contrib.sqla import ModelView
+from starlette_admin.contrib.sqla.filters import (
+    DateBetweenFilter,
+    IsFalseFilter,
+    IsTrueFilter,
+)
 from starlette_admin.exceptions import FormValidationError
 from starlette_admin.fields import (
     BooleanField,
@@ -101,6 +109,39 @@ class PostDateTimeField(DateTimeField):
         return result
 
 
+class PublishedStatusFilter(IsFalseFilter):
+    """``is_draft`` is false: the post is on the public site."""
+
+    label = "Опубликован"
+
+
+class DraftFilter(IsTrueFilter):
+    """``is_draft`` is true: the post is not public."""
+
+    label = "Черновик"
+
+
+class DayRangeFilter(DateBetweenFilter):
+    """Two calendar days, with no time.
+
+    The columns store timestamps. Each chosen day includes every time on
+    that day in the app timezone.
+    """
+
+    def apply(self, ctx: Any) -> Any:
+        start_day = ctx.value
+        end_day = ctx.value2
+        if end_day < start_day:
+            start_day, end_day = end_day, start_day
+        zone = ZoneInfo(settings.timezone)
+        start = datetime.combine(start_day, time.min, tzinfo=zone)
+        end = datetime.combine(
+            end_day + timedelta(days=1), time.min, tzinfo=zone
+        )
+        column = getattr(ctx.view.model, ctx.field_name)
+        return and_(column >= start, column < end)
+
+
 @dataclass
 class DraftStatusField(BooleanField):
     """Draft badge on the list and detail pages. The form buttons set it."""
@@ -152,8 +193,16 @@ class PostAdmin(ModelView):
     # Columns in the list table (left to right)
     list_fields = ["id", "title", "is_draft", "created_at", "updated_at"]
 
-    # Fields included in search
-    searchable_fields = ["title", "content"]
+    # The search box matches title and content. This list is also the
+    # filter menu, so status and the timestamps are included. The search
+    # box itself ignores fields that are not text.
+    searchable_fields = [
+        "title",
+        "content",
+        "is_draft",
+        "created_at",
+        "updated_at",
+    ]
 
     # Sortable columns
     sortable_fields = ["id", "title", "is_draft", "created_at", "updated_at"]
@@ -253,18 +302,24 @@ class PostAdmin(ModelView):
                 "галереей — только то, что вставлено в текст."
             ),
         ),
-        DraftStatusField("is_draft", label="Статус"),
+        DraftStatusField(
+            "is_draft",
+            label="Статус",
+            filters=[PublishedStatusFilter, DraftFilter],
+        ),
         PostDateTimeField(
             "created_at",
             read_only=True,
             label="Создан",
             exclude_from_import=True,
+            filters=[DayRangeFilter],
         ),
         PostDateTimeField(
             "updated_at",
             read_only=True,
             label="Обновлён",
             exclude_from_import=True,
+            filters=[DayRangeFilter],
         ),
     ]
 
@@ -281,7 +336,7 @@ class PostAdmin(ModelView):
         links = list(super()._additional_css_links(request))
         action = request.state.action
         if action == RequestAction.LIST:
-            link = static_url(request, "posts/list.css", v=1)
+            link = static_url(request, "posts/list.css", v=5)
             if link not in links:
                 links.append(link)
         if action in (RequestAction.LIST, RequestAction.DETAIL):
@@ -293,7 +348,7 @@ class PostAdmin(ModelView):
             RequestAction.EDIT,
             RequestAction.DETAIL,
         ):
-            link = static_url(request, "posts/layout.css", v=4)
+            link = static_url(request, "posts/layout.css", v=5)
             if link not in links:
                 links.append(link)
         return links

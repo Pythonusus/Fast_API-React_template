@@ -13,8 +13,6 @@ import { Heading, Section, Text } from "@radix-ui/themes";
 import type { MetaFunction } from "react-router";
 import { useParams, useSearchParams } from "react-router";
 
-import { BACKEND_UNAVAILABLE_HINT } from "~/common-texts/errors";
-import { LOADING } from "~/common-texts/ui";
 import { PostArticle, PostBackLink } from "~/components/post-article";
 import { usePost } from "~/hooks/use-post";
 import { loadPostPreview } from "~/utils/post-preview";
@@ -64,7 +62,7 @@ const PostDetailRoute = () => {
       <PostBackLink />
       {isLoading && !draftId ? (
         <Text as="p" color="gray" size="3">
-          {LOADING}
+          Loading…
         </Text>
       ) : null}
 
@@ -87,7 +85,7 @@ const PostDetailRoute = () => {
 
       {error ? (
         <Text as="p" color="red" size="3">
-          {error} {BACKEND_UNAVAILABLE_HINT}
+          {error} We know about the problem and are working on it.
         </Text>
       ) : null}
 

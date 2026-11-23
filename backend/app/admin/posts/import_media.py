@@ -1,9 +1,22 @@
-"""Turn exported media links into files owned by the imported post.
+"""Copy imported post media onto the post being saved in the admin panel.
 
-The export cell is a JSON list of public URLs plus the flags the form
-stores (cover, gallery visibility). Import copies each object to a new
-key so deleting one post does not remove the other's files, then
-rewrites those URLs inside the HTML body.
+The only caller is ``PostAdmin`` in ``app/admin/posts/views.py``.
+
+Export, in ``app/admin/posts/media_field.py``, writes the media cell as a
+JSON list of public URLs plus the flags the form stores (cover, gallery
+visibility). On import, ``PostMediaField.parse_import_value`` reads that
+JSON and returns the list. Assigning the list to ``Post.media_selection``
+keeps it on ``pending_media_import`` and does not copy files yet. A
+normal form save assigns a ``MediaSelection`` and clears that pending list.
+
+``PostAdmin.validate`` calls ``media_import_error`` while the value is
+still that list, and shows the message on the media field.
+
+``before_create`` and ``before_edit`` call ``apply_pending_media_import``.
+It copies each object to a new key, so deleting one post does not remove
+the other's files, rewrites those URLs inside the HTML body, and attaches
+the new rows. A form save has no pending list and is skipped. A copy
+failure is shown on the media field, and objects copied so far are deleted.
 """
 
 import asyncio
@@ -18,26 +31,6 @@ from app.storage import (
     delete_objects,
     object_key_from_public_url,
 )
-
-# Same allow-list as the upload endpoint. Import must not attach a type
-# the form would refuse.
-_EXTENSIONS = {
-    "image/jpeg": ".jpg",
-    "image/png": ".png",
-    "image/gif": ".gif",
-    "image/webp": ".webp",
-    "audio/mpeg": ".mp3",
-    "audio/mp4": ".m4a",
-    "audio/ogg": ".ogg",
-    "audio/wav": ".wav",
-    "audio/webm": ".weba",
-    "video/mp4": ".mp4",
-    "video/webm": ".webm",
-    "video/ogg": ".ogv",
-    "video/quicktime": ".mov",
-}
-
-_KINDS = {"image", "video", "audio"}
 
 
 def media_import_error(items: object) -> str | None:
@@ -121,9 +114,10 @@ def _item_error(item: dict[str, Any]) -> str | None:
     if object_key_from_public_url(url) is None:
         return "Медиа: ссылка должна вести в хранилище этого сайта"
     kind = item.get("kind")
-    if kind not in _KINDS:
+    if kind not in settings.media_kinds:
         return "Медиа: тип должен быть image, video или audio"
-    if _EXTENSIONS.get(str(item.get("content_type") or "")) is None:
+    content_type = str(item.get("content_type") or "")
+    if settings.media_extensions.get(content_type) is None:
         return "Медиа: этот тип файла прикреплять нельзя"
     if item.get("is_cover") and kind != "image":
         return "Обложка должна быть изображением"
@@ -138,7 +132,7 @@ def _copy_item(
     if source_key is None:
         raise ValueError("Медиа: ссылка должна вести в хранилище этого сайта")
     content_type = str(item["content_type"])
-    extension = _EXTENSIONS[content_type]
+    extension = settings.media_extensions[content_type]
     dest_key = f"posts/{uuid4().hex}{extension}"
     filename = _filename(item.get("filename"))
     try:

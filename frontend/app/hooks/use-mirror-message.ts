@@ -25,8 +25,6 @@ import { useEffect, useRef, useState } from "react";
 
 import { isAbortError } from "~/api/abort";
 import { fetchMirror } from "~/api/example-api";
-import { BACKEND_UNAVAILABLE_HINT } from "~/common-texts/errors";
-
 export const useMirrorMessage = () => {
   const [inputMessage, setInputMessage] = useState("");
   const [mirrorMessage, setMirrorMessage] = useState("");
@@ -55,7 +53,7 @@ export const useMirrorMessage = () => {
         return;
       }
 
-      setMirrorError(BACKEND_UNAVAILABLE_HINT);
+      setMirrorError("We know about the problem and are working on it.");
     } finally {
       if (!controller.signal.aborted) {
         setIsMirroring(false);

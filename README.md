@@ -67,9 +67,9 @@ React 19 + React Router 8 (framework mode) + Vite 8 + Radix Themes + next-themes
 
 **Root shell.** `Layout` in `root.tsx` owns `<html>` / `<head>` / `<body>`, Radix + next-themes providers, header, and footer. `App` only renders `<Outlet />` for the matched child route. Conventional export names (`Layout`, `ErrorBoundary`, `Outlet`, `meta`) must stay exact — React Router discovers them by name.
 
-**API calls.** Helpers in `app/api/` use relative URLs like `/api/hello`. In development, Vite’s `server.proxy` forwards them to `localhost:8000`. In production, Nginx reverse-proxies `/api/*`. On failure, throw with shared copy from `common-texts/errors.ts`; routes/hooks catch and show a soft error in the UI.
+**API calls.** Helpers in `app/api/` use relative URLs like `/api/hello`. In development, Vite’s `server.proxy` forwards them to `localhost:8000`. In production, Nginx reverse-proxies `/api/*`. On failure, throw an `Error` with a message next to the call; routes/hooks catch and show a soft error in the UI.
 
-**Types & shared text.** Put cross-module API shapes in `app/types/`. Colocate props/local state next to the one file that uses them. Add strings to `common-texts/` only when they appear in more than one place.
+**Types & copy.** Put cross-module API shapes in `app/types/`. Colocate props, local state, and user-facing strings next to the file that uses them.
 
 **Styling & theme.** Prefer Radix Themes components/props. Custom CSS lives next to the component or under `styles/` (global resets, light/dark token overrides). Theme toggle uses CSS to pick icons so prerendered HTML does not flash the wrong icon.
 
@@ -87,7 +87,7 @@ React 19 + React Router 8 (framework mode) + Vite 8 + Radix Themes + next-themes
 | React components | PascalCase exports | `Header`, `HomePageCards`, `AboutRoute` |
 | Hooks | `use` + camelCase | `useMirrorMessage` |
 | API helpers | `fetch` + camelCase | `fetchHello`, `fetchMirror` |
-| Shared constants / error strings | SCREAMING_SNAKE_CASE | `BACKEND_UNAVAILABLE_HINT`, `HTML_LANG` |
+| Module constants | SCREAMING_SNAKE_CASE | `HTML_LANG`, `POSTS_PAGE_SIZE` |
 | Types | PascalCase | `TextResponse` |
 | CSS classes | kebab-case (often `app-` prefix for shell UI) | `app-header`, `app-shell` |
 | Env keys (client) | `VITE_` prefix | `VITE_HTML_LANG` |
@@ -111,16 +111,262 @@ Example: a public `/products` page that loads data from the backend after hydrat
 
 3. **Prerender the shell (optional)** — in `react-router.config.ts`, add `"/products"` to `prerender` for public marketing/content pages whose shell is known at build time. Skip auth-only, personalized, or parameterized routes. Do not prerender the 404 splat.
 
-4. **API helper (if needed)** — add a typed function in `app/api/` with a relative `/api/...` URL; put shared response types in `app/types/`; reuse `fetchDataError` / shared error strings.
+4. **API helper (if needed)** — add a typed function in `app/api/` with a relative `/api/...` URL; put shared response types in `app/types/`. Throw an `Error` with the message next to the failed response.
 
-5. **Styles / shared components (optional)** — colocate CSS under `app/components/<name>/`, or put page-only rules in `app/styles/components/`. Prefer Radix props first. Put reusable domain-agnostic UI in `app/components/ui/`; put feature wrappers (e.g. posts toolbar) under `app/components/<feature>/`.
+5. **Styles / shared components (optional)** — colocate CSS under `app/components/<name>/`, or put page-only rules in `app/styles/components/`. Prefer Radix props first. Put reusable domain-agnostic UI in `app/components/ui/`; put feature wrappers (e.g. posts toolbar) under `app/components/<feature>/`. Leave page copy in the route or component that renders it.
 
-6. **Shared strings** — if the same copy is used elsewhere, add it to `app/common-texts/`; otherwise leave it inline.
-
-7. **Nginx** — a normal page needs no `nginx.conf` change. In production the frontend image serves the build with Nginx (`Dockerfile.frontend`). `location /` uses `try_files $uri $uri/ /__spa-fallback.html`: a prerendered `/products` is its static HTML file; a CSR-only route hydrates from `__spa-fallback.html` and the in-app router (including the 404 splat) takes over. Hashed files under `/assets/` are cached for a year.
+6. **Nginx** — a normal page needs no `nginx.conf` change. In production the frontend image serves the build with Nginx (`Dockerfile.frontend`). `location /` uses `try_files $uri $uri/ /__spa-fallback.html`: a prerendered `/products` is its static HTML file; a CSR-only route hydrates from `__spa-fallback.html` and the in-app router (including the 404 splat) takes over. Hashed files under `/assets/` are cached for a year.
    - Keep API calls on a prefix Nginx already reverse-proxies to `backend:8080`: `/api`, `/metrics`, `/docs`, `/redoc`, `/openapi.json`, `/admin`. That list must stay in sync with `frontend/vite.config.ts`. A new prefix (for example `/billing`) has to be added in both places or production requests never reach FastAPI.
    - Do not put a page on one of those prefixes — Nginx sends them to the backend, not the React app.
    - If the page loads third-party scripts, fonts, images, or APIs, extend the `Content-Security-Policy` header in `nginx.conf` (`script-src`, `font-src`, `img-src`, `connect-src`, and so on). The default policy is same-origin only.
+
+<a name = "backend"></a>
+## 🔐 Backend
+
+### Authentication system
+
+One admin account. The name, password hash, and signing secret live in the repo-root `.env`. After a successful login the browser keeps a signed `session` cookie. The server does not keep its own copy of that login.
+
+```text
+.env
+keeps the admin name, the password hash, the signing secret, and the development switch
+        |
+        v
+app/settings.py
+reads .env when the process starts
+keeps those four values, plus the panel address /admin,
+a 1-hour login lifetime, and a 7-day login lifetime
+        |
+        +-----------------------------+--------------------------------+
+        |                             |                                |
+        v                             v                                v
+app/utils/password_rules.py      app/api.py                    app/admin/__init__.py
+decides if a typed password      creates the web app           creates the admin panel
+is acceptable                    and wraps every request       at /admin
+                                 in the cookie layer           and connects it to auth.py
+        ^                             |                        so a page is shown only
+        |                             |                        after auth.py agrees
+        |                             |
+scripts/generate_password_hash.py     |
+asks you to type a password,          |
+asks password_rules.py if it is       |
+acceptable, then prints a hash        |
+for you to save in .env               |
+                                      |
+                      the cookie layer runs first on every request
+                      it turns the session cookie into data the app can read
+                      and, if that data changed, sends an updated cookie back
+                                      |
+                                      v
+                                the /admin panel
+                                      |
+                                      v
+                              app/admin/auth.py
+                              login form: compares the typed name with .env,
+                              checks the password against the stored hash,
+                              and on success writes the name and the login time
+                              into the session
+                              later visits: reads that session and allows the page
+                              only while the login is still inside 1 hour,
+                              or inside 7 days if "remember me" was chosen
+                              logout: clears the session so the cookie is removed
+
+frontend/vite.config.ts and nginx.conf
+keep no login data; they only forward /admin to this Python app
+```
+
+Paths under `app/` are relative to `backend/`.
+
+### Post management system
+
+Staff write posts in the admin panel. The public site only reads published ones. Both sides share the same tables, the same file bucket, and the same limits.
+
+```text
+backend/app/settings.py
+keeps the post limits: body length, upload size, gallery count,
+how long an unsaved file lives, allowed file types, and image/video/audio
+        |
+        +------------------------------+-------------------------------+
+        |                              |                               |
+        v                              v                               v
+backend/app/db/posts/models.py   backend/app/schemas/posts.py   backend/app/storage.py
+keeps the posts table and the    keeps the JSON shape of a      keeps the bucket helpers
+post_media table                 post for the public API        upload, copy, delete,
+a post has a title, HTML body,   and for the admin checks       and the public file URL
+a gallery switch, and a draft    times are sent in the          each media row stores
+flag                             app timezone                   that URL
+media rows start with no post
+and are attached on save
+        |
+        v
+the database and the file bucket
+a deleted post also deletes its media rows
+the files themselves are removed after that delete is saved
+
+staff write
+-----------
+
+the admin post form
+backend/app/admin/templates/posts/   the HTML of the list, form, and detail
+backend/app/admin/static/posts/      the editor, the media picker, the preview button
+        |
+        | a chosen file is stored in the file bucket right away
+        v
+backend/app/routers/admin_media.py
+requires the admin login cookie
+rejects a type or a size outside the settings
+stores the file in the bucket and adds a media row with no post yet
+files still unattached after one day are deleted
+        |
+        | save, import, or delete
+        v
+backend/app/admin/posts/views.py
+the post screens in the admin panel
+checks the title, the body, and the media against the settings
+a new post can be saved as a draft
+a published post stays published
+        |
+        +------------------------------+-------------------------------+
+        |                              |                               |
+        v                              v                               v
+normal save                    import                         delete
+backend/app/admin/posts/       backend/app/admin/posts/       the post row goes
+media_field.py                 import_media.py                the media rows go with it
+reads the form's chosen        the media cell is a JSON       then the files are
+files and cover                list of public URLs            removed from the bucket
+and attaches those rows        from an export
+to the post                    each file is copied to a
+files dropped from the form    new key, the links inside
+are removed from the bucket    the body are rewritten,
+after the save is stored       and the new rows are attached
+                               if a source file is already
+                               gone, the save stops and
+                               shows the error on the media field
+
+public read
+-----------
+
+    frontend
+        |
+        v
+backend/app/routers/posts.py
+the public posts API
+the site uses the list and the detail reads
+        |
+        v
+backend/app/db/posts/query.py
+hides drafts
+applies search, sort, and the date range
+        |
+        v
+backend/app/db/posts/crud.py
+reads the rows
+drafts come back as missing, so the public site shows them as not found
+        |
+        v
+backend/app/schemas/posts.py
+turns each row into the JSON the pages render
+
+preview
+-------
+
+the preview button in the admin form stores the unsaved post in the browser
+frontend/app/utils/post-preview.ts reads it
+the detail page with ?draft= shows that copy instead of asking the API
+
+backend/app/db/engine.py
+opens one database session for a request and saves it when the request succeeds
+the public routes and the admin screens both use it
+```
+
+### Attachment management system
+
+One bucket holds every attachment. A page receives a permanent public link, and the browser loads the file from that link.
+
+**Private address.** Only the app uses it: upload, copy, delete, and creating the bucket.
+
+**Public address.** This is what gets written into links, and the browser opens it. A path prefix such as `/s3/` sits in front of the bucket name.
+
+**Bucket.** One bucket holds covers and gallery files. It is created on startup if it is missing. Anyone who knows an object key may fetch that object. Listing the keys stays closed. A key looks like `posts/<random id>.<extension>`.
+
+**Database row.** The row stores the key, the kind, the original file name, and the flags. Cover, gallery, and hidden-from-gallery are flags on that row. The public link is not stored there. It is built when a response is made, from the public address, the bucket, and the key. The post body is the exception: an embed keeps the full public link as text.
+
+**Public link.** `<public address>/<bucket>/posts/<random id>.<extension>`. It does not expire. The page JSON carries this link and never the file bytes. Gallery and cover links are rebuilt on each read, so they follow the current public address. A link already written into the post body stays as the text that was saved.
+
+```text
+startup
+-------
+
+the app, on the private address
+        |
+        | the bucket is created if it is missing, then opened for public reads
+        v
+the bucket
+fetching one known object is allowed
+asking for the list of keys is refused
+
+a file is chosen
+----------------
+
+the admin form
+        |
+        | the file bytes are stored in the bucket right away, under a new key
+        v
+the bucket and a database row
+the row keeps that key and is not attached to a post yet
+the form is shown the public link built from the key
+        |
+        | save attaches the row to the post
+        v
+the post
+the body may also keep that same public link as text
+a file still unattached after one day is removed from the bucket, and its row goes with it
+
+a page is opened
+----------------
+
+the page JSON
+carries the public link for each cover and gallery file
+        |
+        | the browser requests that link
+        v
+the public front door
+strips the /s3/ prefix and forwards the rest
+        |
+        | the store is asked for /<bucket>/<key>
+        v
+the bucket
+returns the file
+audio and video ask for byte ranges of that same file
+the app is not on this path
+
+a post is copied by import
+--------------------------
+
+an exported media cell
+a list of public links from this site
+        |
+        | a link that does not start with this site's public address and bucket is refused
+        v
+the same bucket
+each object is copied to a new key
+the new row stores the new key
+links inside the body text are rewritten to the new public links
+the source object is left in place
+if a source object is already gone, the copy stops
+and the new objects made so far are removed from the bucket
+
+a post is deleted
+-----------------
+
+the database
+the post row goes, and its media rows go with it
+        |
+        | each stored key is then removed
+        v
+the bucket
+a file dropped from the form on save is removed the same way, after that save is stored
+```
 
 <a name = "quick-start"></a>
 ## 🚀 Quick Start

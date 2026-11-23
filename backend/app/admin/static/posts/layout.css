@@ -45,3 +45,23 @@
   align-items: center;
   margin-bottom: 1rem;
 }
+
+/*
+ * Detail fields live in a table. The table grows to fit the pictures,
+ * then .table-responsive scrolls sideways. Create and edit are normal
+ * blocks, so the same gallery wraps. A fixed table gives the value
+ * column a real width and the tiles wrap inside it.
+ */
+.page-body .table-responsive {
+  overflow-x: clip;
+}
+
+.page-body .table-responsive > table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.page-body .table-responsive > table > thead > tr > th:first-child,
+.page-body .table-responsive > table > tbody > tr > td:first-child {
+  width: 12rem;
+}

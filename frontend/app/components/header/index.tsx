@@ -17,7 +17,6 @@ import { useTheme } from "next-themes";
 import { NavLink } from "react-router";
 
 import reactLogo from "~/assets/react.svg";
-import { APP_NAME } from "~/common-texts/ui";
 import "./header.css";
 
 export const Header = () => {
@@ -59,7 +58,7 @@ export const Header = () => {
                 width="24"
               />
               <Text as="p" className="app-header-title" size="4" weight="bold">
-                {APP_NAME}
+                FastAPI + React Template
               </Text>
             </Flex>
             {/*

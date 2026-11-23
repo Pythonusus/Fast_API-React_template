@@ -12,7 +12,6 @@ import { useEffect, useState } from "react";
 
 import { isAbortError } from "~/api/abort";
 import { PostNotFoundError, fetchPost } from "~/api/posts";
-import { BACKEND_UNAVAILABLE } from "~/common-texts/errors";
 import type { Post } from "~/types/posts";
 
 type PostResult = {
@@ -47,7 +46,9 @@ export const usePost = (postId: number | null) => {
           post: null,
           notFound: error_ instanceof PostNotFoundError,
           error:
-            error_ instanceof PostNotFoundError ? null : BACKEND_UNAVAILABLE,
+            error_ instanceof PostNotFoundError
+              ? null
+              : "Backend is currently unavailable.",
         });
       }
     };

@@ -5,6 +5,7 @@ Values load when ``Settings()`` runs at import time.
 See ``.env.example`` at the repository root for names and examples.
 """
 
+from datetime import timedelta
 from pathlib import Path
 from typing import ClassVar
 from urllib.parse import urlsplit
@@ -169,6 +170,13 @@ class Settings(BaseSettings):
         ),
     )
 
+    # Error codes returned by S3 providers when a bucket does not exist.
+    missing_bucket_codes: ClassVar[set[str]] = {
+        "404",
+        "NoSuchBucket",
+        "NotFound",
+    }
+
     # Server-side session TTL in seconds when remember_me is false (1 hour).
     session_max_age: ClassVar[int] = 3600
 
@@ -193,7 +201,34 @@ class Settings(BaseSettings):
 
     # Max gallery attachments per post. A separately uploaded cover does
     # not count toward this limit.
-    post_media_max_count: ClassVar[int] = 10
+    post_media_max_count: ClassVar[int] = 12
+
+    # Uploads that were never saved with a post (form closed, file removed
+    # before saving) are deleted once they are this old.
+    pending_media_ttl: ClassVar[timedelta] = timedelta(days=1)
+
+    # Files are served from this site's host, so only types a browser
+    # renders as media are allowed. SVG is omitted: it would run as
+    # same-origin script. Content type maps to the stored file extension.
+    media_extensions: ClassVar[dict[str, str]] = {
+        "image/jpeg": ".jpg",
+        "image/png": ".png",
+        "image/gif": ".gif",
+        "image/webp": ".webp",
+        "audio/mpeg": ".mp3",
+        "audio/mp4": ".m4a",
+        "audio/ogg": ".ogg",
+        "audio/wav": ".wav",
+        "audio/webm": ".weba",
+        "video/mp4": ".mp4",
+        "video/webm": ".webm",
+        "video/ogg": ".ogv",
+        "video/quicktime": ".mov",
+    }
+
+    # Top-level media kinds a post can attach. Matches the keys of
+    # ``media_extensions`` before the slash.
+    media_kinds: ClassVar[set[str]] = {"image", "video", "audio"}
 
 
 # Shared instance; import validates config once at startup.
